@@ -10,12 +10,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by the {@code parseRule}
-	 * labeled alternative in {@link sqliteParser#parse}.
+	 * Visit a parse tree produced by {@link sqliteParser#parse}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParseRule(sqliteParser.ParseRuleContext ctx);
+	T visitParse(sqliteParser.ParseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link sqliteParser#error}.
 	 * @param ctx the parse tree
@@ -159,12 +158,12 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitForeignKey(sqliteParser.ForeignKeyContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code none}
+	 * Visit a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNone(sqliteParser.NoneContext ctx);
+	T visitNone1(sqliteParser.None1Context ctx);
 	/**
 	 * Visit a parse tree produced by the {@code myExpression}
 	 * labeled alternative in {@link sqliteParser#expr}.
@@ -229,12 +228,12 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMyStar(sqliteParser.MyStarContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code dotANDstar}
+	 * Visit a parse tree produced by the {@code mystart}
 	 * labeled alternative in {@link sqliteParser#result_column}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDotANDstar(sqliteParser.DotANDstarContext ctx);
+	T visitMystart(sqliteParser.MystartContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code expressionAlias}
 	 * labeled alternative in {@link sqliteParser#result_column}.
@@ -255,6 +254,13 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitJoin_clause(sqliteParser.Join_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code none}
+	 * labeled alternative in {@link sqliteParser#join_operator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNone(sqliteParser.NoneContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code joinOperator}
 	 * labeled alternative in {@link sqliteParser#join_operator}.
@@ -325,6 +331,48 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitColumnAlias(sqliteParser.ColumnAliasContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code getDot}
+	 * labeled alternative in {@link sqliteParser#dot_symbol}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetDot(sqliteParser.GetDotContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code getComma}
+	 * labeled alternative in {@link sqliteParser#comma_symbol}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetComma(sqliteParser.GetCommaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code getSCOL}
+	 * labeled alternative in {@link sqliteParser#semicolon_symbol}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetSCOL(sqliteParser.GetSCOLContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code getOpenPar}
+	 * labeled alternative in {@link sqliteParser#open_paren}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetOpenPar(sqliteParser.GetOpenParContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code getClosePar}
+	 * labeled alternative in {@link sqliteParser#close_paren}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetClosePar(sqliteParser.GetCloseParContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code getAssign}
+	 * labeled alternative in {@link sqliteParser#assign_symbol}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetAssign(sqliteParser.GetAssignContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link sqliteParser#keyword}.
 	 * @param ctx the parse tree

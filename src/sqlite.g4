@@ -1,7 +1,7 @@
 grammar sqlite;
 
 parse
- : ( sql_stmt SCOL | error )* EOF #parseRule
+ : ( sql_stmt semicolon_symbol | error )* EOF
  ;
 
 error
@@ -12,38 +12,38 @@ error
  ;
 
 sql_stmt
-  :  alter_table_stmt
-   | compound_select_stmt
-   | create_table_stmt
-   | delete_stmt
-   | delete_stmt_limited
-   | drop_table_stmt
-   | factored_select_stmt
-   | insert_stmt
-   | simple_select_stmt
-   | select_stmt
-   | update_stmt
-   | update_stmt_limited
+  :  alter_table_stmt //status0
+   | compound_select_stmt //status 1 //en tou ekama label.
+   | create_table_stmt //status 2
+   | delete_stmt       //status 3
+   | delete_stmt_limited //status 4
+   | drop_table_stmt  //status 5
+   | factored_select_stmt //status 6
+   | insert_stmt //status 7
+   | simple_select_stmt //status 8
+   | select_stmt //status 9
+   | update_stmt //status 10
+   | update_stmt_limited //status 11
   ;
 
 alter_table_stmt
- : K_ALTER K_TABLE ( database_name DOT )? table_name
+ : K_ALTER K_TABLE ( database_name dot_symbol )? table_name
    ( K_RENAME K_TO new_table_name
    | K_ADD K_COLUMN? column_def //column def en to ekama store ! gt prepi na allakso ta types.
    ) #alterTable
  ;
 //skip it pros to paron !
 compound_select_stmt
- : (K_WITH common_table_expression ( COMMA common_table_expression )* )?
+ : (K_WITH common_table_expression ( comma_symbol common_table_expression )* )?
    select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
-   ( K_ORDER K_BY ordering_term ( COMMA ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | COMMA) expr )? )?
+   ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | comma_symbol) expr )? )?
  ;
 
 create_table_stmt
  : K_CREATE  K_TABLE /*( K_IF K_NOT K_EXISTS )?*/
-   ( database_name DOT )? table_name
-   ( OPEN_PAR column_def ( COMMA column_def )* ( COMMA table_constraint )* CLOSE_PAR
+   ( database_name dot_symbol )? table_name
+   ( open_paren column_def ( comma_symbol column_def )* ( comma_symbol table_constraint )* close_paren
    | K_AS select_stmt
    ) #createTable
  ;
@@ -56,62 +56,62 @@ delete_stmt
 delete_stmt_limited
  : with_clause? K_DELETE K_FROM qualified_table_name
    ( K_WHERE expr )?
-   ( ( K_ORDER K_BY ordering_term ( COMMA ordering_term )* )?
-     K_LIMIT expr ( ( K_OFFSET | COMMA ) expr )?
+   ( ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
+     K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )?
    )? #deleteLimited
  ;
 
 drop_table_stmt
- : K_DROP K_TABLE ( K_IF K_EXISTS )? ( database_name DOT )? table_name #dropTable
+ : K_DROP K_TABLE ( K_IF K_EXISTS )? ( database_name dot_symbol )? table_name #dropTable
  ;
 
 factored_select_stmt
- : (common_table_expression ( COMMA common_table_expression )* )?
+ : (K_WITH common_table_expression ( comma_symbol common_table_expression )* )?
    select_core ( compound_operator select_core )*
-   ( K_ORDER K_BY ordering_term ( COMMA ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | COMMA ) expr )? )? #factoredSelectStatement
+   ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )? )? #factoredSelectStatement
  ;
 
 insert_stmt
  : with_clause? ( K_INSERT
                 | K_REPLACE ) K_INTO
-   ( database_name DOT )? table_name ( OPEN_PAR column_name ( COMMA column_name )* CLOSE_PAR )?
-   ( K_VALUES OPEN_PAR expr (COMMA expr )* CLOSE_PAR ( COMMA OPEN_PAR expr ( COMMA expr )* CLOSE_PAR )*
+   ( database_name dot_symbol )? table_name ( open_paren column_name ( comma_symbol column_name )* close_paren )?
+   ( K_VALUES open_paren expr (comma_symbol expr )* close_paren ( comma_symbol open_paren expr ( comma_symbol expr )* close_paren )*
    | select_stmt
    )#insertStatement
  ;
 
 simple_select_stmt
- : (K_WITH common_table_expression ( COMMA common_table_expression )* )?
-   select_core ( K_ORDER K_BY ordering_term ( COMMA ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | COMMA ) expr )? )? #simpleSelectStatement
+ : (K_WITH common_table_expression ( comma_symbol common_table_expression )* )?
+   select_core ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )? )? #simpleSelectStatement
  ;
 
 select_stmt
- : (K_WITH common_table_expression ( COMMA common_table_expression )* )?
+ : (K_WITH common_table_expression ( comma_symbol common_table_expression )* )?
    select_or_values ( compound_operator select_or_values )*
-   ( K_ORDER K_BY ordering_term ( COMMA ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | COMMA ) expr )? )? #selectStatement
+   ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )? )? #selectStatement
  ;
 
 select_or_values
- : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( COMMA result_column )*
-   ( K_FROM ( table_or_subquery ( COMMA table_or_subquery )* | join_clause ) )?
+ : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( comma_symbol result_column )*
+   ( K_FROM ( table_or_subquery ( comma_symbol table_or_subquery )* | join_clause ) )?
    ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( COMMA expr )* ( K_HAVING expr )? )?  #selectOrValues
+   ( K_GROUP K_BY expr ( comma_symbol expr )* ( K_HAVING expr )? )?  #selectOrValues
  //| K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
 
 update_stmt
  : with_clause? K_UPDATE qualified_table_name
-   K_SET column_name ASSIGN expr ( COMMA column_name ASSIGN expr )* ( K_WHERE expr )? #updateStatement
+   K_SET column_name assign_symbol expr ( comma_symbol column_name assign_symbol expr )* ( K_WHERE expr )? #updateStatement
  ;
 
 update_stmt_limited
  : with_clause? K_UPDATE  qualified_table_name
-   K_SET column_name ASSIGN expr ( COMMA column_name ASSIGN expr )* ( K_WHERE expr )?
-   ( ( K_ORDER K_BY ordering_term ( COMMA ordering_term )* )?
-     K_LIMIT expr ( ( K_OFFSET | COMMA ) expr )?
+   K_SET column_name assign_symbol expr ( comma_symbol column_name assign_symbol expr )* ( K_WHERE expr )?
+   ( ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
+     K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )?
    )? #updateStatementLimited
  ;
 
@@ -126,8 +126,8 @@ column_def
 
  type_name
  : name
- | name_with_brackets + ( OPEN_PAR signed_number CLOSE_PAR
-                       | OPEN_PAR signed_number COMMA signed_number CLOSE_PAR )?
+ | name_with_brackets + ( open_paren signed_number close_paren
+                       | open_paren signed_number comma_symbol signed_number close_paren )?
  ;
 
 column_constraint
@@ -139,37 +139,37 @@ column_constraint
  ;
 
 expr
- : literal_value #none
+ : literal_value #myExpression
  //| BIND_PARAMETER
- | ( ( database_name DOT )? table_name DOT )? column_name #myExpression
- | unary_operator expr #none
+ | ( ( database_name dot_symbol )? table_name dot_symbol )? column_name #myExpression
+ | unary_operator expr #none1
  | expr PIPE2 expr  #myExpression
  | expr ( STAR |DIV |MOD ) expr #myExpression ///
  | expr ( PLUS |MINUS ) expr #myExpression
  | expr ( LT2 | GT2 | AMP | PIPE ) expr #myExpression
  | expr ( LT | LT_EQ | GT | GT_EQ ) expr #myExpression
- | expr ( ASSIGN | EQ | NOT_EQ1 | NOT_EQ2 | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB ) expr #myExpression
+ | expr ( assign_symbol | EQ | NOT_EQ1 | NOT_EQ2 | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB ) expr #myExpression
  | expr K_AND expr #myExpression
  | expr K_OR expr #myExpression
 // | function_name OPEN_PAR ( K_DISTINCT? expr ( COMMA expr )* | STAR )? CLOSE_PAR #myExpression
- | OPEN_PAR expr CLOSE_PAR #myExpression
- | K_CAST OPEN_PAR expr K_AS type_name CLOSE_PAR #myExpression
+ | open_paren expr close_paren #myExpression
+ | K_CAST open_paren expr K_AS type_name close_paren #myExpression
  | expr K_NOT? ( K_LIKE | K_GLOB) expr #myExpression
  | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL ) #myExpression
  | expr K_IS K_NOT? expr #myExpression
  | expr K_NOT? K_BETWEEN expr K_AND expr #myExpression
- | expr K_NOT? K_IN ( OPEN_PAR ( select_stmt
-                          | expr ( COMMA expr )*
+ | expr K_NOT? K_IN ( open_paren ( select_stmt
+                          | expr ( comma_symbol expr )*
                           )?
-                      CLOSE_PAR
-                    | ( database_name DOT )? table_name ) #myExpression
- | ( ( K_NOT )? K_EXISTS )? OPEN_PAR select_stmt CLOSE_PAR #myExpression
+                      close_paren
+                    | ( database_name dot_symbol )? table_name ) #myExpression
+ | ( ( K_NOT )? K_EXISTS )? open_paren select_stmt close_paren #myExpression
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END #myExpression
  ;
 
 //// nmz prei na fii kati!!!
 foreign_key_clause
- : K_REFERENCES foreign_table ( OPEN_PAR column_name ( COMMA column_name )* CLOSE_PAR )? #references
+ : K_REFERENCES foreign_table ( open_paren column_name ( comma_symbol column_name )* close_paren )? #references
  ;
 
 //nmz touto ptrpi na fi alla prepi prota na fi to allo!!
@@ -178,16 +178,16 @@ indexed_column
  ;
 //kati prpi na allaksi alla afisto pros to paron!
 table_constraint
- : ( ( K_PRIMARY K_KEY | K_UNIQUE ) OPEN_PAR indexed_column ( COMMA indexed_column )* CLOSE_PAR
-   | K_FOREIGN K_KEY OPEN_PAR column_name ( COMMA column_name )* CLOSE_PAR foreign_key_clause
+ : ( ( K_PRIMARY K_KEY | K_UNIQUE ) open_paren indexed_column ( comma_symbol indexed_column )* close_paren
+   | K_FOREIGN K_KEY open_paren column_name ( comma_symbol column_name )* close_paren foreign_key_clause
    ) #tableConstraint
  ;
 
 with_clause
-  : cte_table_name K_AS OPEN_PAR select_stmt CLOSE_PAR ( COMMA cte_table_name K_AS OPEN_PAR select_stmt CLOSE_PAR )* #withClause
+  : cte_table_name K_AS open_paren select_stmt close_paren ( comma_symbol cte_table_name K_AS open_paren select_stmt close_paren )* #withClause
   ;
 qualified_table_name
- : ( database_name DOT )? table_name #qualifiedTableName
+ : ( database_name dot_symbol )? table_name #qualifiedTableName
  ;
 
 ordering_term
@@ -195,21 +195,21 @@ ordering_term
  ;
 
 common_table_expression
- : table_name ( OPEN_PAR column_name ( COMMA column_name )* CLOSE_PAR )? K_AS OPEN_PAR select_stmt CLOSE_PAR #commonTableExpression
+ : table_name ( open_paren column_name ( comma_symbol column_name )* close_paren )? K_AS open_paren select_stmt close_paren #commonTableExpression
  ;
 
 result_column
  : STAR #myStar
- | table_name DOT STAR #dotANDstar
+ | table_name dot_symbol STAR #mystart
  | expr ( K_AS? column_alias )?  #expressionAlias
  ;
 
 table_or_subquery
- : ( database_name DOT )? table_name ( K_AS? table_alias )?  #tableORSubqueryA
- | OPEN_PAR ( table_or_subquery ( COMMA table_or_subquery )*
+ : ( database_name dot_symbol )? table_name ( K_AS? table_alias )?  #tableORSubqueryA
+ | open_paren ( table_or_subquery ( comma_symbol table_or_subquery )*
        | join_clause )
-   CLOSE_PAR ( K_AS? table_alias )? #tableORSubqueryA
- | OPEN_PAR select_stmt CLOSE_PAR ( K_AS? table_alias )? #tableORSubqueryA
+   close_paren ( K_AS? table_alias )? #tableORSubqueryA
+ | open_paren select_stmt close_paren ( K_AS? table_alias )? #tableORSubqueryA
  ;
 
 join_clause
@@ -217,20 +217,20 @@ join_clause
  ;
 
 join_operator
- : COMMA #joinOperator
+ : comma_symbol #none
  | K_NATURAL? ( K_LEFT K_OUTER? | K_INNER | K_CROSS )? K_JOIN #joinOperator
  ;
 
 join_constraint
  : ( K_ON expr
-   | K_USING OPEN_PAR column_name ( COMMA column_name )* CLOSE_PAR )? #joinConstraint
+   | K_USING open_paren column_name ( comma_symbol column_name )* close_paren )? #joinConstraint
  ;
 
 select_core
- : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( COMMA result_column )*
-   ( K_FROM ( table_or_subquery ( COMMA table_or_subquery )* | join_clause ) )?
+ : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( comma_symbol result_column )*
+   ( K_FROM ( table_or_subquery ( comma_symbol table_or_subquery )* | join_clause ) )?
    ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( COMMA expr )* ( K_HAVING expr )? )? #selectCore
+   ( K_GROUP K_BY expr ( comma_symbol expr )* ( K_HAVING expr )? )? #selectCore
 // | K_VALUES OPEN_PAR expr ( COMMA expr )* CLOSE_PAR ( COMMA OPEN_PAR expr ( COMMA expr )* CLOSE_PAR )*
  ;
 
@@ -242,7 +242,7 @@ compound_operator
  ;
 
 cte_table_name
- : table_name ( OPEN_PAR column_name ( COMMA column_name )* CLOSE_PAR )? #cteTableName
+ : table_name ( open_paren column_name ( comma_symbol column_name )* close_paren )? #cteTableName
  ;
 
 signed_number
@@ -270,6 +270,28 @@ column_alias
  : IDENTIFIER #columnAlias
  | STRING_LITERAL #columnAlias
  ;
+
+dot_symbol
+: DOT #getDot;
+
+comma_symbol
+: COMMA #getComma;
+
+semicolon_symbol
+: SCOL #getSCOL;
+
+open_paren
+: OPEN_PAR #getOpenPar
+;
+
+close_paren
+: CLOSE_PAR #getClosePar
+;
+
+assign_symbol
+: ASSIGN #getAssign
+;
+
 
 keyword
  : K_ADD

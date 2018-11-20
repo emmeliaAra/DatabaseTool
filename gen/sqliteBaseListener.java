@@ -15,13 +15,13 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParseRule(sqliteParser.ParseRuleContext ctx) { }
+	@Override public void enterParse(sqliteParser.ParseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitParseRule(sqliteParser.ParseRuleContext ctx) { }
+	@Override public void exitParse(sqliteParser.ParseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -279,13 +279,13 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNone(sqliteParser.NoneContext ctx) { }
+	@Override public void enterNone1(sqliteParser.None1Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNone(sqliteParser.NoneContext ctx) { }
+	@Override public void exitNone1(sqliteParser.None1Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -399,13 +399,13 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDotANDstar(sqliteParser.DotANDstarContext ctx) { }
+	@Override public void enterMystart(sqliteParser.MystartContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDotANDstar(sqliteParser.DotANDstarContext ctx) { }
+	@Override public void exitMystart(sqliteParser.MystartContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -442,6 +442,18 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitJoin_clause(sqliteParser.Join_clauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNone(sqliteParser.NoneContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNone(sqliteParser.NoneContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -562,6 +574,78 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitColumnAlias(sqliteParser.ColumnAliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGetDot(sqliteParser.GetDotContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGetDot(sqliteParser.GetDotContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGetComma(sqliteParser.GetCommaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGetComma(sqliteParser.GetCommaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGetSCOL(sqliteParser.GetSCOLContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGetSCOL(sqliteParser.GetSCOLContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGetOpenPar(sqliteParser.GetOpenParContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGetOpenPar(sqliteParser.GetOpenParContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGetClosePar(sqliteParser.GetCloseParContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGetClosePar(sqliteParser.GetCloseParContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGetAssign(sqliteParser.GetAssignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGetAssign(sqliteParser.GetAssignContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

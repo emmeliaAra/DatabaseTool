@@ -7,17 +7,15 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface sqliteListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by the {@code parseRule}
-	 * labeled alternative in {@link sqliteParser#parse}.
+	 * Enter a parse tree produced by {@link sqliteParser#parse}.
 	 * @param ctx the parse tree
 	 */
-	void enterParseRule(sqliteParser.ParseRuleContext ctx);
+	void enterParse(sqliteParser.ParseContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code parseRule}
-	 * labeled alternative in {@link sqliteParser#parse}.
+	 * Exit a parse tree produced by {@link sqliteParser#parse}.
 	 * @param ctx the parse tree
 	 */
-	void exitParseRule(sqliteParser.ParseRuleContext ctx);
+	void exitParse(sqliteParser.ParseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link sqliteParser#error}.
 	 * @param ctx the parse tree
@@ -261,17 +259,17 @@ public interface sqliteListener extends ParseTreeListener {
 	 */
 	void exitForeignKey(sqliteParser.ForeignKeyContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code none}
+	 * Enter a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterNone(sqliteParser.NoneContext ctx);
+	void enterNone1(sqliteParser.None1Context ctx);
 	/**
-	 * Exit a parse tree produced by the {@code none}
+	 * Exit a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitNone(sqliteParser.NoneContext ctx);
+	void exitNone1(sqliteParser.None1Context ctx);
 	/**
 	 * Enter a parse tree produced by the {@code myExpression}
 	 * labeled alternative in {@link sqliteParser#expr}.
@@ -381,17 +379,17 @@ public interface sqliteListener extends ParseTreeListener {
 	 */
 	void exitMyStar(sqliteParser.MyStarContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code dotANDstar}
+	 * Enter a parse tree produced by the {@code mystart}
 	 * labeled alternative in {@link sqliteParser#result_column}.
 	 * @param ctx the parse tree
 	 */
-	void enterDotANDstar(sqliteParser.DotANDstarContext ctx);
+	void enterMystart(sqliteParser.MystartContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code dotANDstar}
+	 * Exit a parse tree produced by the {@code mystart}
 	 * labeled alternative in {@link sqliteParser#result_column}.
 	 * @param ctx the parse tree
 	 */
-	void exitDotANDstar(sqliteParser.DotANDstarContext ctx);
+	void exitMystart(sqliteParser.MystartContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code expressionAlias}
 	 * labeled alternative in {@link sqliteParser#result_column}.
@@ -426,6 +424,18 @@ public interface sqliteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitJoin_clause(sqliteParser.Join_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code none}
+	 * labeled alternative in {@link sqliteParser#join_operator}.
+	 * @param ctx the parse tree
+	 */
+	void enterNone(sqliteParser.NoneContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code none}
+	 * labeled alternative in {@link sqliteParser#join_operator}.
+	 * @param ctx the parse tree
+	 */
+	void exitNone(sqliteParser.NoneContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code joinOperator}
 	 * labeled alternative in {@link sqliteParser#join_operator}.
@@ -546,6 +556,78 @@ public interface sqliteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitColumnAlias(sqliteParser.ColumnAliasContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code getDot}
+	 * labeled alternative in {@link sqliteParser#dot_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void enterGetDot(sqliteParser.GetDotContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code getDot}
+	 * labeled alternative in {@link sqliteParser#dot_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void exitGetDot(sqliteParser.GetDotContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code getComma}
+	 * labeled alternative in {@link sqliteParser#comma_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void enterGetComma(sqliteParser.GetCommaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code getComma}
+	 * labeled alternative in {@link sqliteParser#comma_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void exitGetComma(sqliteParser.GetCommaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code getSCOL}
+	 * labeled alternative in {@link sqliteParser#semicolon_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void enterGetSCOL(sqliteParser.GetSCOLContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code getSCOL}
+	 * labeled alternative in {@link sqliteParser#semicolon_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void exitGetSCOL(sqliteParser.GetSCOLContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code getOpenPar}
+	 * labeled alternative in {@link sqliteParser#open_paren}.
+	 * @param ctx the parse tree
+	 */
+	void enterGetOpenPar(sqliteParser.GetOpenParContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code getOpenPar}
+	 * labeled alternative in {@link sqliteParser#open_paren}.
+	 * @param ctx the parse tree
+	 */
+	void exitGetOpenPar(sqliteParser.GetOpenParContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code getClosePar}
+	 * labeled alternative in {@link sqliteParser#close_paren}.
+	 * @param ctx the parse tree
+	 */
+	void enterGetClosePar(sqliteParser.GetCloseParContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code getClosePar}
+	 * labeled alternative in {@link sqliteParser#close_paren}.
+	 * @param ctx the parse tree
+	 */
+	void exitGetClosePar(sqliteParser.GetCloseParContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code getAssign}
+	 * labeled alternative in {@link sqliteParser#assign_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void enterGetAssign(sqliteParser.GetAssignContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code getAssign}
+	 * labeled alternative in {@link sqliteParser#assign_symbol}.
+	 * @param ctx the parse tree
+	 */
+	void exitGetAssign(sqliteParser.GetAssignContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link sqliteParser#keyword}.
 	 * @param ctx the parse tree
