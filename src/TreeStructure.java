@@ -12,13 +12,15 @@ public class TreeStructure<T> {
         private LinkedList<Node<T>> children;
         private TreeStructure<T> hostingTree;
         private Node<T> parentNode;
+        private int nodeStatus;
 
-        public Node(LinkedList<Node<T>> children, TreeStructure<T> hostingTree, Node<T> parentNode, T data)
+        public Node(LinkedList<Node<T>> children, TreeStructure<T> hostingTree, Node<T> parentNode, T data, int nodeStatus)
         {
             this.children = children;
             this.hostingTree = hostingTree;
             this.parentNode = parentNode;
             this.data = data;
+            this.nodeStatus = nodeStatus;
         }
 
         public T getData()
@@ -36,22 +38,25 @@ public class TreeStructure<T> {
 
         public Node<T> getParentNode() {
             return parentNode;
+        }    public int getNodeStatus()
+        {
+            return nodeStatus;
         }
     }
 
-    public void addRootNode(T data) throws IllegalAccessException {
+    public void addRootNode(T data,int nodeStatus) throws IllegalAccessException {
         if(rootNode == null )
-            rootNode = new Node<>(new LinkedList<>(), this, null,data);
+            rootNode = new Node<>(new LinkedList<>(), this, null,data, nodeStatus);
         else
             throw new IllegalAccessException("A tree can not have more than one root node");
     }
 
-    public Node<T> addChildNode(Node<T> parentNode, T data) throws IllegalAccessException {
+    public Node<T> addChildNode(Node<T> parentNode, T data, int nodeStatus) throws IllegalAccessException {
 
 
         if(parentNode != null && parentNode.hostingTree == this)
         {
-            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data);
+            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data,nodeStatus);
             parentNode.getChildren().addLast(newNode);
             return newNode;
         }
@@ -66,6 +71,11 @@ public class TreeStructure<T> {
         stack.push(node);
         node.getChildren().forEach(each -> printTree(each, appender +appender));
     }
+    public void traverseTree(Node<T> node, String appender){
+        System.out.println(appender + node.getData());
+        stack.push(node);
+        node.getChildren().forEach(each -> printTree(each, appender +appender));
+    }
 
     public Node<T> getRootNode() {
         return rootNode;
@@ -75,4 +85,6 @@ public class TreeStructure<T> {
     {
         return stack;
     }
+
+
 }

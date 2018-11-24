@@ -40,7 +40,7 @@ public class TreeParser {
       //  ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree);
         //executeCanonicalTree.execute();
 
-        //test();
+       // test();
     }
 
     public void getParts()
@@ -84,12 +84,14 @@ public class TreeParser {
     }
 
 
-    public void test() throws IllegalAccessException {
+  /*  public void test() throws IllegalAccessException {
         TreeStructure<Integer> myTest = new TreeStructure<>();
-        myTest.addRootNode(19);
-        TreeStructure.Node<Integer> rootNode19 = myTest.getRootNode();
-        TreeStructure.Node<Integer> node18 = myTest.addChildNode(rootNode19,18);
-        TreeStructure.Node<Integer> node17 = myTest.addChildNode(rootNode19,17);
+        myTest.addRootNode(0);
+        TreeStructure.Node<Integer> rootNode0 = myTest.getRootNode();
+
+        TreeStructure.Node<Integer> node19 = myTest.addChildNode(rootNode0,19);
+        TreeStructure.Node<Integer> node18 = myTest.addChildNode(node19,18);
+        TreeStructure.Node<Integer> node17 = myTest.addChildNode(node19,17);
 
         TreeStructure.Node<Integer> node16 = myTest.addChildNode(node18,16);
         TreeStructure.Node<Integer> node14 = myTest.addChildNode(node18,14);
@@ -117,7 +119,7 @@ public class TreeParser {
         TreeStructure.Node<Integer> node1= myTest.addChildNode(node11,1);
 
 
-        myTest.printTree(rootNode19," ");
+        myTest.printTree(rootNode0," ");
 
         System.out.println(node1.getParentNode().getData() + "emme");
 
@@ -125,6 +127,6 @@ public class TreeParser {
      //   System.out.println(myTest.getStack());
         //System.out.println(myTest.stack.pop() );
 
-    }
+    }*/
 
 }
