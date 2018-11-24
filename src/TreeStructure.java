@@ -1,8 +1,10 @@
 import java.util.LinkedList;
+import java.util.Stack;
 
 public class TreeStructure<T> {
 
     private Node<T> rootNode = null;
+    private Stack<Node<T>> stack = new Stack<>();
 
     public static class Node<T>
     {
@@ -46,9 +48,10 @@ public class TreeStructure<T> {
 
     public Node<T> addChildNode(Node<T> parentNode, T data) throws IllegalAccessException {
 
+
         if(parentNode != null && parentNode.hostingTree == this)
         {
-            Node<T> newNode = new Node<>(new LinkedList<>(),this,rootNode,data);
+            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data);
             parentNode.getChildren().addLast(newNode);
             return newNode;
         }
@@ -60,12 +63,16 @@ public class TreeStructure<T> {
 
     public void printTree(Node<T> node, String appender){
         System.out.println(appender + node.getData());
-        //System.out.println(node.getChildren().size() + "d"  + node.getData());
+        stack.push(node);
         node.getChildren().forEach(each -> printTree(each, appender +appender));
-       // System.out.println("emmelia ");
     }
 
     public Node<T> getRootNode() {
         return rootNode;
+    }
+
+    public Stack<Node<T>> getStack()
+    {
+        return stack;
     }
 }
