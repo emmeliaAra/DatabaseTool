@@ -8,15 +8,17 @@ public class ExecuteCanonicalTree {
     private TreeStructure<String> canonicalTree;
     private MySQLite mySQLite;
     private LinkedList<TreeStructure.Node<String>> holdNodes;
-    private Vector<String> selectFieldName;
+    private Vector<String> selectFieldName,whereClause;
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
-    private static final int ACTION_NODE_STATUS = 2;
+    private static final int WHERE_NODE_STATUS = 2;
+    private static final int ACTION_NODE_STATUS = 3;
 
-    public ExecuteCanonicalTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName)
+    public ExecuteCanonicalTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName,Vector<String> whereClause)
     {
         this.canonicalTree = canonicalTree;
         this.selectFieldName = selectFieldName;
+        this.whereClause = whereClause;
         mySQLite = new MySQLite("University.db");
     }
 
@@ -34,6 +36,10 @@ public class ExecuteCanonicalTree {
                 }
                 case CARTESIAN_NODE_STATUS: {
                     isCartesian(popNode);
+                    break;
+                }
+                case WHERE_NODE_STATUS :{
+                    isWhereClause(popNode);
                     break;
                 }
                 case ACTION_NODE_STATUS:
@@ -98,12 +104,34 @@ public class ExecuteCanonicalTree {
     public void isAction(TreeStructure.Node<String> popNode) throws IllegalAccessException {
         if(holdNodes.size() == 1) {
             LinkedList<String> temp = new LinkedList<>() ;
-            List<String> newList = new LinkedList<>(selectFieldName);
+            List<String> selectFields = new LinkedList<>(selectFieldName);
 
             temp.add(holdNodes.getFirst().getData());
-            mySQLite.simpleSelect((LinkedList<String>) newList,temp);
+            mySQLite.simpleSelect((LinkedList<String>) selectFields,temp);
             canonicalTree.deleteNode(popNode);
         }
 
+    }
+
+    public void isWhereClause(TreeStructure.Node<String> popNode) throws IllegalAccessException
+    {
+        if(holdNodes.size() == 1)
+        {
+            LinkedList<String> tempSelect = new LinkedList<>();
+            LinkedList<String> tempFrom = new LinkedList<>();
+            List<String> where = new LinkedList<>(whereClause);
+            String tableName = "where" + holdNodes.getFirst().getData();
+
+            tempSelect.addFirst("*");
+            tempFrom.addFirst(holdNodes.getFirst().getData());
+            mySQLite.whereSelect(tempSelect,tempFrom, (LinkedList<String>) where);
+
+            TreeStructure.Node<String> newNode =popNode.getParentNode();
+            popNode.getHostingTree().deleteNode(popNode);
+
+            mySQLite.createAsStatementWhere(tempSelect,tempFrom,tableName, (LinkedList<String>) where);
+            TreeStructure.Node<String> n = canonicalTree.addChildNode(newNode,tableName ,RELATION_NODE_STATUS);
+            holdNodes = new LinkedList<>();
+        }
     }
 }

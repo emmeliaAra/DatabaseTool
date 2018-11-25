@@ -38,7 +38,7 @@ public class TreeParser {
 
         canonicalTree = selectStatementToTree.buildSelectTree();
         System.out.println("--------------------------------------");
-        ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName);
+        ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
 //        canonicalTree.printTree(canonicalTree.getRootNode(), " ");

@@ -8,7 +8,9 @@ public class SelectStatement {
     private boolean once = true;
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
-    private static final int ACTION_NODE_STATUS = 2;
+    private static final int WHERE_NODE_STATUS = 2;
+    private static final int ACTION_NODE_STATUS = 3;
+
 
 
 
@@ -30,7 +32,7 @@ public class SelectStatement {
         TreeStructure.Node<String> tempNode = rootNode;
 
         if (whereClause.size() != 0) {
-            TreeStructure.Node<String> whereClauseNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, ACTION_NODE_STATUS);
+            TreeStructure.Node<String> whereClauseNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS);
             tempNode = whereClauseNode;
         }
 

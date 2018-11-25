@@ -32,6 +32,25 @@ public class MySQLite extends DatabaseBasic{
         executeCreate(queryTemplate);
     }
 
+    public void whereSelect(LinkedList<String> selectFields, LinkedList<String> fromFields,LinkedList<String> whereClause) {
+
+        StringBuilder fromF = getFields(fromFields);
+        StringBuilder selectF = getFields(selectFields);
+        StringBuilder whereCl = getWhereFields(whereClause);
+        String queryTemplate = "Select" + selectF +" from " + fromF + " where " + whereCl + ";";
+        resultSet = execute(queryTemplate);
+    }
+
+    public void createAsStatementWhere(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName,LinkedList<String> whereClause)
+    {
+        StringBuilder fromF = getFields(fromFields);
+        StringBuilder selectF = getFields(selectFields);
+        StringBuilder whereCl = getWhereFields(whereClause);
+
+        String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + " where " + whereCl + ";";
+        executeCreate(queryTemplate);
+    }
+
 
     public ResultSet execute(String queryTemplate)
     {
@@ -61,6 +80,15 @@ public class MySQLite extends DatabaseBasic{
                 sb.append(myList.get(i) +",");
             sb.deleteCharAt(sb.length()-1);
         }
+        return sb;
+    }
+    public StringBuilder getWhereFields(LinkedList<String> myList)
+    {
+        StringBuilder sb = new StringBuilder( 1024 );
+        if(myList != null)
+            for(int i=0; i<myList.size(); i++)
+                    sb.append(myList.get(i) + " ");
+
         return sb;
     }
 
