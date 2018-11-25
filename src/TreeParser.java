@@ -35,12 +35,13 @@ public class TreeParser {
         TreeStructure<String> canonicalTree;
         System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-       canonicalTree = selectStatementToTree.buildSelectTree();
 
-      //  ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree);
-        //executeCanonicalTree.execute();
-
-       // test();
+        canonicalTree = selectStatementToTree.buildSelectTree();
+        System.out.println("--------------------------------------");
+        ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName);
+        canonicalTree.createStack(canonicalTree.getRootNode());
+        executeCanonicalTree.execute(canonicalTree.getStack());
+//        canonicalTree.printTree(canonicalTree.getRootNode(), " ");
     }
 
     public void getParts()
@@ -82,51 +83,4 @@ public class TreeParser {
         System.out.println("from Relation: " + fromRelationNames);
         System.out.println("whereClause: " + whereClause);
     }
-
-
-  /*  public void test() throws IllegalAccessException {
-        TreeStructure<Integer> myTest = new TreeStructure<>();
-        myTest.addRootNode(0);
-        TreeStructure.Node<Integer> rootNode0 = myTest.getRootNode();
-
-        TreeStructure.Node<Integer> node19 = myTest.addChildNode(rootNode0,19);
-        TreeStructure.Node<Integer> node18 = myTest.addChildNode(node19,18);
-        TreeStructure.Node<Integer> node17 = myTest.addChildNode(node19,17);
-
-        TreeStructure.Node<Integer> node16 = myTest.addChildNode(node18,16);
-        TreeStructure.Node<Integer> node14 = myTest.addChildNode(node18,14);
-
-
-        TreeStructure.Node<Integer> node15 = myTest.addChildNode(node17,15);
-        TreeStructure.Node<Integer> node13 = myTest.addChildNode(node17,13);
-
-        TreeStructure.Node<Integer> node12 = myTest.addChildNode(node16,12);
-        TreeStructure.Node<Integer> node10= myTest.addChildNode(node16,10);
-
-        TreeStructure.Node<Integer> node8= myTest.addChildNode(node14,8);
-        TreeStructure.Node<Integer> node6= myTest.addChildNode(node14,6);
-
-        TreeStructure.Node<Integer> node11= myTest.addChildNode(node15,11);
-        TreeStructure.Node<Integer> node9= myTest.addChildNode(node15,9);
-
-        TreeStructure.Node<Integer> node7= myTest.addChildNode(node13,7);
-        TreeStructure.Node<Integer> node5= myTest.addChildNode(node13,5);
-
-        TreeStructure.Node<Integer> node4= myTest.addChildNode(node12,4);
-        TreeStructure.Node<Integer> node2= myTest.addChildNode(node12,2);
-
-        TreeStructure.Node<Integer> node3= myTest.addChildNode(node11,3);
-        TreeStructure.Node<Integer> node1= myTest.addChildNode(node11,1);
-
-
-        myTest.printTree(rootNode0," ");
-
-        System.out.println(node1.getParentNode().getData() + "emme");
-
-        System.out.println("----------------------------------------" );
-     //   System.out.println(myTest.getStack());
-        //System.out.println(myTest.stack.pop() );
-
-    }*/
-
 }

@@ -1,3 +1,5 @@
+import org.omg.CosNaming.NamingContextPackage.NotEmpty;
+
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -42,6 +44,7 @@ public class TreeStructure<T> {
         {
             return nodeStatus;
         }
+
     }
 
     public void addRootNode(T data,int nodeStatus) throws IllegalAccessException {
@@ -66,15 +69,33 @@ public class TreeStructure<T> {
             throw new IllegalAccessException("The parent node provided is not part of this tree.");
     }
 
+    public void deleteNode(Node<T> node) throws IllegalAccessException
+    {
+        if(node != null)
+        {
+            if(node.parentNode == null)
+                rootNode = null;
+            else{
+                int index = node.parentNode.children.indexOf(node);
+                node.parentNode.children.remove(index);
+            }
+
+        }
+        else if(node == null)
+            throw  new NullPointerException("Cannot delete an empty node!!");
+
+        else
+            throw  new IllegalAccessException("The node is not part of the Tree!! ");
+    }
+
     public void printTree(Node<T> node, String appender){
         System.out.println(appender + node.getData());
-        stack.push(node);
+       // stack.push(node);
         node.getChildren().forEach(each -> printTree(each, appender +appender));
     }
-    public void traverseTree(Node<T> node, String appender){
-        System.out.println(appender + node.getData());
+    public void createStack(Node<T> node){
         stack.push(node);
-        node.getChildren().forEach(each -> printTree(each, appender +appender));
+        node.getChildren().forEach(each -> createStack(each));
     }
 
     public Node<T> getRootNode() {
