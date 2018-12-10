@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class TreeParser {
@@ -30,6 +31,8 @@ public class TreeParser {
         MyListener.MyInnerListener myListener = new MyListener.MyInnerListener(parser);
         walker.walk(myListener,myTree);
         statement = myListener.getMyStatement();
+        //MySQLite mySQLite = new MySQLite("University.db");
+        //mySQLite.getSchema();
 
         getParts();
         TreeStructure<String> canonicalTree;
@@ -41,7 +44,6 @@ public class TreeParser {
         ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
-//        canonicalTree.printTree(canonicalTree.getRootNode(), " ");
     }
 
     public void getParts()
