@@ -3,8 +3,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
-import java.sql.SQLException;
 import java.util.*;
 
 public class TreeParser {
@@ -19,7 +17,6 @@ public class TreeParser {
 
     public void getStatementTokens() throws IllegalAccessException {
 
-
         sqliteLexer lexer = new sqliteLexer(charStream);
         TokenStream tokenStream = new CommonTokenStream( lexer);
         sqliteParser parser = new sqliteParser(tokenStream);
@@ -31,19 +28,31 @@ public class TreeParser {
         MyListener.MyInnerListener myListener = new MyListener.MyInnerListener(parser);
         walker.walk(myListener,myTree);
         statement = myListener.getMyStatement();
-        //MySQLite mySQLite = new MySQLite("University.db");
-        //mySQLite.getSchema();
-
         getParts();
+
+        MySQLite mySQLite = new MySQLite("University.db");
+      //mySQLite.getSchema();
+
         TreeStructure<String> canonicalTree;
+        TreeStructure<String> canonicalTreeForOpt;
         System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+        SelectStatement selectStatementToTree1 = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
 
+        //creates the trees
         canonicalTree = selectStatementToTree.buildSelectTree();
         System.out.println("--------------------------------------");
+
+        //keep a copy of the original tree so that can be optimised.
+        canonicalTreeForOpt = selectStatementToTree1.buildSelectTree();
+
         ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
+
+        OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),selectFieldName,fromRelationNames,whereClause);
+        optimizeTree.splitWhere();
+        canonicalTreeForOpt.inorderTreeTraverse(canonicalTreeForOpt.getRootNode());
     }
 
     public void getParts()
@@ -69,7 +78,7 @@ public class TreeParser {
         }
 
         for(Map.Entry<Integer,String> myPair : statement.entrySet()) {
-            if(!myPair.getValue().equals(",") && !myPair.getValue().equals(".") && !myPair.getValue().equals(";") ){
+            if(!myPair.getValue().equals(",") && !myPair.getValue().equals(";") ){
 
                 if(myPair.getKey()> selectKey && myPair.getKey() < fromKey && selectKey!= -1 )
                     selectFieldName.add(myPair.getValue());

@@ -1,5 +1,4 @@
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -26,14 +25,17 @@ public class ExecuteCanonicalTree {
 
         TreeStructure.Node<String> popNode;
         holdNodes = new LinkedList<>();
+        //pops the nodes from the stack
         while (!stack.empty() )
         {
             popNode = stack.pop();
             switch (popNode.getNodeStatus()){
+                //if a relation node then hold that node
                 case RELATION_NODE_STATUS: {
                     holdNodes.addFirst(popNode);
                     break;
                 }
+                //if a helper node -> 'X' invoke method
                 case CARTESIAN_NODE_STATUS: {
                     isCartesian(popNode);
                     break;
@@ -60,6 +62,7 @@ public class ExecuteCanonicalTree {
 
     public void isCartesian(TreeStructure.Node<String> popNode) throws IllegalAccessException {
 
+        //if there are 2 nodes on hold -> produce cartesian product on those relations.
         if(holdNodes.size() == 2) {
 
             LinkedList<String> tempSelect = new LinkedList<>();
@@ -67,6 +70,7 @@ public class ExecuteCanonicalTree {
             tempFrom.addFirst(holdNodes.getFirst().getData());
             tempFrom.addFirst(holdNodes.getLast().getData());
 
+            //create a name for the table that will be create temporarily for the cartesian product of those relations.
             String tableName = holdNodes.getFirst().getData() + "_" + holdNodes.getLast().getData();
             tempSelect.addFirst("*");
             //execute the statement.
@@ -76,12 +80,16 @@ public class ExecuteCanonicalTree {
             //Delete the current Node from the tree and add a new node to the tree representing the relation created by the cartesian product.
             TreeStructure.Node<String> newNode =popNode.getParentNode();
             popNode.getHostingTree().deleteNode(popNode);
+            //create new relation for the cartesian product.
             mySQLite.createAsStatement(tempSelect,tempFrom,tableName);
             TreeStructure.Node<String> n = canonicalTree.addChildNode(newNode,tableName,RELATION_NODE_STATUS);
+            //clear the list that holds the relations.
             holdNodes = new LinkedList<>();
         }
+        //if there are 2 nodes on hold -> produce cartesian product with first and second and add the other one back to the three.
         else if(holdNodes.size() == 3)
         {
+            int o = 1;
             LinkedList<String> tempSelect = new LinkedList<>();
             LinkedList<String> tempFrom = new LinkedList<>();
             String tableName = holdNodes.getFirst().getData() + "_" + holdNodes.get(1).getData();
@@ -91,45 +99,49 @@ public class ExecuteCanonicalTree {
 
             //execute the statement.
             mySQLite.simpleSelect(tempSelect,tempFrom );
-
-
             TreeStructure.Node<String> newNode =popNode.getParentNode();
+            o++;
             popNode.getHostingTree().deleteNode(popNode);
+            o++;
             mySQLite.createAsStatement(tempSelect,tempFrom,tableName);
+            o++;
             TreeStructure.Node<String> n = canonicalTree.addChildNode(newNode,tableName ,RELATION_NODE_STATUS);
+            o++;
             holdNodes = new LinkedList<>();
         }
     }
 
     public void isAction(TreeStructure.Node<String> popNode) throws IllegalAccessException {
+        //execute the project operation on the final resulting relation
         if(holdNodes.size() == 1) {
             LinkedList<String> temp = new LinkedList<>() ;
-            List<String> selectFields = new LinkedList<>(selectFieldName);
+            LinkedList<String> selectFields = new LinkedList<>(selectFieldName);
 
             temp.add(holdNodes.getFirst().getData());
-            mySQLite.simpleSelect((LinkedList<String>) selectFields,temp);
+            mySQLite.simpleSelect(selectFields,temp);
             canonicalTree.deleteNode(popNode);
         }
-
     }
 
     public void isWhereClause(TreeStructure.Node<String> popNode) throws IllegalAccessException
     {
+        //execute the where condition on the resulting relation from the cartesian products and create a new relation
+        //so that will be used to execute the project operation!
         if(holdNodes.size() == 1)
         {
             LinkedList<String> tempSelect = new LinkedList<>();
             LinkedList<String> tempFrom = new LinkedList<>();
-            List<String> where = new LinkedList<>(whereClause);
+            LinkedList<String> where = new LinkedList<>(whereClause);
             String tableName = "where" + holdNodes.getFirst().getData();
 
             tempSelect.addFirst("*");
             tempFrom.addFirst(holdNodes.getFirst().getData());
-            mySQLite.whereSelect(tempSelect,tempFrom, (LinkedList<String>) where);
+            mySQLite.whereSelect(tempSelect,tempFrom,where);
 
             TreeStructure.Node<String> newNode =popNode.getParentNode();
             popNode.getHostingTree().deleteNode(popNode);
 
-            mySQLite.createAsStatementWhere(tempSelect,tempFrom,tableName, (LinkedList<String>) where);
+            mySQLite.createAsStatementWhere(tempSelect,tempFrom,tableName, where);
             TreeStructure.Node<String> n = canonicalTree.addChildNode(newNode,tableName ,RELATION_NODE_STATUS);
             holdNodes = new LinkedList<>();
         }

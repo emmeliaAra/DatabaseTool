@@ -6,21 +6,21 @@ public class MyRelation {
 
     private Schema mySchema;
     private String relationName;
-    private LinkedList<MyField> fileds,primaryKeys;
+    private LinkedList<MyField> fields,primaryKeys;
     private HashMap<MyField,HashMap<String,Field>> foreignKeys;
 
     public MyRelation(Schema mySchema, String relationName) // en ksero an tha kamo class foreing key j primayr key gia na ta krata touta.
     {
         this.mySchema = mySchema;
         this.relationName = relationName;
-        fileds = new LinkedList<>();
+        fields = new LinkedList<>();
         primaryKeys = new LinkedList<>();
         foreignKeys = new HashMap<>();
     }
 
     public void addField(MyField field)
     {
-        this.fileds.add(field);
+        this.fields.add(field);
     }
 
     public Schema getMySchema() {
@@ -49,5 +49,9 @@ public class MyRelation {
         this.foreignKeys.put(foreignKey,referencingKey);
     }
 
+    public LinkedList<MyField> getFields()
+    {
+        return fields;
+    }
 }
 

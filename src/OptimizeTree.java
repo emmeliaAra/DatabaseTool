@@ -9,9 +9,9 @@ public class OptimizeTree {
     private MyHelper myHelper;
     private Schema schema;
 
-    public OptimizeTree(TreeStructure<String> canonicalTree, Schema schema, Vector<String> selectFieldName, Vector<String> fromRelationNames, Vector<String> whereClause)
+    public OptimizeTree(TreeStructure<String> canonicalTree1, Schema schema, Vector<String> selectFieldName, Vector<String> fromRelationNames, Vector<String> whereClause)
     {
-        this.canonicalTree = canonicalTree;
+        this.canonicalTree = canonicalTree1;
         this.selectFieldName = selectFieldName;
         this.fromRelationNames = fromRelationNames;
         this.whereClause = whereClause;
@@ -19,7 +19,7 @@ public class OptimizeTree {
         myHelper = new MyHelper();
     }
 
-    public HashMap<String,LinkedList<String>> splitWhere(Vector<String> whereClause) {
+    public HashMap<String,LinkedList<String>> splitWhere() {
         HashMap<String,LinkedList<String>> optimizedWhere = new HashMap<>();
         LinkedList<String> where = new LinkedList<>(whereClause);
         LinkedList<String> referencingFields;
@@ -63,7 +63,6 @@ public class OptimizeTree {
                     else
                         condition = condition + temp;
                 }
-                System.out.println(condition + "  " + referencingFields);
                 optimizedWhere.put(condition,referencingFields);
             }
         }

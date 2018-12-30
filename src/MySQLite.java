@@ -1,4 +1,3 @@
-import jdk.internal.org.objectweb.asm.Type;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,7 +10,6 @@ public class MySQLite extends DatabaseBasic{
     private static final String TABLE_NAME = "TABLE_NAME";
     private static final String TABLE = "TABLE";
     private static final String COLUMN_NAME = "COLUMN_NAME";
-    private static final String DATA_TYPE = "DATA_TYPE";
     private static final String FKCOLUMN_NAME = "FKCOLUMN_NAME";
     private static final String REFCOLUMN_NAME = "PKCOLUMN_NAME";
     private static final String REFTABLE_NAME = "PKTABLE_NAME";
@@ -20,47 +18,49 @@ public class MySQLite extends DatabaseBasic{
     private static final int NOT_NULL_CON= 2;
     private static final int NULL_CON = 3;
     private static final int DEFAULT_CON = 4;
-
+    private static final String DATA_TYPE = "DATA_TYPE";
+    private MyHelper myHelper;
 
     public MySQLite(String databaseName)
     {
         super(databaseName);
         this.databaseName =databaseName;
+        myHelper = new MyHelper();
     }
 
     public void simpleSelect(LinkedList<String> selectFields, LinkedList<String> fromFields) {
-
-        StringBuilder fromF = getFields(fromFields);
-        StringBuilder selectF = getFields(selectFields);
+        StringBuilder fromF = myHelper.getFields(fromFields);
+        StringBuilder selectF = myHelper.getFields(selectFields);
 
         String queryTemplate = "Select " + selectF +" from " + fromF + ";";
         resultSet = execute(queryTemplate);
     }
 
-    public void createAsStatement(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName)
-    {
-        StringBuilder fromF = getFields(fromFields);
-        StringBuilder selectF = getFields(selectFields);
-
+    public void createAsStatement(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName) {
+        StringBuilder fromF = myHelper.getFields(fromFields);
+        StringBuilder selectF = myHelper.getFields(selectFields);
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + ";";
         executeCreate(queryTemplate);
     }
 
     public void whereSelect(LinkedList<String> selectFields, LinkedList<String> fromFields,LinkedList<String> whereClause) {
+        StringBuilder fromF = myHelper.getFields(fromFields);
+        StringBuilder selectF = myHelper.getFields(selectFields);
 
-        StringBuilder fromF = getFields(fromFields);
-        StringBuilder selectF = getFields(selectFields);
-        StringBuilder whereCl = getWhereFields(whereClause);
+        StringBuilder whereCl = myHelper.getWhereFields(whereClause);
+        whereCl = whereException(whereCl.toString());
+
         String queryTemplate = "Select" + selectF +" from " + fromF + " where " + whereCl + ";";
         resultSet = execute(queryTemplate);
     }
 
-    public void createAsStatementWhere(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName,LinkedList<String> whereClause)
-    {
-        StringBuilder fromF = getFields(fromFields);
-        StringBuilder selectF = getFields(selectFields);
-        StringBuilder whereCl = getWhereFields(whereClause);
+    public void createAsStatementWhere(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName,LinkedList<String> whereClause) {
+        StringBuilder fromF = myHelper.getFields(fromFields);
+        StringBuilder selectF = myHelper.getFields(selectFields);
+        int emm = 2 ; // apla gia na gi to duplicate.
 
+        StringBuilder whereCl = myHelper.getWhereFields(whereClause);
+        whereCl = whereException(whereCl.toString());
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + " where " + whereCl + ";";
         executeCreate(queryTemplate);
     }
@@ -71,6 +71,7 @@ public class MySQLite extends DatabaseBasic{
         preparedStatement = null;
         resultSet = null;
         try {
+            //queryTemplate = whereException(queryTemplate);
             preparedStatement = connection.prepareStatement(queryTemplate);
             resultSet = preparedStatement.executeQuery();
             System.out.println("______________________________________________________________________________________");
@@ -78,32 +79,10 @@ public class MySQLite extends DatabaseBasic{
                 System.out.println(resultSet.getString(1));
 
             System.out.println("______________________________________________________________________________________");
-        }catch (Exception e)
-        {
-            e.printStackTrace();
+        }catch (Exception e) {
+           e.printStackTrace();
         }
         return resultSet;
-    }
-
-    public StringBuilder getFields(LinkedList<String> myList)
-    {
-        StringBuilder sb = new StringBuilder( 1024 );
-        if(myList != null)
-        {
-            for(int i=0; i<myList.size(); i++)
-                sb.append(myList.get(i) +",");
-            sb.deleteCharAt(sb.length()-1);
-        }
-        return sb;
-    }
-    public StringBuilder getWhereFields(LinkedList<String> myList)
-    {
-        StringBuilder sb = new StringBuilder( 1024 );
-        if(myList != null)
-            for(int i=0; i<myList.size(); i++)
-                    sb.append(myList.get(i) + " ");
-
-        return sb;
     }
 
     public void executeCreate(String queryTemplate)
@@ -118,9 +97,7 @@ public class MySQLite extends DatabaseBasic{
         }
     }
 
-
     ///no neeed to have parameter database name as parameter giati etsi jialios onta kamno isntance toutou toy class xrinsipopoio ena database j kamno connect se jino kalontas touto to method me jino to instance enna paisi to schema!!
-
     public Schema getSchema()
     {
         DatabaseMetaData metaData;
@@ -129,8 +106,6 @@ public class MySQLite extends DatabaseBasic{
         String columnName;
         LinkedList<String> primaryKeys;
         HashMap<String, HashMap<String, String>> foreignKeys;
-        int columnflag;
-
         try{
             metaData = connection.getMetaData();
             resultSetTable = metaData.getTables(null,null,null,new String[]{TABLE});
@@ -144,10 +119,7 @@ public class MySQLite extends DatabaseBasic{
             }
 
             LinkedList<MyRelation> relations = mySchema.getRelations();
-            for (int i=1; i<relations.size(); i++ )
-            {
-                //Get Columns of reach relations.
-                System.out.println("relation Name = " + relations.get(i).getRelationName() );
+            for (int i=0; i<relations.size(); i++ ) {
                 resultSetTable = metaData.getColumns(null,null,relations.get(i).getRelationName(),null);
 
                 // Get primary and foreign keys
@@ -158,43 +130,33 @@ public class MySQLite extends DatabaseBasic{
 
                 //GET INFORMATION FOR EACH COLUMN!
                 while(resultSetTable.next()) {
-                    LinkedList<Integer> constraints = new LinkedList<>();
 
-                    //String type = resultSetTable.getString(DATA_TYPE);
-                    //type = getType(type);
+                    LinkedList<Integer> constraints = new LinkedList<>();
                     columnName = resultSetTable.getString(COLUMN_NAME);
                     String type = resultSetTable.getString("TYPE_NAME");
-                    System.out.println("column Name = " + columnName + "  " + type );
 
-                    MyField field = new MyField(relations.get(i),columnName,type,null);
-                    if(primaryKeys.contains(columnName)) {
+                    MyField field = new MyField(relations.get(i), columnName, type, null);
+                    relations.get(i).addField(field);
+                    if (primaryKeys.contains(columnName)) {
                         //Add constraint
                         constraints.add(PRIMARY_CON);
                         relations.get(i).addPrimaryKey(field);
-                        System.out.println("Primary key -> " + field.getFieldName() );
                     }
-                    if(foreignKeys.containsKey(columnName)) {
+                    if (foreignKeys.containsKey(columnName)) {
                         //add constraint
                         constraints.add(FOREING_CON);
                         relations.get(i).addForeignKey(field, foreignKeys.get(columnName));
                         HashMap<String, String> temp = foreignKeys.get(columnName);
-                        System.out.println("foreign Key " + field.getFieldName());
-                        System.out.println("Referencing." + temp);
                     }
-                    String temp = resultSetTable.getString("IS_NULLABLE");
-                    System.out.println(temp + " ho ho ho ");
-
+                    //  String temp = resultSetTable.getString("IS_NULLABLE");
                 }
-                System.out.println("------------------------------------------------------------");
             }
-        }catch (SQLException sql)
-        {
+        }catch (SQLException sql) {
             sql.printStackTrace();
         }
 
         return mySchema;
     }
-
 
     public LinkedList<String> getPrimaryKeys(ResultSet primaryKeySet) throws SQLException
     {
@@ -222,48 +184,35 @@ public class MySQLite extends DatabaseBasic{
         return foreignKeys;
     }
 
+    public StringBuilder whereException(String query) {
 
-
-    public String getType(String typeNum)
-    {
-        //theli jialla types.
-        int typeInt = Integer.parseInt(typeNum);
-        switch (typeInt)
+        //(?i) -> use embedded flag in the regex to ignore case!
+        String[] whereParts = query.split("(?i)and");
+        StringBuilder myNewWhere = new StringBuilder();
+        for(int i=0; i<whereParts.length; i++)
         {
-            case Types.BIGINT:{
-                typeNum = "BIGINT";
-                break;
-            }
-            case Types.BLOB:{
-                typeNum =  "BLOB";
-                break;
-            }
-            case Types.CHAR:{
-                typeNum = "CHAR";
-                break;
-            }
-            case Types.DATE: {
-                typeNum = "DATE";
-                break;
-            }
-            case Types.DOUBLE:{
-                typeNum = "DOUBLE";
-                break;
-            }
-            case Type.FLOAT:{
-                typeNum = "FLOAT";
-                break;
-            }
-            case Types.INTEGER:{
-                typeNum = "INTEGER";
-                break;
-            }
-            case Types.VARCHAR:{
-                typeNum = "VARCHAR";
-                break;
-            }
+            //en tha dulefki panta dioti pes oti to filed name eshi kataxorimeno to name = {emmelia=emmelia} tote enne apiasi to = enno en tha prepi
+            //to idio isxii j gia tin telia. alla telos panton pros to paron! afisto !
+            if(whereParts[i].contains("=")) // if in case that there is also Like j ta alla oulla!!!
+            {
+                String[] equationParts = whereParts[i].split("=");
+                //check if it's referring to a field using the relation and remove it because this relation does not exists anymore.
+                for(int j=0; j<equationParts.length; j++) {
+                    if (equationParts[j].contains("."))
+                        equationParts[j] = equationParts[j].substring(equationParts[j].indexOf(".") + 1);
+                }
 
+                if(equationParts[0].equalsIgnoreCase(equationParts[1]))
+                    // add "" and :1 to the second column if they have the same name. length-1 to remove the space between the name and ":".
+                    equationParts[1] = "\"" + equationParts[1].substring(0, equationParts[1].length() - 1) + ":1\"";
+
+                whereParts[i] = equationParts[0] + " = " + equationParts[1];
+            }
+            if(i != whereParts.length-1)
+                myNewWhere.append(whereParts[i] + " and ");
+            else
+                myNewWhere.append(whereParts[i]);
         }
-        return typeNum;
+        return  myNewWhere;
     }
 }

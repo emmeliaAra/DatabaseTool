@@ -24,4 +24,13 @@ public class Schema{
     {
         return databaseName;
     }
+
+    public MyRelation getRelationOnName(String relationName)
+    {
+        for (MyRelation temp : relations) {
+            if(temp.getRelationName().equalsIgnoreCase(relationName))
+                return temp;
+        }
+        return null;
+    }
 }

@@ -1,5 +1,3 @@
-import org.omg.CosNaming.NamingContextPackage.NotEmpty;
-
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -96,6 +94,24 @@ public class TreeStructure<T> {
     public void createStack(Node<T> node){
         stack.push(node);
         node.getChildren().forEach(each -> createStack(each));
+    }
+
+
+    public void inorderTreeTraverse(Node<T> node){
+
+        //If node does not have child nodes then it's a leaf node and print
+        if(node.children.size() == 0 )
+            System.out.print(node.data + " " );
+        //if node has 2 nodes -> travers through the left child print the value and then do the same fr the right!
+        else if(node.children.size() == 2){
+            inorderTreeTraverse(node.children.get(1));
+            System.out.print(node.data + " " );
+            inorderTreeTraverse(node.children.get(0));
+            //if only one child traverse through the left child and print value.
+        }else if (node.children.size() == 1){
+            inorderTreeTraverse(node.children.get(0));
+            System.out.print(node.data + " " );
+        }
     }
 
     public Node<T> getRootNode() {
