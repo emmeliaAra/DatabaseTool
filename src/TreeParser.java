@@ -50,9 +50,18 @@ public class TreeParser {
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
 
+
+        canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
+
+        Stack<TreeStructure.Node<String>> stack = canonicalTreeForOpt.getStack();
+
         OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),selectFieldName,fromRelationNames,whereClause);
         optimizeTree.splitWhere();
-        canonicalTreeForOpt.inorderTreeTraverse(canonicalTreeForOpt.getRootNode());
+        optimizeTree.optimiseTree();
+
+
+        //canonicalTreeForOpt.inorderTreeTraverse(canonicalTreeForOpt.getRootNode());
+        //canonicalTreeForOpt.getSubtrees(canonicalTreeForOpt.getRootNode());
     }
 
     public void getParts()

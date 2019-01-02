@@ -202,9 +202,12 @@ public class MySQLite extends DatabaseBasic{
                         equationParts[j] = equationParts[j].substring(equationParts[j].indexOf(".") + 1);
                 }
 
+                //remove any white spaces before comparing the 2 parts!
+                equationParts[0] = equationParts[0].replaceAll("\\s","");
+                equationParts[1] = equationParts[1].replaceAll("\\s","");
                 if(equationParts[0].equalsIgnoreCase(equationParts[1]))
-                    // add "" and :1 to the second column if they have the same name. length-1 to remove the space between the name and ":".
-                    equationParts[1] = "\"" + equationParts[1].substring(0, equationParts[1].length() - 1) + ":1\"";
+                    // add "" and :1 to the second column if they have the same name. If it doesn't work -> check this line on git!
+                    equationParts[1] = "\"" + equationParts[1]+ ":1\"";
 
                 whereParts[i] = equationParts[0] + " = " + equationParts[1];
             }

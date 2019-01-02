@@ -38,11 +38,22 @@ public class TreeStructure<T> {
 
         public Node<T> getParentNode() {
             return parentNode;
-        }    public int getNodeStatus()
+        }
+
+        public int getNodeStatus()
         {
             return nodeStatus;
         }
 
+        public void setNodeData(T newData)
+        {
+            data = newData;
+        }
+
+        public void setNodeStatus(int status)
+        {
+            nodeStatus = status;
+        }
     }
 
     public void addRootNode(T data,int nodeStatus) throws IllegalAccessException {
@@ -111,6 +122,28 @@ public class TreeStructure<T> {
         }else if (node.children.size() == 1){
             inorderTreeTraverse(node.children.get(0));
             System.out.print(node.data + " " );
+        }
+    }
+
+    public void getSubtrees(Node<T> node)
+    {
+        if(node.children.size() == 2 )
+        {
+            System.out.println("_________________________________________________");
+            printTree(node.children.get(0), " ");
+            System.out.println("_________________________________________________");
+            getSubtrees(node.children.get(0));
+
+            System.out.println("_________________________________________________");
+            printTree(node.children.get(1), " ");
+            System.out.println("_________________________________________________");
+
+            getSubtrees(node.children.get(1));
+        }else if(node.children.size() == 1) {
+            System.out.println("_________________________________________________");
+            printTree(node.children.get(0), " ");
+            System.out.println("_________________________________________________");
+            getSubtrees(node.children.get(0));
         }
     }
 
