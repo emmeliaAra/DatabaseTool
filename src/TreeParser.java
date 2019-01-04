@@ -33,35 +33,29 @@ public class TreeParser {
         MySQLite mySQLite = new MySQLite("University.db");
       //mySQLite.getSchema();
 
-        TreeStructure<String> canonicalTree;
-        TreeStructure<String> canonicalTreeForOpt;
+        TreeStructure<String> canonicalTree, canonicalTreeForOpt;
+
         System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
         SelectStatement selectStatementToTree1 = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
 
         //creates the trees
         canonicalTree = selectStatementToTree.buildSelectTree();
+        canonicalTree.printTree(canonicalTree.getRootNode(), " ");
         System.out.println("--------------------------------------");
 
         //keep a copy of the original tree so that can be optimised.
         canonicalTreeForOpt = selectStatementToTree1.buildSelectTree();
 
-        ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause);
+        /*ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause);
         canonicalTree.createStack(canonicalTree.getRootNode());
-        executeCanonicalTree.execute(canonicalTree.getStack());
+        executeCanonicalTree.execute(canonicalTree.getStack());*/
 
-
-        canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
-
-        Stack<TreeStructure.Node<String>> stack = canonicalTreeForOpt.getStack();
-
-        OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),selectFieldName,fromRelationNames,whereClause);
+        OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
         optimizeTree.splitWhere();
-        optimizeTree.optimiseTree();
+        canonicalTreeForOpt = optimizeTree.optimiseTree();
+        canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
 
-
-        //canonicalTreeForOpt.inorderTreeTraverse(canonicalTreeForOpt.getRootNode());
-        //canonicalTreeForOpt.getSubtrees(canonicalTreeForOpt.getRootNode());
     }
 
     public void getParts()

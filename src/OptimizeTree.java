@@ -2,22 +2,21 @@ import java.util.*;
 
 public class OptimizeTree {
 
-    private Vector<String> whereClause;
     private HashMap<String,LinkedList<String>> optimizedWhere;
     private LinkedList<String> associatedRelations;
     private TreeStructure<String> canonicalTree;
+    private Vector<String> whereClause;
     private MyHelper myHelper;
     private Schema schema;
+
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
     private static final int WHERE_NODE_STATUS = 2;
     private static final int ACTION_NODE_STATUS = 3;
     private static final int OPT_COND_NODE_STATUS = 4;
+    private static final int JOIN_NODE_STATUS = 5;
 
-
-
-    public OptimizeTree(TreeStructure<String> canonicalTree1, Schema schema, Vector<String> whereClause)
-    {
+    public OptimizeTree(TreeStructure<String> canonicalTree1, Schema schema, Vector<String> whereClause) {
         this.canonicalTree = canonicalTree1;
         this.whereClause = whereClause;
         this.schema = schema;
@@ -65,10 +64,12 @@ public class OptimizeTree {
             optimizationStack.push(popNode);
         }
         //Delete node that holds the condition if any from the initial tree
-        //whereNodeToDelete.getChildren().get(0).setParentNode(whereNodeToDelete.getParentNode());
-        //System.out.println(whereNodeToDelete.getChildren().get(0).getData() + "   m " + whereNodeToDelete.getParentNode().getData());
-        //canonicalTree.deleteNode(whereNodeToDelete);
-        //System.out.println(canonicalTree.getRootNode().getChildren().get(0).getData());
+        if(whereNodeToDelete!=null){
+            whereNodeToDelete.getChildren().get(0).setParentNode(whereNodeToDelete.getParentNode());
+            canonicalTree.deleteNode(whereNodeToDelete);
+        }
+        convertCartesianToJoin();
+
         return canonicalTree;
     }
 
@@ -168,6 +169,23 @@ public class OptimizeTree {
                        }
         }
         return condition;
+    }
+
+    public void convertCartesianToJoin(){
+
+        //Remove the nodes that are representing the cartesian products and a condition to a join operation
+        canonicalTree.createStack(canonicalTree.getRootNode());
+        Stack<TreeStructure.Node<String>> stack = canonicalTree.getStack();
+        TreeStructure.Node<String> node;
+
+        while (!stack.empty()) {
+            node = stack.pop();
+            //if the node is a cartesian product and it does not only hold "X" and then change it to join operation remove the "X" and add the condition!
+            if(node.getNodeStatus() == CARTESIAN_NODE_STATUS && !node.getData().equalsIgnoreCase("X")){
+                node.setNodeData("⨝" + node.getData().replace("X", " "));
+                node.setNodeStatus(JOIN_NODE_STATUS);
+            }
+        }
     }
 
     public void splitWhere() {

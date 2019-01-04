@@ -78,7 +78,6 @@ public class SelectStatement {
             TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS);
         }
         getLeafNodes(rootNode, canonicalTree);
-        canonicalTree.printTree(rootNode, " ");
         return canonicalTree;
     }
 

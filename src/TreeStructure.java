@@ -54,6 +54,13 @@ public class TreeStructure<T> {
         {
             nodeStatus = status;
         }
+
+        public void setParentNode(Node<T> parentNode)
+        {
+            this.parentNode = parentNode;
+            System.out.println(this.data + " emmelia id \n");
+            parentNode.children.addLast(this);
+        }
     }
 
     public void addRootNode(T data,int nodeStatus) throws IllegalAccessException {
@@ -107,46 +114,6 @@ public class TreeStructure<T> {
         node.getChildren().forEach(each -> createStack(each));
     }
 
-
-    public void inorderTreeTraverse(Node<T> node){
-
-        //If node does not have child nodes then it's a leaf node and print
-        if(node.children.size() == 0 )
-            System.out.print(node.data + " " );
-        //if node has 2 nodes -> travers through the left child print the value and then do the same fr the right!
-        else if(node.children.size() == 2){
-            inorderTreeTraverse(node.children.get(1));
-            System.out.print(node.data + " " );
-            inorderTreeTraverse(node.children.get(0));
-            //if only one child traverse through the left child and print value.
-        }else if (node.children.size() == 1){
-            inorderTreeTraverse(node.children.get(0));
-            System.out.print(node.data + " " );
-        }
-    }
-
-    public void getSubtrees(Node<T> node)
-    {
-        if(node.children.size() == 2 )
-        {
-            System.out.println("_________________________________________________");
-            printTree(node.children.get(0), " ");
-            System.out.println("_________________________________________________");
-            getSubtrees(node.children.get(0));
-
-            System.out.println("_________________________________________________");
-            printTree(node.children.get(1), " ");
-            System.out.println("_________________________________________________");
-
-            getSubtrees(node.children.get(1));
-        }else if(node.children.size() == 1) {
-            System.out.println("_________________________________________________");
-            printTree(node.children.get(0), " ");
-            System.out.println("_________________________________________________");
-            getSubtrees(node.children.get(0));
-        }
-    }
-
     public Node<T> getRootNode() {
         return rootNode;
     }
@@ -155,6 +122,5 @@ public class TreeStructure<T> {
     {
         return stack;
     }
-
 
 }

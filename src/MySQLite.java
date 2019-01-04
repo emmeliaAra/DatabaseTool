@@ -192,7 +192,7 @@ public class MySQLite extends DatabaseBasic{
         for(int i=0; i<whereParts.length; i++)
         {
             //en tha dulefki panta dioti pes oti to filed name eshi kataxorimeno to name = {emmelia=emmelia} tote enne apiasi to = enno en tha prepi
-            //to idio isxii j gia tin telia. alla telos panton pros to paron! afisto !
+            //to idio isxii j gia tin telia. alla telos panton pros to paron! afi sto !
             if(whereParts[i].contains("=")) // if in case that there is also Like j ta alla oulla!!!
             {
                 String[] equationParts = whereParts[i].split("=");
