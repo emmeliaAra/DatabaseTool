@@ -53,5 +53,14 @@ public class MyRelation {
     {
         return fields;
     }
+
+    public MyField getFieldOnName (String fieldName)
+    {
+        for (MyField temp : fields) {
+            if(temp.getFieldName().equalsIgnoreCase(fieldName))
+                return temp;
+        }
+        return null;
+    }
 }
 

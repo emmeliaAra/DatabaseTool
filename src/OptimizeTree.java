@@ -52,7 +52,7 @@ public class OptimizeTree {
                 }
                 case CARTESIAN_NODE_STATUS: {
 
-                    cartesianNodeAction(popNode, (Stack<TreeStructure.Node<String>>) optimizationStack.clone());
+                    cartesianNodeAction(popNode,(Stack<TreeStructure.Node<String>>) optimizationStack.clone());
                     cartesianNodesIncludeCond(popNode, associatedRelations);
                     associatedRelations = new LinkedList<>();
                 }
@@ -219,7 +219,7 @@ public class OptimizeTree {
                     }else {
                         //if no "."  p simeni en ksero se pio relation kamni reference enna to psaxo p to schema !!
                         relations = schema.getRelations();
-                        String name = getRelationNameOnField(equationParts[j],relations);
+                        String name = myHelper.getRelationNameOnField(equationParts[j],relations);
 
                         //if name is a field name add the table name to the referencing
                         if(name != null) {
@@ -239,22 +239,5 @@ public class OptimizeTree {
         System.out.println("optimized where  " + optimizedWhere + "\n");
     }
 
-    public String getRelationNameOnField(String fieldName, LinkedList<MyRelation> relations) {
-        String relationName = null;
-        boolean found = false;
-        //get the relation that the field is in !
-        for (MyRelation tempRelation : relations) {
-            LinkedList<MyField> tempField = tempRelation.getFields();
-            for(MyField field : tempField) {
-                if (field.getFieldName().equalsIgnoreCase(fieldName)) {
-                    relationName = tempRelation.getRelationName();
-                    found = true;
-                    break;
-                }
-            }
-            if(found) break;
-        }
-        return relationName;
-    }
 }
 

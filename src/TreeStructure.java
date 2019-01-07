@@ -58,7 +58,6 @@ public class TreeStructure<T> {
         public void setParentNode(Node<T> parentNode)
         {
             this.parentNode = parentNode;
-            System.out.println(this.data + " emmelia id \n");
             parentNode.children.addLast(this);
         }
     }
@@ -92,6 +91,8 @@ public class TreeStructure<T> {
             if(node.parentNode == null)
                 rootNode = null;
             else{
+
+              // System.out.println(" here " + node.getParentNode().getChildren().indexOf(node) + node.getParentNode().getChildren().size() + " 1to " + node.getParentNode().getChildren().getFirst().getData() + " deftert " + node.getParentNode().getChildren().getLast().getData());
                 int index = node.parentNode.children.indexOf(node);
                 node.parentNode.children.remove(index);
             }

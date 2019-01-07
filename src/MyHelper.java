@@ -30,4 +30,23 @@ public class MyHelper {
 
         return sb;
     }
+
+
+    public String getRelationNameOnField(String fieldName, LinkedList<MyRelation> relations) {
+        String relationName = null;
+        boolean found = false;
+        //get the relation that the field is in !
+        for (MyRelation tempRelation : relations) {
+            LinkedList<MyField> tempField = tempRelation.getFields();
+            for(MyField field : tempField) {
+                if (field.getFieldName().equalsIgnoreCase(fieldName)) {
+                    relationName = tempRelation.getRelationName();
+                    found = true;
+                    break;
+                }
+            }
+            if(found) break;
+        }
+        return relationName;
+    }
 }

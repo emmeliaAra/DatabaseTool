@@ -31,7 +31,7 @@ public class TreeParser {
         getParts();
 
         MySQLite mySQLite = new MySQLite("University.db");
-      //mySQLite.getSchema();
+        //mySQLite.getSchema();
 
         TreeStructure<String> canonicalTree, canonicalTreeForOpt;
 
@@ -47,15 +47,18 @@ public class TreeParser {
         //keep a copy of the original tree so that can be optimised.
         canonicalTreeForOpt = selectStatementToTree1.buildSelectTree();
 
-        /*ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause);
+        ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause,mySQLite);
         canonicalTree.createStack(canonicalTree.getRootNode());
-        executeCanonicalTree.execute(canonicalTree.getStack());*/
+        executeCanonicalTree.execute(canonicalTree.getStack());
 
         OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
         optimizeTree.splitWhere();
         canonicalTreeForOpt = optimizeTree.optimiseTree();
         canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
 
+        ExecuteCanonicalTree executeOptionalTree = new ExecuteCanonicalTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);
+        canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
+        executeOptionalTree.execute(canonicalTreeForOpt.getStack());
     }
 
     public void getParts()
