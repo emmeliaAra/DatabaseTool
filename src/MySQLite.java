@@ -5,8 +5,8 @@ import java.util.Vector;
 
 public class MySQLite extends DatabaseBasic{
 
-    private ResultSet resultSet;
     private String databaseName;
+    //private HashMap<String,LinkedList<String>> newTablesCreated;
     private Vector<String> newTablesCreated;
     private static final String TABLE_NAME = "TABLE_NAME";
     private static final String TABLE = "TABLE";
@@ -16,10 +16,6 @@ public class MySQLite extends DatabaseBasic{
     private static final String REFTABLE_NAME = "PKTABLE_NAME";
     private static final int PRIMARY_CON = 0;
     private static final int FOREIGN_CON = 1;
-    private static final int NOT_NULL_CON= 2;
-    private static final int NULL_CON = 3;
-    private static final int DEFAULT_CON = 4;
-    private static final String DATA_TYPE = "DATA_TYPE";
     private MyHelper myHelper;
 
     public MySQLite(String databaseName) {
@@ -32,18 +28,19 @@ public class MySQLite extends DatabaseBasic{
     public void simpleSelect(LinkedList<String> selectFields, LinkedList<String> fromFields) {
 
         StringBuilder fromF = myHelper.getFields(fromFields);
-        StringBuilder selectF = myHelper.getFields(selectFields);
+        StringBuilder selectF = myHelper.getSelectFields(selectFields);
 
         String queryTemplate = "Select " + selectF +" from " + fromF + ";";
-        resultSet = execute(queryTemplate);
+        execute(queryTemplate);
     }
 
     public void createAsStatement(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName) {
 
         StringBuilder fromF = myHelper.getFields(fromFields);
-        StringBuilder selectF = myHelper.getFields(selectFields);
+        StringBuilder selectF = myHelper.getSelectFields(selectFields);
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + ";";
-        System.out.println(" createAsStatement + " + queryTemplate);
+
+
         newTablesCreated.add(tableName);
         executeCreate(queryTemplate);
     }
@@ -51,58 +48,57 @@ public class MySQLite extends DatabaseBasic{
     public void whereSelect(LinkedList<String> selectFields, LinkedList<String> fromFields,LinkedList<String> whereClause) {
 
         StringBuilder fromF = myHelper.getFields(fromFields);
-        StringBuilder selectF = myHelper.getFields(selectFields);
-        StringBuilder whereCl = myHelper.getWhereFields(whereClause);
+        StringBuilder selectF = myHelper.getSelectFields(selectFields);
 
+        StringBuilder whereCl = myHelper.getWhereFields(whereClause);
         whereCl = whereException(whereCl.toString());
+
         String queryTemplate = "Select" + selectF +" from " + fromF + " where " + whereCl + ";";
-        System.out.println("whereSelect + " + queryTemplate);
+
         execute(queryTemplate);
     }
 
     public void createAsStatementWhere(LinkedList<String> selectFields,LinkedList<String> fromFields,String tableName,LinkedList<String> whereClause) {
 
         StringBuilder fromF = myHelper.getFields(fromFields);
-        StringBuilder selectF = myHelper.getFields(selectFields);
+        StringBuilder selectF = myHelper.getSelectFields(selectFields);
         StringBuilder whereCl = myHelper.getWhereFields(whereClause);
 
         newTablesCreated.add(tableName);
 
         whereCl = whereException(whereCl.toString());
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + " where " + whereCl + ";";
-        System.out.println("createAsStatementWhere + " + queryTemplate);
 
         executeCreate(queryTemplate);
     }
 
     public void joinStatement(LinkedList<String> selectFields, LinkedList<String> fromFields, LinkedList<String> onClause) {
        // StringBuilder fromF = myHelper.getFields(fromFields);
-        StringBuilder selectF = myHelper.getFields(selectFields);
+        StringBuilder selectF = myHelper.getSelectFields(selectFields);
         StringBuilder onClause1 = myHelper.getWhereFields(onClause);
 
-        onClause1 = joineException(onClause1.toString(),fromFields.get(0), fromFields.get(1));
+        onClause1 = joinException(onClause1.toString(),fromFields.get(0), fromFields.get(1));
         String queryTemplate = "Select" + selectF + " from " + fromFields.get(0) + " join " + fromFields.get(1) + " on " + onClause1 + ";";
-        System.out.println(" join " + queryTemplate + " emmeliaaaaaaaaaaaaa");
         execute(queryTemplate);
     }
 
     public void createJoinStatement(LinkedList<String> selectFields, LinkedList<String> fromFields, String tableName, LinkedList<String> onClause) {
 
-        StringBuilder selectF = myHelper.getFields(selectFields);
+        StringBuilder selectF = myHelper.getSelectFields(selectFields);
         StringBuilder onClause1 = myHelper.getWhereFields(onClause);
-        onClause1 = joineException(onClause1.toString(),fromFields.get(0), fromFields.get(1));
+
+        onClause1 = joinException(onClause1.toString(),fromFields.get(0), fromFields.get(1));
+
         String queryTemplate = "Create table " + tableName + " AS Select " + selectF + " from " + fromFields.get(0) + " join " + fromFields.get(1) + " on " + onClause1 + ";";
-        System.out.println(" Create join " + queryTemplate );
         executeCreate(queryTemplate);
     }
 
 
     public ResultSet execute(String queryTemplate) {
 
-        PreparedStatement preparedStatement = null;
-        resultSet = null;
+        ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(queryTemplate);
+            PreparedStatement preparedStatement = connection.prepareStatement(queryTemplate);
             resultSet = preparedStatement.executeQuery();
             System.out.println("______________________________________________________________________________________");
             while (resultSet.next())
@@ -257,11 +253,9 @@ public class MySQLite extends DatabaseBasic{
                 //remove any white spaces before comparing the 2 parts!
                 equationParts[0] = equationParts[0].replaceAll("\\s","");
                 equationParts[1] = equationParts[1].replaceAll("\\s","");
-                if(equationParts[0].equalsIgnoreCase(equationParts[1])) {
+                if(equationParts[0].equalsIgnoreCase(equationParts[1]))
                     // add "" and :1 to the second column if they have the same name. If it doesn't work -> check this line on git!
                     equationParts[1] = "\"" + equationParts[1] + ":1\"";
-                    System.out.println(" emmelia is here ¬" + equationParts[1] + " ho hoh " + equationParts[0] + "   ff " + query);
-                }
 
                 whereParts[i] = equationParts[0] + " = " + equationParts[1];
             }
@@ -270,11 +264,10 @@ public class MySQLite extends DatabaseBasic{
             else
                 myNewWhere.append(whereParts[i]);
         }
-        System.out.println(myNewWhere + " new Where");
         return  myNewWhere;
     }
 
-    public StringBuilder joineException(String query, String relation1, String relation2)
+    public StringBuilder joinException(String query, String relation1, String relation2)
     {
         //(?i) -> use embedded flag in the regex to ignore case!
         String[] joinParts = query.split("(?i)and");
@@ -308,5 +301,7 @@ public class MySQLite extends DatabaseBasic{
         }
         return myNewJoin;
     }
+
+
 
 }

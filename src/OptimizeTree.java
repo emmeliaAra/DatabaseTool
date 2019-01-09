@@ -32,6 +32,7 @@ public class OptimizeTree {
         Stack<TreeStructure.Node<String>> stack = canonicalTree.getStack();
         Stack<TreeStructure.Node<String>> optimizationStack = new Stack<>();
 
+        System.out.println(stack.size() + "stack size");
         boolean conditionAlready;
         while (!stack.empty()) {
             popNode = stack.pop();
@@ -188,7 +189,7 @@ public class OptimizeTree {
         }
     }
 
-    public void splitWhere() {
+    public HashMap<String,LinkedList<String>>  splitWhere() {
 
         LinkedList<String> where = new LinkedList<>(whereClause);
         LinkedList<String> referencingRelations;
@@ -237,6 +238,7 @@ public class OptimizeTree {
             }
         }
         System.out.println("optimized where  " + optimizedWhere + "\n");
+        return optimizedWhere;
     }
 
 }

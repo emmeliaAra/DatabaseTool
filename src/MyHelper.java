@@ -8,9 +8,25 @@ public class MyHelper {
         if(myList != null)
         {
             for(int i=0; i<myList.size(); i++)
-                sb.append(myList.get(i) +",");
+                sb.append(myList.get(i)).append(",");
+            //DELETE THE LAST COMMA
             sb.deleteCharAt(sb.length()-1);
         }
+        return sb;
+    }
+
+    public StringBuilder getSelectFields (LinkedList<String> myList)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (String var: myList) {
+            if(!var.equalsIgnoreCase("."))
+                sb.append(var).append(",");
+            else
+                //if is a full stop replace the last character of the sb (,) with a full stop
+                sb.replace(sb.length() - 1, sb.length() , var);
+        }
+        //delete the last comma!
+        sb.deleteCharAt(sb.length()-1);
         return sb;
     }
 

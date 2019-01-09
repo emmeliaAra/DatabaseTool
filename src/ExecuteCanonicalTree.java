@@ -1,26 +1,35 @@
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Vector;
 
 public class ExecuteCanonicalTree {
 
+
+    private LinkedList<String> relationInOrder = new LinkedList<>();
+    private LinkedList<TreeStructure.Node<String>> holdNodes;
+    private HashMap<String,LinkedList<String>> newTablesCreated;
+    private Vector<String> selectFieldName,whereClause;
     private TreeStructure<String> canonicalTree;
     private MySQLite mySQLite;
-    private LinkedList<TreeStructure.Node<String>> holdNodes;
-    private Vector<String> selectFieldName,whereClause;
+
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
     private static final int WHERE_NODE_STATUS = 2;
     private static final int ACTION_NODE_STATUS = 3;
     private static final int OPT_COND_NODE_STATUS = 4;
     private static final int JOIN_NODE_STATUS = 5;
+    private static final int IS_ZERO_METHOD_NUM = 0;
+    private static final int IS_ONE_METHOD_NUM= 1;
+    private static final int IS_TWO_METHOD_NUM= 2;
 
-    public ExecuteCanonicalTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName,Vector<String> whereClause, MySQLite mySQLite)
-    {
+    public ExecuteCanonicalTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName,Vector<String> whereClause, MySQLite mySQLite) {
         this.canonicalTree = canonicalTree;
         this.selectFieldName = selectFieldName;
         this.whereClause = whereClause;
         this.mySQLite = mySQLite;
+
+        newTablesCreated = new HashMap<>();
     }
 
     public void execute(Stack<TreeStructure.Node<String>> stack) throws IllegalAccessException {
@@ -28,7 +37,6 @@ public class ExecuteCanonicalTree {
         TreeStructure.Node<String> popNode;
         holdNodes = new LinkedList<>();
         //pops the nodes from the stack
-        canonicalTree.printTree(canonicalTree.getRootNode(), " ");
         while (!stack.empty() )
         {
             popNode = stack.pop();
@@ -66,7 +74,6 @@ public class ExecuteCanonicalTree {
             execute(canonicalTree.getStack());
         }
         mySQLite.undoTables();
-        //select * from staff,work_on,department,projects,courses;
     }
 
     public void isCartesian(TreeStructure.Node<String> popNode) throws IllegalAccessException {
@@ -87,7 +94,7 @@ public class ExecuteCanonicalTree {
 
             //execute the statement.
             mySQLite.simpleSelect(tempSelect,tempFrom );
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,null,1);
+            createNewRelation(popNode,tempSelect,tempFrom,tableName,null,IS_ONE_METHOD_NUM);
 
             //clear the list that holds the relations.
             holdNodes = new LinkedList<>();
@@ -101,7 +108,7 @@ public class ExecuteCanonicalTree {
 
             //execute the statement.
             mySQLite.simpleSelect(tempSelect,tempFrom );
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,null,1);
+            createNewRelation(popNode,tempSelect,tempFrom,tableName,null,IS_ONE_METHOD_NUM);
             holdNodes = new LinkedList<>();
         }
     }
@@ -109,8 +116,21 @@ public class ExecuteCanonicalTree {
     public void isAction(TreeStructure.Node<String> popNode) throws IllegalAccessException {
         //execute the project operation on the final resulting relation
         if(holdNodes.size() == 1) {
+
+            MyHelper myHelper = new MyHelper();
             LinkedList<String> temp = new LinkedList<>() ;
-            LinkedList<String> selectFields = new LinkedList<>(selectFieldName);
+            LinkedList<String> selectFields;
+
+            /*If there are no new relations created means that the condition will be applied to the one relation in the query
+            If new relations are created then the getRightSelect method is called*/
+            getRelationsInOrder(holdNodes.getFirst().getData());
+            if(!relationInOrder.isEmpty()){
+                //call helper method to make the list into one String so that it can be split later when ever "," appears
+                StringBuilder selectF = myHelper.getSelectFields(new LinkedList<>(selectFieldName));
+                selectFields  = getRightSelect(selectF.toString());
+            }
+            else
+                selectFields = new LinkedList<>(selectFieldName);
 
             temp.add(holdNodes.getFirst().getData());
             mySQLite.simpleSelect(selectFields,temp);
@@ -133,7 +153,7 @@ public class ExecuteCanonicalTree {
             tempFrom.addFirst(holdNodes.getFirst().getData());
             mySQLite.whereSelect(tempSelect,tempFrom,where);
 
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,where,0);
+            createNewRelation(popNode,tempSelect,tempFrom,tableName,where,IS_ZERO_METHOD_NUM);
             holdNodes = new LinkedList<>();
         }
     }
@@ -154,7 +174,7 @@ public class ExecuteCanonicalTree {
         mySQLite.whereSelect(tempSelect,tempFrom,where);
 
         //Add the new node to the place that the node that the condition was applied to so that the next operation if any will be applied to that one !
-        TreeStructure.Node<String> newNode = createNewRelation(popNode,tempSelect,tempFrom,tableName,where,0);
+        TreeStructure.Node<String> newNode = createNewRelation(popNode,tempSelect,tempFrom,tableName,where,IS_ZERO_METHOD_NUM);
         holdNodes.set(holdNodes.indexOf(holdNodes.getFirst()),newNode);
     }
 
@@ -175,7 +195,7 @@ public class ExecuteCanonicalTree {
             tempOnClause.addFirst(popNode.getData().substring(1));
 
             mySQLite.joinStatement(tempSelect,tempFrom,tempOnClause);
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,tempOnClause,2);
+            createNewRelation(popNode,tempSelect,tempFrom,tableName,tempOnClause,IS_TWO_METHOD_NUM);
         }
     }
 
@@ -195,8 +215,73 @@ public class ExecuteCanonicalTree {
         else
             mySQLite.createJoinStatement(tempSelect,tempFrom,tableName,where);
 
+        LinkedList<String> temp = new LinkedList<>();
+        temp.addFirst(tempFrom.get(0));
+        if(tempFrom.size() == 2)
+            temp.addFirst(tempFrom.get(1));
+        newTablesCreated.put(tableName,temp);
+
         //Add the node to the tree and return it because its needed for isOptCond method!
         TreeStructure.Node<String> newNode = canonicalTree.addChildNode(parentNode,tableName,RELATION_NODE_STATUS);
         return newNode;
+    }
+
+    /* When a cartesian product of 2 relations that have the same field name the first one is the same and the second one has the format
+    "fieldNAme:1" and the number changes according to how many times the same field name appears.
+    This function is used to set the right select field because the initial one ex.courses.c_id is wrong because the final relation may have a different name.
+     */
+    public LinkedList<String> getRightSelect( String selectString) {
+
+        LinkedList<String> newSelectList = new LinkedList<>();
+        String[] selectStringParts = selectString.split(",");
+
+        for (int i = 0; i < selectStringParts.length; i++)
+            // if there is a referencing table it must be removed because this is not the one in the from list anymore.
+            if (selectStringParts[i].contains(".")) {
+                String[] fullStopParts = selectStringParts[i].split("\\.");
+                /*get the position of the referencing table in the relationInOrder.
+                -> if index ==0 then in the inital statement this relation is the first one appeared in the from list*/
+                int index = relationInOrder.indexOf(fullStopParts[0]);
+                //if index -> zero then their is no need to add :1
+                if (index == 0)
+                    newSelectList.add(fullStopParts[1]);
+                /*if index >0 check if the same field name appears in one of the previous relations in the relationInOrder list
+                If yes add :count to the field if not the field name is added as it is to the  newSelectList
+                 */
+                else if (index > 0) {
+                    int count = 0;
+                    for (int j = 0; j < index; j++) {
+                        String relationName = relationInOrder.get(j);
+                        MyRelation relation = mySQLite.getSchema().getRelationOnName(relationName);
+                        if (relation.getFieldOnName(fullStopParts[1]) != null)
+                            count++;
+                    }
+                    if(count !=0)
+                        newSelectList.add("\"" + fullStopParts[1] + ":" + count + "\"");
+                    else
+                        newSelectList.add(fullStopParts[1]);
+                }
+            } else
+                //if there is no referencing table the statement stays the same!
+                newSelectList.add(selectStringParts[i]);
+        return newSelectList;
+    }
+
+    /*Checks if the tableName passed as argument is an element of the newTablesCreated if not then it means that it is an existing table
+    If the table is a part of newTablesCreated it will check the values of that element in the hashMap and if the value is an existing table
+    it will be added to the relationInOrder. If the value is also an new table it will recursively call that method until there are no new tables
+    stored in the value element of the HashMap!
+     */
+    private void  getRelationsInOrder(String tableName)
+    {
+        if(newTablesCreated.containsKey(tableName))
+        {
+            LinkedList temp = newTablesCreated.get(tableName);
+            for(Object var: temp)
+                if(!newTablesCreated.containsKey(var))
+                    relationInOrder.add(var.toString());
+                else
+                    getRelationsInOrder(var.toString());
+        }
     }
 }

@@ -52,9 +52,10 @@ public class TreeParser {
         executeCanonicalTree.execute(canonicalTree.getStack());
 
         OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
-        optimizeTree.splitWhere();
-        canonicalTreeForOpt = optimizeTree.optimiseTree();
-        canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
+        if(!optimizeTree.splitWhere().isEmpty()) {
+            canonicalTreeForOpt = optimizeTree.optimiseTree();
+            canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
+        }
 
         ExecuteCanonicalTree executeOptionalTree = new ExecuteCanonicalTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);
         canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
