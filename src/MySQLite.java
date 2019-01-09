@@ -5,18 +5,17 @@ import java.util.Vector;
 
 public class MySQLite extends DatabaseBasic{
 
-    private String databaseName;
-    //private HashMap<String,LinkedList<String>> newTablesCreated;
-    private Vector<String> newTablesCreated;
-    private static final String TABLE_NAME = "TABLE_NAME";
     private static final String TABLE = "TABLE";
+    private static final String TABLE_NAME = "TABLE_NAME";
     private static final String COLUMN_NAME = "COLUMN_NAME";
     private static final String FKCOLUMN_NAME = "FKCOLUMN_NAME";
     private static final String REFCOLUMN_NAME = "PKCOLUMN_NAME";
     private static final String REFTABLE_NAME = "PKTABLE_NAME";
     private static final int PRIMARY_CON = 0;
     private static final int FOREIGN_CON = 1;
+    private Vector<String> newTablesCreated;
     private MyHelper myHelper;
+    private String databaseName;
 
     public MySQLite(String databaseName) {
         super(databaseName);
@@ -73,7 +72,7 @@ public class MySQLite extends DatabaseBasic{
     }
 
     public void joinStatement(LinkedList<String> selectFields, LinkedList<String> fromFields, LinkedList<String> onClause) {
-       // StringBuilder fromF = myHelper.getFields(fromFields);
+
         StringBuilder selectF = myHelper.getSelectFields(selectFields);
         StringBuilder onClause1 = myHelper.getWhereFields(onClause);
 

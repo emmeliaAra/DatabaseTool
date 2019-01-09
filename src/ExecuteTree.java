@@ -3,7 +3,7 @@ import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Vector;
 
-public class ExecuteCanonicalTree {
+public class ExecuteTree {
 
 
     private LinkedList<String> relationInOrder = new LinkedList<>();
@@ -23,7 +23,7 @@ public class ExecuteCanonicalTree {
     private static final int IS_ONE_METHOD_NUM= 1;
     private static final int IS_TWO_METHOD_NUM= 2;
 
-    public ExecuteCanonicalTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName,Vector<String> whereClause, MySQLite mySQLite) {
+    public ExecuteTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName,Vector<String> whereClause, MySQLite mySQLite) {
         this.canonicalTree = canonicalTree;
         this.selectFieldName = selectFieldName;
         this.whereClause = whereClause;

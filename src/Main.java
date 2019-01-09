@@ -1,5 +1,5 @@
-import java.io.IOException;
 import org.antlr.v4.runtime.*;
+import java.io.IOException;
 
 public class Main {
 
@@ -9,6 +9,7 @@ public class Main {
             CharStream charStream = CharStreams.fromStream(System.in);
             TreeParser myTreeParser = new TreeParser(charStream);
             myTreeParser.getStatementTokens();
+            myTreeParser.operations();
         }catch (IOException ioE)
         {
             ioE.printStackTrace();

@@ -1,8 +1,8 @@
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.CharStream;
 import java.util.*;
 
 public class TreeParser {
@@ -15,10 +15,10 @@ public class TreeParser {
         this.charStream = charStream;
     }
 
-    public void getStatementTokens() throws IllegalAccessException {
+    public void getStatementTokens(){
 
         sqliteLexer lexer = new sqliteLexer(charStream);
-        TokenStream tokenStream = new CommonTokenStream( lexer);
+        TokenStream tokenStream = new CommonTokenStream(lexer);
         sqliteParser parser = new sqliteParser(tokenStream);
 
         ParseTree myTree = parser.parse();
@@ -29,27 +29,28 @@ public class TreeParser {
         walker.walk(myListener,myTree);
         statement = myListener.getMyStatement();
         getParts();
+    }
 
+    public void operations()throws IllegalAccessException
+    {
         MySQLite mySQLite = new MySQLite("University.db");
-        //mySQLite.getSchema();
-
-        TreeStructure<String> canonicalTree, canonicalTreeForOpt;
 
         System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-        SelectStatement selectStatementToTree1 = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
 
         //creates the trees
-        canonicalTree = selectStatementToTree.buildSelectTree();
+        TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
         canonicalTree.printTree(canonicalTree.getRootNode(), " ");
         System.out.println("--------------------------------------");
 
-        //keep a copy of the original tree so that can be optimised.
-        canonicalTreeForOpt = selectStatementToTree1.buildSelectTree();
-
-        ExecuteCanonicalTree executeCanonicalTree = new ExecuteCanonicalTree(canonicalTree,selectFieldName,whereClause,mySQLite);
+        ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
+
+        //keep a copy of the original tree so that can be optimised.
+        System.out.println("--------------------------------------");
+        SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+        TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.buildSelectTree();
 
         OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
         if(!optimizeTree.splitWhere().isEmpty()) {
@@ -57,9 +58,9 @@ public class TreeParser {
             canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
         }
 
-        ExecuteCanonicalTree executeOptionalTree = new ExecuteCanonicalTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);
+        ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);
         canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
-        executeOptionalTree.execute(canonicalTreeForOpt.getStack());
+        executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
     }
 
     public void getParts()
@@ -72,9 +73,11 @@ public class TreeParser {
         int fromKey =0;
         int whereKey =0;
 
+        //If there is no where part set whereKey to -1
         if (!statement.containsValue("where"))
             whereKey = -1;
 
+        //Get the stating point of each keyWord
         for(Map.Entry<Integer,String> myPair : statement.entrySet()) {
             if(myPair.getValue().equalsIgnoreCase("select"))
                 selectKey = myPair.getKey();
@@ -84,6 +87,7 @@ public class TreeParser {
                 whereKey = myPair.getKey();
         }
 
+        //if the value is not "," or ";" then distribute the values to the correct vector according to the key ranges!
         for(Map.Entry<Integer,String> myPair : statement.entrySet()) {
             if(!myPair.getValue().equals(",") && !myPair.getValue().equals(";") ){
 

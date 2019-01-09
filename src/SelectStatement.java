@@ -4,11 +4,11 @@ import java.util.Vector;
 public class SelectStatement {
 
     private Vector<String> selectFieldName, fromRelationNames, whereClause;
-    private int fieldNameNum = 0;
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
     private static final int WHERE_NODE_STATUS = 2;
     private static final int ACTION_NODE_STATUS = 3;
+    private int fieldNameNum = 0;
 
     public SelectStatement(Vector<String> selectFieldName, Vector<String> fromRelationNames, Vector<String> whereClause) {
         this.selectFieldName = selectFieldName;
@@ -18,20 +18,17 @@ public class SelectStatement {
 
     public TreeStructure<String> buildSelectTree() throws IllegalAccessException {
 
-        //Create the tree and add the root node.
+        /*Create the tree and add the root node. If I have 7 relations 6 helper nodes will be needed.*/
         TreeStructure<String> canonicalTree = new TreeStructure<>();
         int numOfRelations = fromRelationNames.size();
-        //If I have 7 relations 6 helper nodes will be needed.
         int  numOfExtra = numOfRelations-1;
 
         canonicalTree.addRootNode("π" + selectFieldName, ACTION_NODE_STATUS);
         TreeStructure.Node<String> rootNode = canonicalTree.getRootNode();
         TreeStructure.Node<String> tempNode = rootNode;
 
-        if (whereClause.size() != 0) {
-            TreeStructure.Node<String> whereClauseNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS);
-            tempNode = whereClauseNode;
-        }
+        if (whereClause.size() != 0)
+           tempNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS);
 
         //If there are more than 3 relations
         if (numOfRelations > 3) {

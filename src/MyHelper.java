@@ -4,6 +4,7 @@ public class MyHelper {
 
     public StringBuilder getFields(LinkedList<String> myList)
     {
+        //Append the string together
         StringBuilder sb = new StringBuilder( 1024 );
         if(myList != null)
         {
@@ -17,6 +18,7 @@ public class MyHelper {
 
     public StringBuilder getSelectFields (LinkedList<String> myList)
     {
+        //Append the select fields together
         StringBuilder sb = new StringBuilder();
         for (String var: myList) {
             if(!var.equalsIgnoreCase("."))
@@ -32,6 +34,7 @@ public class MyHelper {
 
     public StringBuilder getWhereFields(LinkedList<String> myList)
     {
+        //Append whereFields together
         StringBuilder sb = new StringBuilder( 1024 );
         if(myList != null)
             for(int i=0; i<myList.size(); i++)
@@ -46,6 +49,7 @@ public class MyHelper {
 
         return sb;
     }
+
 
 
     public String getRelationNameOnField(String fieldName, LinkedList<MyRelation> relations) {
