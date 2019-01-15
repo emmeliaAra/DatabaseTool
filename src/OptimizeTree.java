@@ -32,10 +32,10 @@ public class OptimizeTree {
         Stack<TreeStructure.Node<String>> stack = canonicalTree.getStack();
         Stack<TreeStructure.Node<String>> optimizationStack = new Stack<>();
 
-        System.out.println(stack.size() + "stack size");
         boolean conditionAlready;
         while (!stack.empty()) {
             popNode = stack.pop();
+            System.out.println(popNode.getData() + " this is the node ");
             switch (popNode.getNodeStatus()) {
                 case RELATION_NODE_STATUS:{
                     conditionAlready = false;
@@ -45,6 +45,7 @@ public class OptimizeTree {
                     relation node again (if node has a child node-> avoid exception)
                      So that i will remember how it works!!!*/
                     while(optimizedWhere.containsValue(new LinkedList<>(Collections.singleton(popNode.getData())))) {
+                        System.out.println(" in here twice?");
                         conditionAlready = relationNodeAction(popNode, conditionAlready);
                         if(popNode.getChildren().size() == 1) popNode = popNode.getChildren().get(0);
                     }
@@ -194,17 +195,33 @@ public class OptimizeTree {
         LinkedList<String> where = new LinkedList<>(whereClause);
         LinkedList<String> referencingRelations;
         LinkedList<MyRelation> relations;
-        String temp ;
+        String temp ,operator;
         optimizedWhere = new HashMap<>();
 
         String whereString = new String(myHelper.getWhereFields(where));
-        String[] whereParts = whereString.split("(?i)and");
+        //String[] whereParts = whereString.split("(?i)and");
+        String[] whereParts = whereString.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
+        for (String emm: whereParts
+             ) {System.out.println(emm);
 
+        }
         //Iterates through all the parts divided by "AND"
         for (int i=0; i<whereParts.length; i++) {
+
             referencingRelations = new LinkedList<>();
-            if(whereParts[i].contains("=")) {
-                String[] equationParts = whereParts[i].split("=");
+            String symbol = myHelper.getSymbol(whereParts[i]);
+
+            operator = null ;
+            if(whereParts[i].toLowerCase().contains("and")) {
+                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("and"));
+                operator = " and ";
+            } else if(whereParts[i].toLowerCase().contains("or")) {
+                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("or"));
+                operator = " or ";
+            }
+
+            if(symbol != null) {
+                String[] equationParts = whereParts[i].split(symbol);
                 String condition = null;
 
                 //For every side of the "=" sing.
@@ -231,9 +248,12 @@ public class OptimizeTree {
                             temp = equationParts[j].substring(equationParts[j].indexOf(".")+1);
                     }
                     if(j!= equationParts.length-1)
-                        condition = temp + "=";
+                        condition = temp + symbol;
                     else condition = condition + temp;
                 }
+                LinkedList<String> emmelia = new LinkedList<>();
+                emmelia.add(operator);
+
                 optimizedWhere.put(condition,referencingRelations);
             }
         }

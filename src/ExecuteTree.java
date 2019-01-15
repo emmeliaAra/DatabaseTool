@@ -2,6 +2,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
 
 public class ExecuteTree {
 
@@ -12,6 +13,7 @@ public class ExecuteTree {
     private Vector<String> selectFieldName,whereClause;
     private TreeStructure<String> canonicalTree;
     private MySQLite mySQLite;
+    private MyHelper myHelper;
 
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
@@ -30,6 +32,7 @@ public class ExecuteTree {
         this.mySQLite = mySQLite;
 
         newTablesCreated = new HashMap<>();
+        myHelper = new MyHelper();
     }
 
     public void execute(Stack<TreeStructure.Node<String>> stack) throws IllegalAccessException {
@@ -60,7 +63,7 @@ public class ExecuteTree {
                     break;
                 }
                 case OPT_COND_NODE_STATUS: {
-                    isOptConditionNode(popNode);
+                    isWhereClause(popNode);
                     break;
                 }
                 case JOIN_NODE_STATUS:{
@@ -78,37 +81,37 @@ public class ExecuteTree {
 
     public void isCartesian(TreeStructure.Node<String> popNode) throws IllegalAccessException {
 
-
         LinkedList<String> tempSelect = new LinkedList<>();
         LinkedList<String> tempFrom = new LinkedList<>();
+        StringBuilder fromF ,selectF;
+        String tableName;
 
-        //if there are 2 nodes on hold -> produce cartesian product on those relations.
-        if(holdNodes.size() == 2) {
+        if(holdNodes.size() ==2 || holdNodes.size() == 3 )
+        {
+            //if there are 2 nodes on hold -> produce cartesian product on those relations.
+            if(holdNodes.size() == 2) {
+                //create a name for the table that will be create temporarily for the cartesian product of those relations.
+                tableName = holdNodes.getFirst().getData() + "_" + holdNodes.getLast().getData();
+                tempFrom.addFirst(holdNodes.getFirst().getData());
+                tempFrom.addFirst(holdNodes.getLast().getData());
+            }
+            //if there are 2 nodes on hold -> produce cartesian product with first and second and add the other one back to the three.
+            else {
+                tableName = holdNodes.getFirst().getData() + "_" + holdNodes.get(1).getData();
+                tempFrom.addFirst(holdNodes.getFirst().getData());
+                tempFrom.addFirst(holdNodes.get(1).getData());
+            }
 
-            tempFrom.addFirst(holdNodes.getFirst().getData());
-            tempFrom.addFirst(holdNodes.getLast().getData());
-
-            //create a name for the table that will be create temporarily for the cartesian product of those relations.
-            String tableName = holdNodes.getFirst().getData() + "_" + holdNodes.getLast().getData();
             tempSelect.addFirst("*");
 
+            fromF = myHelper.getFields(tempFrom);
+            selectF = myHelper.getSelectFields(tempSelect);
+
             //execute the statement.
-            mySQLite.simpleSelect(tempSelect,tempFrom );
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,null,IS_ONE_METHOD_NUM);
+            mySQLite.simpleSelect(selectF,fromF );
+            createNewRelation(popNode,selectF,tempFrom,fromF,tableName,null,IS_ONE_METHOD_NUM);
 
             //clear the list that holds the relations.
-            holdNodes = new LinkedList<>();
-        }
-        //if there are 2 nodes on hold -> produce cartesian product with first and second and add the other one back to the three.
-        else if(holdNodes.size() == 3) {
-            String tableName = holdNodes.getFirst().getData() + "_" + holdNodes.get(1).getData();
-            tempSelect.addFirst("*");
-            tempFrom.addFirst(holdNodes.getFirst().getData());
-            tempFrom.addFirst(holdNodes.get(1).getData());
-
-            //execute the statement.
-            mySQLite.simpleSelect(tempSelect,tempFrom );
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,null,IS_ONE_METHOD_NUM);
             holdNodes = new LinkedList<>();
         }
     }
@@ -120,20 +123,27 @@ public class ExecuteTree {
             MyHelper myHelper = new MyHelper();
             LinkedList<String> temp = new LinkedList<>() ;
             LinkedList<String> selectFields;
+            StringBuilder fromF ,selectF;
 
             /*If there are no new relations created means that the condition will be applied to the one relation in the query
             If new relations are created then the getRightSelect method is called*/
-            getRelationsInOrder(holdNodes.getFirst().getData());
-            if(!relationInOrder.isEmpty()){
+            //getRelationsInOrder(holdNodes.getFirst().getData());
+           // if(!relationInOrder.isEmpty()){
+            if(!newTablesCreated.isEmpty()){
+                getRelationsInOrder(holdNodes.getFirst().getData());
                 //call helper method to make the list into one String so that it can be split later when ever "," appears
-                StringBuilder selectF = myHelper.getSelectFields(new LinkedList<>(selectFieldName));
+                selectF = myHelper.getSelectFields(new LinkedList<>(selectFieldName));
                 selectFields  = getRightSelect(selectF.toString());
             }
             else
                 selectFields = new LinkedList<>(selectFieldName);
 
             temp.add(holdNodes.getFirst().getData());
-            mySQLite.simpleSelect(selectFields,temp);
+
+            fromF = myHelper.getFields(temp);
+            selectF = myHelper.getSelectFields(selectFields);
+
+            mySQLite.simpleSelect(selectF,fromF);
             canonicalTree.deleteNode(popNode);
         }
     }
@@ -142,41 +152,64 @@ public class ExecuteTree {
     {
         //execute the where condition on the resulting relation from the cartesian products and create a new relation
         //so that will be used to execute the project operation!
-        if(holdNodes.size() == 1)
-        {
+        if((holdNodes.size() == 1 && popNode.getNodeStatus() == WHERE_NODE_STATUS ) || popNode.getNodeStatus() == OPT_COND_NODE_STATUS) {
+
+            StringBuilder fromF,selectF,whereC;
             LinkedList<String> tempSelect = new LinkedList<>();
             LinkedList<String> tempFrom = new LinkedList<>();
-            LinkedList<String> where = new LinkedList<>(whereClause);
+            LinkedList<String> where = new LinkedList<>();
             String tableName = "where" + holdNodes.getFirst().getData();
+
+            //If is a where node then add the initial condition else add the optional condition which is held as data in the popped node!
+            if(popNode.getNodeStatus() == WHERE_NODE_STATUS)
+                where = new LinkedList<>(whereClause);
+            else
+                where.add(popNode.getData());
 
             tempSelect.addFirst("*");
             tempFrom.addFirst(holdNodes.getFirst().getData());
-            mySQLite.whereSelect(tempSelect,tempFrom,where);
 
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,where,IS_ZERO_METHOD_NUM);
-            holdNodes = new LinkedList<>();
+            fromF = myHelper.getFields(tempFrom);
+            selectF = myHelper.getSelectFields(tempSelect);
+            whereC = myHelper.getWhereFields(where);
+            System.out.println(whereC + " after getWhere");
+            whereC = whereException(whereC.toString(), fromF.toString());
+            mySQLite.whereSelect(selectF,fromF,whereC);
+
+            //If where node then create the new relation and remove the nodes from the holdNodes if not then replace the new relation with the onw that the condition is applied to.
+            if(popNode.getNodeStatus() == WHERE_NODE_STATUS){
+                createNewRelation(popNode,selectF,tempFrom,fromF,tableName,whereC,IS_ZERO_METHOD_NUM);
+               holdNodes = new LinkedList<>();
+            }else{
+                TreeStructure.Node<String> newNode = createNewRelation(popNode,selectF,tempFrom,fromF,tableName,whereC,IS_ZERO_METHOD_NUM);
+                holdNodes.set(holdNodes.indexOf(holdNodes.getFirst()),newNode);
+            }
         }
     }
 
-    public void isOptConditionNode(TreeStructure.Node<String> popNode) throws IllegalAccessException {
+  /*  public void isOptConditionNode(TreeStructure.Node<String> popNode) throws IllegalAccessException {
 
         //create the list and call where select and then createAsStatementWhere! to create the new one!
+        StringBuilder fromF, selectF,whereC;
         LinkedList<String> tempSelect = new LinkedList<>();
         LinkedList<String> tempFrom = new LinkedList<>();
         LinkedList<String> where = new LinkedList<>();
-
-        //get the First one because the last relation added last is the one that this condition will be applied to ! and when adding the nodes we add to the front !
         String tableName = "where" + holdNodes.getFirst().getData();
+
         tempSelect.add("*");
         tempFrom.add(holdNodes.getFirst().getData());
         where.add(popNode.getData());
 
-        mySQLite.whereSelect(tempSelect,tempFrom,where);
+        fromF = myHelper.getFields(tempFrom);
+        selectF = myHelper.getSelectFields(tempSelect);
+        whereC = myHelper.getWhereFields(where);
+        whereC = mySQLite.whereException(whereC.toString(), fromF.toString());
+        mySQLite.whereSelect(selectF,fromF,whereC);
 
         //Add the new node to the place that the node that the condition was applied to so that the next operation if any will be applied to that one !
-        TreeStructure.Node<String> newNode = createNewRelation(popNode,tempSelect,tempFrom,tableName,where,IS_ZERO_METHOD_NUM);
+        TreeStructure.Node<String> newNode = createNewRelation(popNode,selectF,tempFrom,fromF,tableName,whereC,IS_ZERO_METHOD_NUM);
         holdNodes.set(holdNodes.indexOf(holdNodes.getFirst()),newNode);
-    }
+    }*/
 
     private void isJoinCond(TreeStructure.Node<String> popNode) throws IllegalAccessException {
         LinkedList<String> tempSelect = new LinkedList<>();
@@ -194,12 +227,16 @@ public class ExecuteTree {
             //To remove the join symbol
             tempOnClause.addFirst(popNode.getData().substring(1));
 
-            mySQLite.joinStatement(tempSelect,tempFrom,tempOnClause);
-            createNewRelation(popNode,tempSelect,tempFrom,tableName,tempOnClause,IS_TWO_METHOD_NUM);
+            StringBuilder selectF = myHelper.getSelectFields(tempSelect);
+            StringBuilder onClause = myHelper.getWhereFields(tempOnClause);
+            onClause = mySQLite.joinException(onClause.toString(),tempFrom.get(0), tempFrom.get(1));
+
+            mySQLite.joinStatement(selectF,tempFrom,onClause);
+            createNewRelation(popNode,selectF,tempFrom,null,tableName,onClause,IS_TWO_METHOD_NUM);
         }
     }
 
-    public TreeStructure.Node<String> createNewRelation(TreeStructure.Node<String> popNode, LinkedList<String> tempSelect, LinkedList<String> tempFrom, String tableName ,LinkedList<String> where, int numOfMethod) throws IllegalAccessException {
+    public TreeStructure.Node<String> createNewRelation(TreeStructure.Node<String> popNode, StringBuilder selectF, LinkedList<String> listFrom, StringBuilder fromF, String tableName ,StringBuilder where, int numOfMethod) throws IllegalAccessException {
 
         //Get the parentNode of the current node.
         //Delete the current Node from the tree and add a new node to the tree representing the relation created by the cartesian product.
@@ -208,22 +245,76 @@ public class ExecuteTree {
 
         //To see what method will be called!
         //And create new relation for the cartesian product.
-        if(numOfMethod == 0)
-            mySQLite.createAsStatementWhere(tempSelect,tempFrom,tableName,where);
-        else if(numOfMethod == 1)
-            mySQLite.createAsStatement(tempSelect,tempFrom,tableName);
+        if(numOfMethod == IS_ZERO_METHOD_NUM)
+            mySQLite.createAsStatementWhere(selectF,fromF,tableName,where);
+        else if(numOfMethod == IS_ONE_METHOD_NUM)
+            mySQLite.createAsStatement(fromF,selectF,tableName);
         else
-            mySQLite.createJoinStatement(tempSelect,tempFrom,tableName,where);
+            mySQLite.createJoinStatement(selectF,listFrom,tableName,where);
 
         LinkedList<String> temp = new LinkedList<>();
-        temp.addFirst(tempFrom.get(0));
-        if(tempFrom.size() == 2)
-            temp.addFirst(tempFrom.get(1));
+        temp.addFirst(listFrom.get(0));
+        if(listFrom.size() == 2)
+            temp.add(listFrom.get(1));
         newTablesCreated.put(tableName,temp);
+        System.out.println(temp);
 
         //Add the node to the tree and return it because its needed for isOptCond method!
         TreeStructure.Node<String> newNode = canonicalTree.addChildNode(parentNode,tableName,RELATION_NODE_STATUS);
         return newNode;
+    }
+
+    //need to fix this in case that the same fields appears three times to get the right one.
+    public StringBuilder whereException(String query,String fromTable) {
+
+        //(?i) -> use embedded flag in the regex to ignore case! Split string but keep And + or to be added to the condition
+        String[] whereParts = query.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
+        StringBuilder myNewWhere = new StringBuilder();
+        getRelationsInOrder(fromTable);
+        for(int i=0; i<whereParts.length; i++) {
+
+            String symbol = myHelper.getSymbol(whereParts[i]);
+            String[] equationParts;
+            String condition;
+
+            if(whereParts[i].toLowerCase().contains("and")) {
+                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("and"));
+                condition = " and ";
+            } else if(whereParts[i].toLowerCase().contains("or")) {
+                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("or"));
+                condition = " or ";
+            }
+            else condition = null;
+
+            if(symbol!=null) {
+                equationParts = whereParts[i].split(symbol);
+                for(int j=0; j<equationParts.length; j++)
+                    if (equationParts[j].contains(".")) {
+                        // Get the relation name from the equation part and remove the white spaces. Remove the referencing table and any white spaces
+                        String relationName = (equationParts[j].substring(0, equationParts[j].indexOf("."))).replaceAll("\\s", "");
+                        equationParts[j] = (equationParts[j].substring(equationParts[j].indexOf(".") + 1)).replaceAll("\\s", "");
+                        int index = relationInOrder.indexOf(relationName);
+                        if (index > 0) {
+                            int counter = 0;
+                            for (int k = 0; k < index; k++) {
+                                //Get all the relations from relationInorder up to index
+                                MyRelation relation = mySQLite.getSchema().getRelationOnName(relationInOrder.get(k));
+                                if (relation.getFieldOnName(equationParts[j]) != null)
+                                    counter++;
+                            }
+                            if (counter != 0)
+                                equationParts[j] = "\"" + equationParts[j] + ":" + counter + "\"";
+                        }
+                    }
+                    whereParts[i] = equationParts[0] +" " + symbol + " " + equationParts[1];
+            }
+            if(i != whereParts.length-1)
+                myNewWhere.append(whereParts[i] + condition);
+            else
+                myNewWhere.append(whereParts[i]);
+
+        }
+        return  myNewWhere;
     }
 
     /* When a cartesian product of 2 relations that have the same field name the first one is the same and the second one has the format
@@ -240,7 +331,7 @@ public class ExecuteTree {
             if (selectStringParts[i].contains(".")) {
                 String[] fullStopParts = selectStringParts[i].split("\\.");
                 /*get the position of the referencing table in the relationInOrder.
-                -> if index ==0 then in the inital statement this relation is the first one appeared in the from list*/
+                -> if index ==0 then in the initial statement this relation is the first one appeared in the from list*/
                 int index = relationInOrder.indexOf(fullStopParts[0]);
                 //if index -> zero then their is no need to add :1
                 if (index == 0)
@@ -272,7 +363,7 @@ public class ExecuteTree {
     it will be added to the relationInOrder. If the value is also an new table it will recursively call that method until there are no new tables
     stored in the value element of the HashMap!
      */
-    private void  getRelationsInOrder(String tableName)
+    public void  getRelationsInOrder(String tableName)
     {
         if(newTablesCreated.containsKey(tableName))
         {

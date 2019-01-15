@@ -33,7 +33,8 @@ public class TreeParser {
 
     public void operations()throws IllegalAccessException
     {
-        MySQLite mySQLite = new MySQLite("University.db");
+        //"University.db
+        MySQLite mySQLite = new MySQLite("chinook.db");
 
         System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
@@ -48,14 +49,16 @@ public class TreeParser {
         executeCanonicalTree.execute(canonicalTree.getStack());
 
         //keep a copy of the original tree so that can be optimised.
-        System.out.println("--------------------------------------");
         SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
         TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.buildSelectTree();
 
+        //if there is no where condition or only one the tree will be the same as the canonical.
         OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
         if(!optimizeTree.splitWhere().isEmpty()) {
             canonicalTreeForOpt = optimizeTree.optimiseTree();
+            System.out.println("--------------------------------------");
             canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
+            System.out.println("--------------------------------------");
         }
 
         ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);

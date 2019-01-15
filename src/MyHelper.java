@@ -69,4 +69,16 @@ public class MyHelper {
         }
         return relationName;
     }
+
+    public String getSymbol (String wherePart) {
+
+        //The order matters. Need to check if it contains "<=" before checking "<" or "=" because "<=" contains "<" and "=" as well.
+        if(wherePart.contains("<=")) return "<=";
+        else if(wherePart.contains(">=")) return  ">=";
+        else if(wherePart.contains("<")) return  "<";
+        else if(wherePart.contains(">")) return ">";
+        else if(wherePart.contains("=")) return "=";
+        else return null;
+    }
+
 }
