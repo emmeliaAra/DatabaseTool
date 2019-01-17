@@ -107,7 +107,6 @@ public class TreeStructure<T> {
 
     public void printTree(Node<T> node, String appender){
         System.out.println(appender + node.getData());
-       // stack.push(node);
         node.getChildren().forEach(each -> printTree(each, appender +appender));
     }
     public void createStack(Node<T> node){

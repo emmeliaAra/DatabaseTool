@@ -10,6 +10,8 @@ public class TreeParser {
     private CharStream charStream;
     private Map<Integer, String> statement;
     private Vector<String> selectFieldName, fromRelationNames, whereClause;
+    private MySQLite mySQLite;
+    private HashMap<String,LinkedList<String>> optimizedWhere;
 
     public TreeParser(CharStream charStream){
         this.charStream = charStream;
@@ -34,7 +36,7 @@ public class TreeParser {
     public void operations()throws IllegalAccessException
     {
         //"University.db
-        MySQLite mySQLite = new MySQLite("chinook.db");
+        mySQLite = new MySQLite("University.db");
 
         System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
@@ -108,4 +110,30 @@ public class TreeParser {
         System.out.println("from Relation: " + fromRelationNames);
         System.out.println("whereClause: " + whereClause);
     }
+
+    public TreeStructure<String> getCanonicalTree()
+    {
+        SelectStatement selectStatement = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+        TreeStructure<String> canonicalTree = null;
+        try {
+            canonicalTree = selectStatement.buildSelectTree();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return canonicalTree;
+    }
+
+    public TreeStructure<String> getOptimizedTree()
+    {
+        TreeStructure<String> optimizedTree = getCanonicalTree();
+        OptimizeTree optimizeTree = new OptimizeTree(optimizedTree, mySQLite.getSchema(),whereClause);
+        optimizeTree.splitWhere();
+        try {
+            optimizedTree = optimizeTree.optimiseTree();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return optimizedTree;
+    }
+
 }

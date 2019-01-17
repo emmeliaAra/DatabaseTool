@@ -35,7 +35,6 @@ public class OptimizeTree {
         boolean conditionAlready;
         while (!stack.empty()) {
             popNode = stack.pop();
-            System.out.println(popNode.getData() + " this is the node ");
             switch (popNode.getNodeStatus()) {
                 case RELATION_NODE_STATUS:{
                     conditionAlready = false;
@@ -43,9 +42,8 @@ public class OptimizeTree {
                     if a node is associated with more than one conditions all the associated conditions will be added to it's parent node.
                     after every iteration of the loop the popNode is becoming the node that holds the condition if any so need to make pop node to hold the
                     relation node again (if node has a child node-> avoid exception)
-                     So that i will remember how it works!!!*/
+                    So that i will remember how it works!!!*/
                     while(optimizedWhere.containsValue(new LinkedList<>(Collections.singleton(popNode.getData())))) {
-                        System.out.println(" in here twice?");
                         conditionAlready = relationNodeAction(popNode, conditionAlready);
                         if(popNode.getChildren().size() == 1) popNode = popNode.getChildren().get(0);
                     }
@@ -201,10 +199,7 @@ public class OptimizeTree {
         String whereString = new String(myHelper.getWhereFields(where));
         //String[] whereParts = whereString.split("(?i)and");
         String[] whereParts = whereString.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
-        for (String emm: whereParts
-             ) {System.out.println(emm);
 
-        }
         //Iterates through all the parts divided by "AND"
         for (int i=0; i<whereParts.length; i++) {
 
@@ -251,9 +246,6 @@ public class OptimizeTree {
                         condition = temp + symbol;
                     else condition = condition + temp;
                 }
-                LinkedList<String> emmelia = new LinkedList<>();
-                emmelia.add(operator);
-
                 optimizedWhere.put(condition,referencingRelations);
             }
         }
