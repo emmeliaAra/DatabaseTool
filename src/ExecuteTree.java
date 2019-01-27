@@ -2,18 +2,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
 
 public class ExecuteTree {
 
-
     private LinkedList<String> relationInOrder = new LinkedList<>();
+    private LinkedList<String> nodeIdInOrder = new LinkedList<>();
     private LinkedList<TreeStructure.Node<String>> holdNodes;
     private HashMap<String,LinkedList<String>> newTablesCreated;
     private Vector<String> selectFieldName,whereClause;
     private TreeStructure<String> canonicalTree;
     private MySQLite mySQLite;
     private MyHelper myHelper;
+    private String finalTable;
 
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
@@ -24,6 +24,8 @@ public class ExecuteTree {
     private static final int IS_ZERO_METHOD_NUM = 0;
     private static final int IS_ONE_METHOD_NUM= 1;
     private static final int IS_TWO_METHOD_NUM= 2;
+    private static final int NODE_INITIAL_ID = -1;
+    private static final int RESULTING_RELATION_NODE_STATUS = -2;
 
     public ExecuteTree(TreeStructure<String> canonicalTree,Vector<String> selectFieldName,Vector<String> whereClause, MySQLite mySQLite) {
         this.canonicalTree = canonicalTree;
@@ -47,6 +49,11 @@ public class ExecuteTree {
                 //if a relation node then hold that node
                 case RELATION_NODE_STATUS: {
                     holdNodes.addFirst(popNode);
+                    if(popNode.getNodeID() == NODE_INITIAL_ID) {
+                        popNode.setNodeID(nodeIdInOrder.size());
+                        //if a relation node then add the node to the list so that it can be visualized when that node is clicked
+                        nodeIdInOrder.add(popNode.getData());
+                    }
                     break;
                 }
                 //if a helper node -> 'X' invoke method
@@ -76,7 +83,7 @@ public class ExecuteTree {
             canonicalTree.createStack(canonicalTree.getRootNode());
             execute(canonicalTree.getStack());
         }
-        mySQLite.undoTables();
+        //mySQLite.undoTables();
     }
 
     public void isCartesian(TreeStructure.Node<String> popNode) throws IllegalAccessException {
@@ -88,6 +95,8 @@ public class ExecuteTree {
 
         if(holdNodes.size() ==2 || holdNodes.size() == 3 )
         {
+
+            popNode.setNodeID(nodeIdInOrder.size());
             //if there are 2 nodes on hold -> produce cartesian product on those relations.
             if(holdNodes.size() == 2) {
                 //create a name for the table that will be create temporarily for the cartesian product of those relations.
@@ -142,8 +151,14 @@ public class ExecuteTree {
 
             fromF = myHelper.getFields(temp);
             selectF = myHelper.getSelectFields(selectFields);
+            String tableName = "action" + fromF;
 
             mySQLite.simpleSelect(selectF,fromF);
+
+            //Create a relation holding the final result but do not create a relation node. Also add the relation name to the list.
+            mySQLite.createAsStatement(fromF,selectF,tableName);
+            nodeIdInOrder.add(tableName);
+            finalTable = tableName;
             canonicalTree.deleteNode(popNode);
         }
     }
@@ -160,6 +175,9 @@ public class ExecuteTree {
             LinkedList<String> where = new LinkedList<>();
             String tableName = "where" + holdNodes.getFirst().getData();
 
+            //Add the name of the new node created to the list so that when the condition or the cartesian product used to create that node is clicked the results will be presented
+            popNode.setNodeID(nodeIdInOrder.size());
+
             //If is a where node then add the initial condition else add the optional condition which is held as data in the popped node!
             if(popNode.getNodeStatus() == WHERE_NODE_STATUS)
                 where = new LinkedList<>(whereClause);
@@ -172,7 +190,6 @@ public class ExecuteTree {
             fromF = myHelper.getFields(tempFrom);
             selectF = myHelper.getSelectFields(tempSelect);
             whereC = myHelper.getWhereFields(where);
-            System.out.println(whereC + " after getWhere");
             whereC = whereException(whereC.toString(), fromF.toString());
             mySQLite.whereSelect(selectF,fromF,whereC);
 
@@ -187,30 +204,6 @@ public class ExecuteTree {
         }
     }
 
-  /*  public void isOptConditionNode(TreeStructure.Node<String> popNode) throws IllegalAccessException {
-
-        //create the list and call where select and then createAsStatementWhere! to create the new one!
-        StringBuilder fromF, selectF,whereC;
-        LinkedList<String> tempSelect = new LinkedList<>();
-        LinkedList<String> tempFrom = new LinkedList<>();
-        LinkedList<String> where = new LinkedList<>();
-        String tableName = "where" + holdNodes.getFirst().getData();
-
-        tempSelect.add("*");
-        tempFrom.add(holdNodes.getFirst().getData());
-        where.add(popNode.getData());
-
-        fromF = myHelper.getFields(tempFrom);
-        selectF = myHelper.getSelectFields(tempSelect);
-        whereC = myHelper.getWhereFields(where);
-        whereC = mySQLite.whereException(whereC.toString(), fromF.toString());
-        mySQLite.whereSelect(selectF,fromF,whereC);
-
-        //Add the new node to the place that the node that the condition was applied to so that the next operation if any will be applied to that one !
-        TreeStructure.Node<String> newNode = createNewRelation(popNode,selectF,tempFrom,fromF,tableName,whereC,IS_ZERO_METHOD_NUM);
-        holdNodes.set(holdNodes.indexOf(holdNodes.getFirst()),newNode);
-    }*/
-
     private void isJoinCond(TreeStructure.Node<String> popNode) throws IllegalAccessException {
         LinkedList<String> tempSelect = new LinkedList<>();
         LinkedList<String> tempFrom = new LinkedList<>();
@@ -218,6 +211,7 @@ public class ExecuteTree {
 
         if(holdNodes.size() == 2 )
         {
+            popNode.setNodeID(nodeIdInOrder.size());
             tempFrom.addFirst(holdNodes.getFirst().getData());
             tempFrom.addFirst(holdNodes.getLast().getData());
 
@@ -257,10 +251,10 @@ public class ExecuteTree {
         if(listFrom.size() == 2)
             temp.add(listFrom.get(1));
         newTablesCreated.put(tableName,temp);
-        System.out.println(temp);
 
         //Add the node to the tree and return it because its needed for isOptCond method!
-        TreeStructure.Node<String> newNode = canonicalTree.addChildNode(parentNode,tableName,RELATION_NODE_STATUS);
+        TreeStructure.Node<String> newNode = canonicalTree.addChildNode(parentNode,tableName,RELATION_NODE_STATUS,RESULTING_RELATION_NODE_STATUS);
+        nodeIdInOrder.add(newNode.getData());
         return newNode;
     }
 
@@ -375,4 +369,10 @@ public class ExecuteTree {
                     getRelationsInOrder(var.toString());
         }
     }
+
+    public LinkedList<String> getNodeIdInOrder()
+    {
+        return nodeIdInOrder;
+    }
+    public String getFinalTable(){ return finalTable;}
 }

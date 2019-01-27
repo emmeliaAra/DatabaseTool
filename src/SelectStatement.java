@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.Stack;
 import java.util.Vector;
 
 public class SelectStatement {
@@ -8,6 +9,7 @@ public class SelectStatement {
     private static final int CARTESIAN_NODE_STATUS = 1;
     private static final int WHERE_NODE_STATUS = 2;
     private static final int ACTION_NODE_STATUS = 3;
+    private static final int NODE_INITIAL_ID = -1;
     private int fieldNameNum = 0;
 
     public SelectStatement(Vector<String> selectFieldName, Vector<String> fromRelationNames, Vector<String> whereClause) {
@@ -23,30 +25,30 @@ public class SelectStatement {
         int numOfRelations = fromRelationNames.size();
         int  numOfExtra = numOfRelations-1;
 
-        canonicalTree.addRootNode("π" + selectFieldName, ACTION_NODE_STATUS);
+        canonicalTree.addRootNode("π" + selectFieldName, ACTION_NODE_STATUS,NODE_INITIAL_ID);
         TreeStructure.Node<String> rootNode = canonicalTree.getRootNode();
         TreeStructure.Node<String> tempNode = rootNode;
 
         if (whereClause.size() != 0)
-           tempNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS);
+           tempNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS,NODE_INITIAL_ID);
 
         //If there are more than 3 relations
         if (numOfRelations > 3) {
             //create the first helperNode
-            TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS);
+            TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
             numOfExtra--;
 
             //add to more one to the left and one to the right
-            TreeStructure.Node<String> previousLeft = canonicalTree.addChildNode(nodeFrom1, "X", CARTESIAN_NODE_STATUS);
-            TreeStructure.Node<String> previousRight = canonicalTree.addChildNode(nodeFrom1, "X", CARTESIAN_NODE_STATUS);
+            TreeStructure.Node<String> previousLeft = canonicalTree.addChildNode(nodeFrom1, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
+            TreeStructure.Node<String> previousRight = canonicalTree.addChildNode(nodeFrom1, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
             numOfExtra -= 2;
 
             //if more helper nodes are needed
             while (numOfExtra >= 2) {
                 //add a child node to the left and right helper node
-                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(previousLeft, "X", CARTESIAN_NODE_STATUS);
+                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(previousLeft, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
                 numOfExtra--;
-                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(previousRight, "X", CARTESIAN_NODE_STATUS);
+                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(previousRight, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
                 numOfExtra -= 1;
 
 
@@ -63,16 +65,16 @@ public class SelectStatement {
             }
 
             if(numOfExtra ==1 ) {
-                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(previousLeft, "X", CARTESIAN_NODE_STATUS);
+                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(previousLeft, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
                 numOfExtra--;
             }
         //if only 3 relations add a 1 helper node and another helper node as its child
         } else if (numOfRelations == 3) {
-            TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS);
-            TreeStructure.Node<String> nodeFrom2 = canonicalTree.addChildNode(nodeFrom1, "X", CARTESIAN_NODE_STATUS);
+            TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
+            TreeStructure.Node<String> nodeFrom2 = canonicalTree.addChildNode(nodeFrom1, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
         //if only 2 then add 1 helper node after the project or select statement
         } else if (numOfRelations == 2) {
-            TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS);
+            TreeStructure.Node<String> nodeFrom1 = canonicalTree.addChildNode(tempNode, "X", CARTESIAN_NODE_STATUS,NODE_INITIAL_ID);
         }
         getLeafNodes(rootNode, canonicalTree);
         return canonicalTree;
@@ -108,7 +110,7 @@ public class SelectStatement {
         //if the cartesian node has one child and there are more relations to add add a node to it/
         if (node.getChildren().size() == 1 && fieldNameNum < fromRelationNames.size() && node.getNodeStatus() == CARTESIAN_NODE_STATUS) {
             try {
-                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS);
+                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS,NODE_INITIAL_ID);
                 fieldNameNum++;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -117,22 +119,21 @@ public class SelectStatement {
         //if there are no child nodes add 2 relation nodes to the cartesian node.
         else if (node.getChildren().size() == 0 && fieldNameNum < fromRelationNames.size() && node.getNodeStatus() == CARTESIAN_NODE_STATUS) {
             try {
-                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS);
+                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS,NODE_INITIAL_ID);
                 fieldNameNum++;
                 if(fieldNameNum <fromRelationNames.size()) {
-                    TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS);
+                    TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS,NODE_INITIAL_ID);
                     fieldNameNum++;
                 }
 
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-
         }
         //if only one relation add that one and
         else if(fromRelationNames.size()==1 && node.getChildren().size()==0 && fromRelationNames.size() >fieldNameNum)
             try {
-                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS);
+                TreeStructure.Node<String> newNode = canonicalTree.addChildNode(node, fromRelationNames.get(fieldNameNum), RELATION_NODE_STATUS,NODE_INITIAL_ID);
                 fieldNameNum++;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

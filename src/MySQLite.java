@@ -1,4 +1,8 @@
-import javax.xml.crypto.Data;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
+
+import javax.sound.sampled.Line;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,8 +37,13 @@ public class MySQLite extends DatabaseBasic{
 
     public void createAsStatement(StringBuilder fromF,StringBuilder selectF,String tableName) {
 
+        if(!newTablesCreated.isEmpty())
+        {
+            if(newTablesCreated.contains(tableName))
+                tableName = tableName + "1";
+        }
+
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + ";";
-        System.out.println(queryTemplate);
         newTablesCreated.add(tableName);
         executeCreate(queryTemplate);
     }
@@ -47,6 +56,11 @@ public class MySQLite extends DatabaseBasic{
 
     public void createAsStatementWhere(StringBuilder selectF,StringBuilder fromF,String tableName,StringBuilder whereClause) {
 
+        if(!newTablesCreated.isEmpty())
+        {
+            if(newTablesCreated.contains(tableName))
+                tableName = tableName + "1";
+        }
         newTablesCreated.add(tableName);
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + " where " + whereClause + ";";
         executeCreate(queryTemplate);
@@ -60,6 +74,12 @@ public class MySQLite extends DatabaseBasic{
 
     public void createJoinStatement(StringBuilder selectF, LinkedList<String> fromFields, String tableName, StringBuilder onClause) {
 
+        if(!newTablesCreated.isEmpty())
+        {
+            if(newTablesCreated.contains(tableName))
+                tableName = tableName + "1";
+        }
+        newTablesCreated.add(tableName);
         String queryTemplate = "Create table " + tableName + " AS Select " + selectF + " from " + fromFields.get(0) + " join " + fromFields.get(1) + " on " + onClause + ";";
         executeCreate(queryTemplate);
     }
@@ -68,16 +88,9 @@ public class MySQLite extends DatabaseBasic{
     public ResultSet execute(String queryTemplate) {
 
         ResultSet resultSet = null;
-        System.out.println(queryTemplate);
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(queryTemplate);
             resultSet = preparedStatement.executeQuery();
-            getResults(resultSet);
-            System.out.println("______________________________________________________________________________________");
-           /* while (resultSet.next())
-                System.out.println(resultSet.getString(1));*/
-
-            System.out.println("______________________________________________________________________________________");
 
         }catch (Exception e) {
            e.printStackTrace();
@@ -247,9 +260,7 @@ public class MySQLite extends DatabaseBasic{
             ResultSetMetaData  resultSetMetaData = resultSet.getMetaData();
             int columnNum = resultSetMetaData.getColumnCount();
             while (resultSet.next()){
-                for(int i=1; i<columnNum+1; i++)
-                {
-                  //if(i>1) System.out.print(", ");
+                for(int i=1; i<columnNum+1; i++) {
                   String val = resultSet.getString(i);
                   System.out.print(val + "        ");
                 }
@@ -259,8 +270,65 @@ public class MySQLite extends DatabaseBasic{
         }catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    public javafx.scene.control.TableView getRows(TableView table, String tableName)
+    {
+        ObservableList<ObservableList> data = FXCollections.observableArrayList();
+        String queryTemplate = "SELECT * from " + tableName;
+        ResultSet resultSet;
+
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = connection.prepareStatement(queryTemplate);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                //Iterate Row
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++)
+                    //Iterate Column
+                    row.add(resultSet.getString(i));
+                data.add(row);
+            }
+            table.setItems(data);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+         return table;
+    }
+
+    public LinkedList<String> getColumnNames(String tableName)
+    {
+        LinkedList<String> columnNames = new LinkedList<>();
+
+        String queryTemplate = "SELECT * from " + tableName;
+        ResultSet resultSet;
+
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = connection.prepareStatement(queryTemplate);
+            resultSet = preparedStatement.executeQuery();
+            int i=1;
+            while (i<resultSet.getMetaData().getColumnCount())
+            {
+                columnNames.add(resultSet.getMetaData().getColumnName(i));
+                i++;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return columnNames;
     }
 
 
+
+
+    public void getResultsOnTable(String tableName)
+    {
+        String query = "Select * from " + tableName;
+        execute(query);
+    }
 }

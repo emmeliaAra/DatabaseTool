@@ -85,7 +85,7 @@ public class OptimizeTree {
             node.setNodeData(condition);
             node.setNodeStatus(OPT_COND_NODE_STATUS);
             try {
-                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, tempData, RELATION_NODE_STATUS);
+                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, tempData, RELATION_NODE_STATUS,-1);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -249,7 +249,6 @@ public class OptimizeTree {
                 optimizedWhere.put(condition,referencingRelations);
             }
         }
-        System.out.println("optimized where  " + optimizedWhere + "\n");
         return optimizedWhere;
     }
 

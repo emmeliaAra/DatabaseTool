@@ -11,7 +11,10 @@ public class TreeParser {
     private Map<Integer, String> statement;
     private Vector<String> selectFieldName, fromRelationNames, whereClause;
     private MySQLite mySQLite;
-    private HashMap<String,LinkedList<String>> optimizedWhere;
+    private LinkedList<String> nodeIdInOrderCanonical = new LinkedList<>();
+    private LinkedList<String> nodeIdInOrderOptimal = new LinkedList<>();
+    private String finalTable;
+
 
     public TreeParser(CharStream charStream){
         this.charStream = charStream;
@@ -37,18 +40,13 @@ public class TreeParser {
     {
         //"University.db
         mySQLite = new MySQLite("University.db");
-
-        System.out.println("--------------------------------------");
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-
-        //creates the trees
+        //creates and executes the trees to present the results.
         TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
-        canonicalTree.printTree(canonicalTree.getRootNode(), " ");
-        System.out.println("--------------------------------------");
-
         ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
+
 
         //keep a copy of the original tree so that can be optimised.
         SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
@@ -58,14 +56,17 @@ public class TreeParser {
         OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
         if(!optimizeTree.splitWhere().isEmpty()) {
             canonicalTreeForOpt = optimizeTree.optimiseTree();
-            System.out.println("--------------------------------------");
             canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
-            System.out.println("--------------------------------------");
         }
 
         ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);
         canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
         executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
+
+        //Get the relations in the order they are executed.
+        nodeIdInOrderCanonical = executeCanonicalTree.getNodeIdInOrder();
+        nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
+        finalTable = executeCanonicalTree.getFinalTable();
     }
 
     public void getParts()
@@ -106,9 +107,6 @@ public class TreeParser {
                     fromRelationNames.add(myPair.getValue());
             }
         }
-        System.out.println("select fields: " + selectFieldName);
-        System.out.println("from Relation: " + fromRelationNames);
-        System.out.println("whereClause: " + whereClause);
     }
 
     public TreeStructure<String> getCanonicalTree()
@@ -127,13 +125,49 @@ public class TreeParser {
     {
         TreeStructure<String> optimizedTree = getCanonicalTree();
         OptimizeTree optimizeTree = new OptimizeTree(optimizedTree, mySQLite.getSchema(),whereClause);
-        optimizeTree.splitWhere();
+
         try {
-            optimizedTree = optimizeTree.optimiseTree();
+            if(!optimizeTree.splitWhere().isEmpty())
+                optimizedTree = optimizeTree.optimiseTree();
+            else
+                optimizedTree = getCanonicalTree();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+        optimizedTree.printTree(optimizedTree.getRootNode(), " " );
         return optimizedTree;
     }
 
+    //Set node id. The first one  popped has nodeId = 0 etc.
+    public TreeStructure<String> setNodeID(TreeStructure<String> tree)
+    {
+        Stack<TreeStructure.Node<String>> stack;
+        tree.createStack(tree.getRootNode());
+        stack = tree.getStack();
+        TreeStructure.Node popNode;
+        int i =0;
+
+        while(!stack.empty()) {
+            popNode = stack.pop();
+            popNode.setNodeID(i);
+            i++;
+        }
+        return tree;
+    }
+
+    public LinkedList<String> getNodeIdInOrderCanonical() {
+        return nodeIdInOrderCanonical;
+    }
+
+    public LinkedList<String> getNodeIdInOrderOptimal()
+    {
+        return nodeIdInOrderOptimal;
+    }
+    public MySQLite getMySQLite()
+    {
+        return mySQLite;
+    }
+    public String getFinalTable(){
+        return finalTable;
+    }
 }
