@@ -38,6 +38,7 @@ public class OptimizeTree {
             switch (popNode.getNodeStatus()) {
                 case RELATION_NODE_STATUS:{
                     conditionAlready = false;
+                    System.out.println(optimizedWhere.size() + " " + optimizedWhere);
                     /*if there is a condition associated with that relation then call the method. and set set conditionAlready to TRue so that
                     if a node is associated with more than one conditions all the associated conditions will be added to it's parent node.
                     after every iteration of the loop the popNode is becoming the node that holds the condition if any so need to make pop node to hold the
@@ -198,22 +199,13 @@ public class OptimizeTree {
 
         String whereString = new String(myHelper.getWhereFields(where));
         //String[] whereParts = whereString.split("(?i)and");
-        String[] whereParts = whereString.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
+        String[] whereParts = whereString.split("(?i)and");
 
         //Iterates through all the parts divided by "AND"
         for (int i=0; i<whereParts.length; i++) {
 
             referencingRelations = new LinkedList<>();
             String symbol = myHelper.getSymbol(whereParts[i]);
-
-            operator = null ;
-            if(whereParts[i].toLowerCase().contains("and")) {
-                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("and"));
-                operator = " and ";
-            } else if(whereParts[i].toLowerCase().contains("or")) {
-                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("or"));
-                operator = " or ";
-            }
 
             if(symbol != null) {
                 String[] equationParts = whereParts[i].split(symbol);
@@ -246,6 +238,7 @@ public class OptimizeTree {
                         condition = temp + symbol;
                     else condition = condition + temp;
                 }
+                System.out.println(referencingRelations);
                 optimizedWhere.put(condition,referencingRelations);
             }
         }

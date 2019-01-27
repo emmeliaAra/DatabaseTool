@@ -36,17 +36,16 @@ public class TreeParser {
         getParts();
     }
 
-    public void operations()throws IllegalAccessException
+    public void operations(String path)throws IllegalAccessException
     {
         //"University.db
-        mySQLite = new MySQLite("University.db");
+        mySQLite = new MySQLite(path);
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
         //creates and executes the trees to present the results.
         TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
         ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
-
 
         //keep a copy of the original tree so that can be optimised.
         SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);

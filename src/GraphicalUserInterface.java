@@ -3,6 +3,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -12,10 +13,13 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+
+import javax.xml.soap.Text;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -33,10 +37,10 @@ public class GraphicalUserInterface extends Application {
     private TreeView<Button> buttonCanonicalTree, buttonOptimizedTree;
     private HashMap<Button,Integer> canonicalButtonsInOrder = new HashMap<>();
     private HashMap<Button,Integer> optimalButtonsInOrder = new HashMap<>();
-    private String thisIsTheInput = null;
+    private String thisIsTheInput = null, path;
     private MySQLite mySQLite = null;
-    TableView<Object> tableView;
-
+    private TableView<Object> tableView;
+    private TextArea messageArea;
     public static void main(String[]args)
     {
         myMain = new Main();
@@ -59,7 +63,9 @@ public class GraphicalUserInterface extends Application {
         //Create the menuBar and menu Items -- Not Finished
         MenuBar menuBar = new MenuBar();
         Menu options = new Menu("Options");
+        MenuItem loadDataBase = new MenuItem("Load Database");
         menuBar.getMenus().addAll(options);
+        options.getItems().add(loadDataBase);
 
         //ADD ALL ITEMS TO THE topHBox
         menuHBox.getChildren().addAll(menuBar);
@@ -100,10 +106,23 @@ public class GraphicalUserInterface extends Application {
         borderPane.setLeft(leftGrid);
         borderPane.setRight(rightGrid);
 
+        Scene myScene = new Scene(borderPane);
+        myScene.setFill(Color.BLUE);
+        primaryStage.setTitle("Database Tool");
+        primaryStage.setScene(myScene);
+        primaryStage.show();
+
+        MyFileChooser fileChooser = new MyFileChooser();
+
         //Add action to button
-        submitButton.setOnMouseClicked(new EventHandler<javafx.scene.input.MouseEvent>() {
-            @Override
-            public void handle(javafx.scene.input.MouseEvent e) {
+        submitButton.setOnMouseClicked(e -> {
+
+            if(path == null) {
+                messageArea = new TextArea("Please Choose a DataBase First");
+                borderPane.setBottom(messageArea);
+            }
+            else{
+                borderPane.setBottom(null);
                 String charStream = statementField.getText();
                 //If enter is pressed but the textField is empty
                 if (charStream.isEmpty())
@@ -119,7 +138,7 @@ public class GraphicalUserInterface extends Application {
                             mySQLite.close();
                         }
 
-                        myTreeParser = myMain.main(charStream);
+                        myTreeParser = myMain.main(charStream,path);
                         TreeStructure<String> canonicalTree = myTreeParser.getCanonicalTree();
                         TreeStructure<String> optimizesTree = myTreeParser.getOptimizedTree();
 
@@ -146,27 +165,27 @@ public class GraphicalUserInterface extends Application {
             }
         });
 
-        clearButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                statementField.clear();
-                tableView.getItems().clear();
-                leftGrid.getChildren().clear();
-                rightGrid.getChildren().clear();
+        clearButton.setOnMouseClicked(event -> {
+            statementField.clear();
+            tableView.getItems().clear();
+            leftGrid.getChildren().clear();
+            rightGrid.getChildren().clear();
+        });
+
+        loadDataBase.setOnAction(event -> {
+            path = fileChooser.setFileChooser(primaryStage) ;
+            if(path != null)
+            {
+                messageArea = new TextArea("Database loaded");
+                borderPane.setBottom(messageArea);
             }
         });
 
-        Scene myScene = new Scene(borderPane);
-        myScene.setFill(Color.BLUE);
-        primaryStage.setTitle("Database Tool");
-        primaryStage.setScene(myScene);
-        primaryStage.show();
-
         //Close window when close window
         primaryStage.setOnCloseRequest(e -> {
-            if(mySQLite!=null)
-                mySQLite.undoTables();
-            
+/*            if(mySQLite!=null)
+                mySQLite.undoTables();*/
+
             Platform.exit();
             System.exit(0);
         });
