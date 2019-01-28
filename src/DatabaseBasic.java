@@ -17,11 +17,11 @@ public class DatabaseBasic {
         open();
     }
 
-    public void open()
+    private void open()
     {
         File databaseFile = new File(databaseName);
 
-        if(databaseFile.exists() == false) {
+        if(!databaseFile.exists()) {
             System.out.println("The database file : " + databaseName +"does not exist!!");
             System.exit(0);
         }
@@ -36,7 +36,7 @@ public class DatabaseBasic {
 
     //establish a jdbc connection with the database
     //Autocommit is turned off delaying updates until commit( ) is called
-    public void getConnection()
+    private void getConnection()
     {
         try{
             connection = DriverManager.getConnection(DATABASE_LOCATION +databaseName);
@@ -53,12 +53,11 @@ public class DatabaseBasic {
     {
         try {
             connection.commit();
-            connection.close();;
+            connection.close();
         }catch (Exception ex)
         {
             ex.printStackTrace();
         }
     }
-
 
 }

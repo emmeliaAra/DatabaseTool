@@ -13,15 +13,22 @@ public class TreeParser {
     private MySQLite mySQLite;
     private LinkedList<String> nodeIdInOrderCanonical = new LinkedList<>();
     private LinkedList<String> nodeIdInOrderOptimal = new LinkedList<>();
-    private String finalTable;
+    private String finalTable,dropTableName;
+    private final int DROP_STATUS = 0;
+    private final int CREATE_STATUS = 1;
+    private final int SELECT_STATUS = 2;
+    private int parserStatus;
 
 
-    public TreeParser(CharStream charStream){
+    public TreeParser(CharStream charStream,String path)
+    {
         this.charStream = charStream;
+        mySQLite = new MySQLite(path);
     }
 
-    public void getStatementTokens(){
+    public void getStatementTokens() throws IllegalAccessException {
 
+        parserStatus = -1 ;
         sqliteLexer lexer = new sqliteLexer(charStream);
         TokenStream tokenStream = new CommonTokenStream(lexer);
         sqliteParser parser = new sqliteParser(tokenStream);
@@ -33,13 +40,22 @@ public class TreeParser {
         MyListener.MyInnerListener myListener = new MyListener.MyInnerListener(parser);
         walker.walk(myListener,myTree);
         statement = myListener.getMyStatement();
-        getParts();
+
+        //Check if this is a drop, create or select statement
+        if(charStream.toString().toLowerCase().contains( "drop")){
+            parserStatus = DROP_STATUS;
+            dropTableOperation();
+        }
+        else if(charStream.toString().toLowerCase().contains("create"))
+            parserStatus = CREATE_STATUS;
+        else if (charStream.toString().toLowerCase().contains("select")) {
+            parserStatus = SELECT_STATUS;
+            getParts();
+            operations();
+        }
     }
 
-    public void operations(String path)throws IllegalAccessException
-    {
-        //"University.db
-        mySQLite = new MySQLite(path);
+    public void operations()throws IllegalAccessException {
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
         //creates and executes the trees to present the results.
         TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
@@ -66,6 +82,14 @@ public class TreeParser {
         nodeIdInOrderCanonical = executeCanonicalTree.getNodeIdInOrder();
         nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
         finalTable = executeCanonicalTree.getFinalTable();
+    }
+
+    public void dropTableOperation()
+    {
+        Object[] values = statement.values().toArray();
+        //Get the penultimate(protelefteo) element of the list which is always the table name ex-> Drop table name ;
+        dropTableName = values[values.length-2].toString();
+        mySQLite.dropTable(dropTableName);
     }
 
     public void getParts()
@@ -168,5 +192,9 @@ public class TreeParser {
     }
     public String getFinalTable(){
         return finalTable;
+    }
+    public int getParserStatus(){ return parserStatus;}
+    public String getDropTableName(){
+        return dropTableName;
     }
 }

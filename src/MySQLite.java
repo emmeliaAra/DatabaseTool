@@ -1,8 +1,6 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
-
-import javax.sound.sampled.Line;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -45,6 +43,7 @@ public class MySQLite extends DatabaseBasic{
 
         String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + ";";
         newTablesCreated.add(tableName);
+
         executeCreate(queryTemplate);
     }
 
@@ -84,6 +83,11 @@ public class MySQLite extends DatabaseBasic{
         executeCreate(queryTemplate);
     }
 
+    public void dropTableStatement(String query)
+    {
+        executeCreate(query);
+    }
+
 
     public ResultSet execute(String queryTemplate) {
 
@@ -110,11 +114,11 @@ public class MySQLite extends DatabaseBasic{
         }
     }
 
-    public void undoTables()
+    public void undoTables(Vector<String> tablesCreated)
     {
-        while (!newTablesCreated.isEmpty()) {
-            dropTable(newTablesCreated.firstElement());
-            newTablesCreated.remove(0);
+        while (!tablesCreated.isEmpty()) {
+            dropTable(tablesCreated.firstElement());
+            tablesCreated.remove(0);
         }
     }
 
@@ -302,14 +306,9 @@ public class MySQLite extends DatabaseBasic{
     public LinkedList<String> getColumnNames(String tableName)
     {
         LinkedList<String> columnNames = new LinkedList<>();
+        ResultSet resultSet = getResultsOnTable(tableName);
 
-        String queryTemplate = "SELECT * from " + tableName;
-        ResultSet resultSet;
-
-        PreparedStatement preparedStatement;
         try {
-            preparedStatement = connection.prepareStatement(queryTemplate);
-            resultSet = preparedStatement.executeQuery();
             int i=1;
             while (i<resultSet.getMetaData().getColumnCount())
             {
@@ -324,11 +323,14 @@ public class MySQLite extends DatabaseBasic{
     }
 
 
-
-
-    public void getResultsOnTable(String tableName)
+    public ResultSet getResultsOnTable(String tableName)
     {
         String query = "Select * from " + tableName;
-        execute(query);
+        return execute(query);
+    }
+
+    public Vector<String> getNewTablesCreated()
+    {
+        return newTablesCreated;
     }
 }

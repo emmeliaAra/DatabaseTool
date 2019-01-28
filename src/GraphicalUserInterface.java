@@ -1,27 +1,31 @@
+import com.sun.xml.internal.ws.api.model.MEP;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.event.Event;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
-import javafx.stage.FileChooser;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import org.omg.PortableServer.POA;
 
-import javax.xml.soap.Text;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GraphicalUserInterface extends Application {
 
@@ -29,20 +33,26 @@ public class GraphicalUserInterface extends Application {
     private TreeParser myTreeParser;
     private static final int COLUMN_NUM= 8 ;
     private static final int ROWS_NUM = 20 ;
-    private static final int TREE_ROW_START = 3;
-    private static final int CANONICAL_TREE_COLUMN_START = COLUMN_NUM/4 ;
     private static final int CANONICAL_TREE_STATUS = 0;
     private static final int OPTIMIZED_TREE_STATUS = 1;
     private static final int BUTTON_PREFERRED_SIZE = 100;
+    private final int DROP_STATUS = 0;
+    private final int CREATE_STATUS = 1;
+    private final int SELECT_STATUS = 2;
     private TreeView<Button> buttonCanonicalTree, buttonOptimizedTree;
     private HashMap<Button,Integer> canonicalButtonsInOrder = new HashMap<>();
     private HashMap<Button,Integer> optimalButtonsInOrder = new HashMap<>();
     private String thisIsTheInput = null, path;
-    private MySQLite mySQLite = null;
+    private static MySQLite mySQLite = null;
     private TableView<Object> tableView;
-    private TextArea messageArea;
-    public static void main(String[]args)
-    {
+    private Label messageArea;
+    private LinkedList<Stage> newStages = new LinkedList<>();
+    private GridPane leftGrid,rightGrid;
+    private int status;
+    private MyFileChooser fileChooser;
+
+    public static void main(String[]args) {
+
         myMain = new Main();
         //this method internally calls the start() method of the Application class
         launch(args);
@@ -62,10 +72,17 @@ public class GraphicalUserInterface extends Application {
 
         //Create the menuBar and menu Items -- Not Finished
         MenuBar menuBar = new MenuBar();
+        Menu file = new Menu("File");
         Menu options = new Menu("Options");
+        menuBar.getMenus().addAll(file,options);
+
         MenuItem loadDataBase = new MenuItem("Load Database");
-        menuBar.getMenus().addAll(options);
-        options.getItems().add(loadDataBase);
+        MenuItem exit = new MenuItem("exit");
+        file.getItems().addAll(loadDataBase,exit);
+        MenuItem resetDatabase  = new MenuItem("Reset Database");
+        MenuItem saveDatabase = new MenuItem("Save Database");
+        options.getItems().addAll(resetDatabase,saveDatabase);
+
 
         //ADD ALL ITEMS TO THE topHBox
         menuHBox.getChildren().addAll(menuBar);
@@ -88,10 +105,10 @@ public class GraphicalUserInterface extends Application {
         finalHBox.getChildren().addAll(menuHBox,statementBox);
 
         //Create GridPanes for the trees.
-        GridPane leftGrid = new GridPane();
+        leftGrid = new GridPane();
         setGridConstraints(leftGrid);
 
-        GridPane rightGrid = new GridPane();
+        rightGrid = new GridPane();
         setGridConstraints(rightGrid);
 
         Screen myScreen = Screen.getPrimary();
@@ -112,54 +129,72 @@ public class GraphicalUserInterface extends Application {
         primaryStage.setScene(myScene);
         primaryStage.show();
 
-        MyFileChooser fileChooser = new MyFileChooser();
+        fileChooser = new MyFileChooser();
+
+        messageArea = new Label();
+        messageArea.setPrefHeight(bounds.getHeight()/4);
+        messageArea.setPrefWidth(bounds.getWidth());
+        messageArea.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        messageArea.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        messageArea.setAlignment(Pos.TOP_LEFT);
+        messageArea.setFont(Font.font(15));
+
 
         //Add action to button
         submitButton.setOnMouseClicked(e -> {
-
             if(path == null) {
-                messageArea = new TextArea("Please Choose a DataBase First");
+                messageArea.setText("Please Choose a DataBase First");
                 borderPane.setBottom(messageArea);
             }
             else{
                 borderPane.setBottom(null);
                 String charStream = statementField.getText();
                 //If enter is pressed but the textField is empty
-                if (charStream.isEmpty())
-                    System.out.println("Please give a statement");
+                if (charStream.isEmpty()) {
+                    clearStage();
+                    messageArea.setText("Please give a statement");
+                    borderPane.setBottom(null);
+                    borderPane.setBottom(messageArea);
+                }
                 else {
                     //Checks if the input is the same as the last one added. If yes then do nothing if no then present the new trees.
                     if (!charStream.equalsIgnoreCase(thisIsTheInput)){
-
                         //If is not the first statement then delete the previously created tables and close the connection
                         if(thisIsTheInput != null) {
-                            tableView = new TableView<>();
-                            mySQLite.undoTables();
-                            mySQLite.close();
+                            clearStage();
+                            safeCloseConnection(mySQLite);
                         }
-
                         myTreeParser = myMain.main(charStream,path);
-                        TreeStructure<String> canonicalTree = myTreeParser.getCanonicalTree();
-                        TreeStructure<String> optimizesTree = myTreeParser.getOptimizedTree();
 
-                        canonicalTree =  myTreeParser.setNodeID(canonicalTree);
-                        optimizesTree =  myTreeParser.setNodeID(optimizesTree);
+                        if(myTreeParser.getParserStatus() == SELECT_STATUS){
+                            TreeStructure<String> canonicalTree = myTreeParser.getCanonicalTree();
+                            TreeStructure<String> optimizesTree = myTreeParser.getOptimizedTree();
 
-                        mySQLite = myTreeParser.getMySQLite();
+                            canonicalTree =  myTreeParser.setNodeID(canonicalTree);
+                            optimizesTree =  myTreeParser.setNodeID(optimizesTree);
 
-                        LinkedList<String> canonicalInOrder = myTreeParser.getNodeIdInOrderCanonical();
-                        LinkedList<String> optimalInOrder  = myTreeParser.getNodeIdInOrderOptimal();
+                            mySQLite = myTreeParser.getMySQLite();
 
-                        displayTree(canonicalTree.getRootNode(), null, CANONICAL_TREE_STATUS);
-                        makeTReeVertical(buttonCanonicalTree.getRoot(),0,4,leftGrid);
-                        addActionToTree(buttonCanonicalTree.getRoot(),canonicalInOrder,mySQLite,canonicalButtonsInOrder);
+                            LinkedList<String> canonicalInOrder = myTreeParser.getNodeIdInOrderCanonical();
+                            LinkedList<String> optimalInOrder  = myTreeParser.getNodeIdInOrderOptimal();
 
-                        displayTree(optimizesTree.getRootNode(), null, OPTIMIZED_TREE_STATUS);
-                        makeTReeVertical(buttonOptimizedTree.getRoot(),0,4,rightGrid);
-                        addActionToTree(buttonOptimizedTree.getRoot(),optimalInOrder,mySQLite,optimalButtonsInOrder);
-                        thisIsTheInput = charStream;
-                        tableView = displayResults(mySQLite,myTreeParser.getFinalTable());
-                        borderPane.setBottom(tableView);
+                            displayTree(canonicalTree.getRootNode(), null, CANONICAL_TREE_STATUS);
+                            makeTReeVertical(buttonCanonicalTree.getRoot(),0,4,leftGrid);
+                            addActionToTree(buttonCanonicalTree.getRoot(),canonicalInOrder,mySQLite,canonicalButtonsInOrder);
+
+                            displayTree(optimizesTree.getRootNode(), null, OPTIMIZED_TREE_STATUS);
+                            makeTReeVertical(buttonOptimizedTree.getRoot(),0,4,rightGrid);
+                            addActionToTree(buttonOptimizedTree.getRoot(),optimalInOrder,mySQLite,optimalButtonsInOrder);
+                            thisIsTheInput = charStream;
+                            tableView = displayResults(mySQLite,myTreeParser.getFinalTable());
+                            borderPane.setBottom(tableView);
+                        }
+                        else if(myTreeParser.getParserStatus() == DROP_STATUS){
+                            messageArea.setText("Table " + myTreeParser.getDropTableName() + " is dropped successfully ");
+                            borderPane.setBottom(null);
+                            borderPane.setBottom(messageArea);
+                            safeCloseConnection(myTreeParser.getMySQLite());
+                        }
                     }
                 }
             }
@@ -167,29 +202,48 @@ public class GraphicalUserInterface extends Application {
 
         clearButton.setOnMouseClicked(event -> {
             statementField.clear();
-            tableView.getItems().clear();
-            leftGrid.getChildren().clear();
-            rightGrid.getChildren().clear();
+            clearStage();
+            safeCloseConnection(mySQLite);
+            thisIsTheInput =null;
         });
 
         loadDataBase.setOnAction(event -> {
             path = fileChooser.setFileChooser(primaryStage) ;
-            if(path != null)
-            {
-                messageArea = new TextArea("Database loaded");
+            if(path != null) {
+                messageArea.setText("Database loaded");
                 borderPane.setBottom(messageArea);
+                safeCloseConnection(mySQLite);
             }
+        });
+
+        exit.setOnAction(event -> {
+            askToCommit(event);
+        });
+
+        resetDatabase.setOnAction(event -> {
+            safeCloseConnection(mySQLite);
+            clearStage();
+            statementField.clear();
+            thisIsTheInput = null;
+            fileChooser.replaceFile();
+            fileChooser.copyFile(path);
+        });
+
+        saveDatabase.setOnAction(event -> {
+            safeCloseConnection(mySQLite);
+            clearStage();
+            statementField.clear();
+            thisIsTheInput = null;
+            fileChooser.saveWithoutExit();
         });
 
         //Close window when close window
         primaryStage.setOnCloseRequest(e -> {
-/*            if(mySQLite!=null)
-                mySQLite.undoTables();*/
-
-            Platform.exit();
-            System.exit(0);
+            e.consume();
+            safeCloseConnection(mySQLite);
+            clearStage();
+            askToCommit(e);
         });
-
     }
 
     public void setGridConstraints(GridPane gridPane) {
@@ -288,12 +342,22 @@ public class GraphicalUserInterface extends Application {
     //Add action to The button Trees
     public void addActionToTree(TreeItem<Button> treeItem, LinkedList<String> myList, MySQLite mySQLite,HashMap<Button,Integer> buttonsInOrder)
     {
-        treeItem.getValue().setOnMouseClicked(new EventHandler<javafx.scene.input.MouseEvent>() {
-            @Override
-            public void handle(javafx.scene.input.MouseEvent e) {
-                int pos = buttonsInOrder.get(treeItem.getValue());
-                mySQLite.getResultsOnTable(myList.get(pos));
-            }
+        treeItem.getValue().setOnMouseClicked(e -> {
+            int pos = buttonsInOrder.get(treeItem.getValue());
+
+            //Create the table , the new stage. keep track of all new stages to close them when a new statement is added
+            TableView tempTable = displayResults(mySQLite,myList.get(pos));
+            Stage stage = new Stage();
+            newStages.add(stage);
+
+            BorderPane pane = new BorderPane();
+            pane.setMinSize(800, 100);
+            Scene myScene = new Scene(pane);
+            stage.setTitle("RESULTS OF NODE: " + myList.get(pos));
+            stage.setScene(myScene);
+            pane.setCenter(tempTable);
+            stage.show();
+
         });
         treeItem.getChildren().forEach(each -> addActionToTree(each,myList,mySQLite,buttonsInOrder));
     }
@@ -319,5 +383,82 @@ public class GraphicalUserInterface extends Application {
         results.setMaxHeight(250);
         results.onScrollToProperty();
         return results;
+    }
+
+    public void clearStage()
+    {
+        for (Stage stage: newStages) {
+            stage.close();
+        }
+
+        if(tableView != null) {
+            tableView.getItems().clear();
+            tableView.getColumns().clear();
+        }
+
+        leftGrid.getChildren().clear();
+        rightGrid.getChildren().clear();
+    }
+
+    public void safeCloseConnection(MySQLite mySQLite)
+    {
+        try {
+            if(mySQLite!= null && !mySQLite.connection.isClosed())
+            {
+                Vector<String> tempNewcreated = mySQLite.getNewTablesCreated();
+                mySQLite.close();
+                mySQLite = new MySQLite(path);
+                mySQLite.undoTables(tempNewcreated);
+                mySQLite.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void askToCommit(Event e)
+    {
+        status = -1;
+        BorderPane pane = new BorderPane();
+        Scene myScene = new Scene(pane);
+        Stage stage = new Stage();
+        newStages.add(stage);
+        pane.setMinSize(50, 50);
+        stage.setTitle("Database Tool");
+        stage.setScene(myScene);
+
+        Label label = new Label("Want to save any changes to the Database?");
+        pane.setTop(label);
+
+        Button save = new Button("Save");
+        Button dontSave = new Button("Don't save");
+        Button cancel = new Button("Cancel");
+        HBox box = new HBox();
+        box.setAlignment(Pos.CENTER);
+        box.setSpacing(15);
+        box.getChildren().addAll(save,dontSave,cancel);
+        pane.setBottom(box);
+
+        save.setOnMouseClicked(event ->{
+            stage.close();
+            if(fileChooser != null)
+                fileChooser.deleteCopy();
+            Platform.exit();
+            System.exit(0);
+        } );
+
+        dontSave.setOnMouseClicked(event -> {
+            stage.close();
+            if(fileChooser!= null)
+                fileChooser.replaceFile();
+            Platform.exit();
+            System.exit(0);
+
+        });
+        cancel.setOnMouseClicked(event -> {
+            stage.close();
+            e.consume();
+        });
+        stage.show();
     }
 }
