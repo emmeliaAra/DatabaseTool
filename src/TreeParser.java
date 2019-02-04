@@ -3,20 +3,23 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.CharStream;
+import org.stringtemplate.v4.ST;
+
 import java.util.*;
 
 public class TreeParser {
 
     private CharStream charStream;
     private Map<Integer, String> statement;
-    private Vector<String> selectFieldName, fromRelationNames, whereClause;
+    private Vector<String> selectFieldName, fromRelationNames, whereClause,messages;
     private MySQLite mySQLite;
     private LinkedList<String> nodeIdInOrderCanonical = new LinkedList<>();
     private LinkedList<String> nodeIdInOrderOptimal = new LinkedList<>();
+    private HashMap<String, LinkedList<String>> newTablesCreated, optimizedWhere;
     private String finalTable,dropTableName;
     private final int DROP_STATUS = 0;
-    private final int CREATE_STATUS = 1;
-    private final int SELECT_STATUS = 2;
+    private final int SELECT_STATUS = 1;
+    private final int STATEMENT_ERROR_STATUS = 2;
     private int parserStatus;
 
 
@@ -46,42 +49,59 @@ public class TreeParser {
             parserStatus = DROP_STATUS;
             dropTableOperation();
         }
-        else if(charStream.toString().toLowerCase().contains("create"))
-            parserStatus = CREATE_STATUS;
         else if (charStream.toString().toLowerCase().contains("select")) {
-            parserStatus = SELECT_STATUS;
             getParts();
-            operations();
+            messages = mySQLite.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
+            if(!messages.isEmpty())
+                parserStatus = STATEMENT_ERROR_STATUS;
+            else{
+                parserStatus = SELECT_STATUS;
+                operations();
+            }
+        System.out.println("whyyyy " + messages.size());
         }
+
     }
 
     public void operations()throws IllegalAccessException {
-        SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-        //creates and executes the trees to present the results.
-        TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
-        ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
-        canonicalTree.createStack(canonicalTree.getRootNode());
-        executeCanonicalTree.execute(canonicalTree.getStack());
 
-        //keep a copy of the original tree so that can be optimised.
-        SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-        TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.buildSelectTree();
 
-        //if there is no where condition or only one the tree will be the same as the canonical.
-        OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(),whereClause);
-        if(!optimizeTree.splitWhere().isEmpty()) {
-            canonicalTreeForOpt = optimizeTree.optimiseTree();
-            canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
-        }
+            SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+            //creates and executes the trees to present the results.
+            TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
+            ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
+            canonicalTree.createStack(canonicalTree.getRootNode());
+            executeCanonicalTree.execute(canonicalTree.getStack());
 
-        ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt,selectFieldName,whereClause,mySQLite);
-        canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
-        executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
+            mySQLite.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
+            boolean  hasOr = false;
 
-        //Get the relations in the order they are executed.
-        nodeIdInOrderCanonical = executeCanonicalTree.getNodeIdInOrder();
-        nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
-        finalTable = executeCanonicalTree.getFinalTable();
+            if(charStream.toString().toLowerCase().contains(" or "))
+                hasOr = true;
+
+            //keep a copy of the original tree so that can be optimised.
+            SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+            TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.buildSelectTree();
+
+            if(!hasOr) {
+
+                newTablesCreated = executeCanonicalTree.getNewTablesCreated();
+                //if there is no where condition or only one relation in the statement the tree will be the same as the canonical.
+                OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(), whereClause, newTablesCreated, optimizedWhere);
+                optimizedWhere = optimizeTree.splitWhere();
+
+                if (!optimizeTree.splitWhere().isEmpty() && fromRelationNames.size() > 1)
+                    canonicalTreeForOpt = optimizeTree.optimiseTree();
+
+                ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
+                canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
+                executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
+
+                nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
+            }
+            //Get the relations in the order they are executed.
+            nodeIdInOrderCanonical = executeCanonicalTree.getNodeIdInOrder();
+            finalTable = executeCanonicalTree.getFinalTable();
     }
 
     public void dropTableOperation()
@@ -135,9 +155,17 @@ public class TreeParser {
     public TreeStructure<String> getCanonicalTree()
     {
         SelectStatement selectStatement = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+        String temp = charStream.toString().toLowerCase();
+        //Assemble the data of the condition node and the project  node.
+        String condition  = temp.toLowerCase().substring(temp.indexOf("where")+5,temp.indexOf(";"));
+        String project = temp.toLowerCase().substring(temp.indexOf("select") +6,temp.indexOf("from"));
         TreeStructure<String> canonicalTree = null;
         try {
             canonicalTree = selectStatement.buildSelectTree();
+            if(statement.toString().toLowerCase().contains("where")) {
+                canonicalTree.getRootNode().setNodeData("π[" + project + "]");
+                canonicalTree.getRootNode().getChildren().get(0).setNodeData("σ[" + condition + "]");
+            }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -146,19 +174,22 @@ public class TreeParser {
 
     public TreeStructure<String> getOptimizedTree()
     {
-        TreeStructure<String> optimizedTree = getCanonicalTree();
-        OptimizeTree optimizeTree = new OptimizeTree(optimizedTree, mySQLite.getSchema(),whereClause);
+        if(!charStream.toString().toLowerCase().contains("or"))
+        {
+            TreeStructure<String> optimizedTree = getCanonicalTree();
+            OptimizeTree optimizeTree = new OptimizeTree(optimizedTree, mySQLite.getSchema(),whereClause,newTablesCreated,optimizedWhere);
 
-        try {
-            if(!optimizeTree.splitWhere().isEmpty())
-                optimizedTree = optimizeTree.optimiseTree();
-            else
-                optimizedTree = getCanonicalTree();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            try {
+                if(!optimizedWhere.isEmpty() && fromRelationNames.size()>1)
+                    optimizedTree = optimizeTree.optimiseTree();
+                else
+                    optimizedTree = getCanonicalTree();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            return optimizedTree;
         }
-        optimizedTree.printTree(optimizedTree.getRootNode(), " " );
-        return optimizedTree;
+        else return null;
     }
 
     //Set node id. The first one  popped has nodeId = 0 etc.
@@ -196,5 +227,9 @@ public class TreeParser {
     public int getParserStatus(){ return parserStatus;}
     public String getDropTableName(){
         return dropTableName;
+    }
+
+    public Vector<String> getMessages() {
+        return messages;
     }
 }

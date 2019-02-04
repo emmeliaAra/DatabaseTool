@@ -1,10 +1,11 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+
+import javax.management.relation.Relation;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Vector;
+import java.util.*;
 
 public class MySQLite extends DatabaseBasic{
 
@@ -41,7 +42,7 @@ public class MySQLite extends DatabaseBasic{
                 tableName = tableName + "1";
         }
 
-        String queryTemplate = "Create table " + tableName + " AS Select" + selectF +" from " + fromF + ";";
+        String queryTemplate = "Create table " + tableName + " AS Select " + selectF +" from " + fromF + ";";
         newTablesCreated.add(tableName);
 
         executeCreate(queryTemplate);
@@ -83,11 +84,6 @@ public class MySQLite extends DatabaseBasic{
         executeCreate(queryTemplate);
     }
 
-    public void dropTableStatement(String query)
-    {
-        executeCreate(query);
-    }
-
 
     public ResultSet execute(String queryTemplate) {
 
@@ -95,9 +91,10 @@ public class MySQLite extends DatabaseBasic{
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(queryTemplate);
             resultSet = preparedStatement.executeQuery();
-
-        }catch (Exception e) {
+            //getResults(resultSet);
+        }catch (SQLException e) {
            e.printStackTrace();
+
         }
         return resultSet;
     }
@@ -150,8 +147,7 @@ public class MySQLite extends DatabaseBasic{
             metaData = connection.getMetaData();
             resultSetTable = metaData.getTables(null,null,null,new String[]{TABLE});
 
-            while(resultSetTable.next())
-            {
+            while(resultSetTable.next()) {
                 //get Tables and add them to schema.
                 String relationName = resultSetTable.getString(TABLE_NAME);
                 MyRelation relation = new MyRelation(mySchema, relationName);
@@ -161,7 +157,6 @@ public class MySQLite extends DatabaseBasic{
             LinkedList<MyRelation> relations = mySchema.getRelations();
             for (int i=0; i<relations.size(); i++ ) {
                 resultSetTable = metaData.getColumns(null,null,relations.get(i).getRelationName(),null);
-
                 // Get primary and foreign keys
                 keySet = metaData.getPrimaryKeys(null,null,relations.get(i).getRelationName());
                 primaryKeys = getPrimaryKeys(keySet);
@@ -174,7 +169,6 @@ public class MySQLite extends DatabaseBasic{
                     LinkedList<Integer> constraints = new LinkedList<>();
                     columnName = resultSetTable.getString(COLUMN_NAME);
                     String type = resultSetTable.getString("TYPE_NAME");
-
                     MyField field = new MyField(relations.get(i), columnName, type, null);
                     relations.get(i).addField(field);
                     if (primaryKeys.contains(columnName)) {
@@ -309,10 +303,9 @@ public class MySQLite extends DatabaseBasic{
         ResultSet resultSet = getResultsOnTable(tableName);
 
         try {
-            int i=1;
-            while (i<resultSet.getMetaData().getColumnCount())
-            {
-                columnNames.add(resultSet.getMetaData().getColumnName(i));
+            int i=0;
+            while (i<resultSet.getMetaData().getColumnCount()) {
+                columnNames.add(resultSet.getMetaData().getColumnName(i+1));
                 i++;
             }
 
@@ -322,11 +315,128 @@ public class MySQLite extends DatabaseBasic{
         return columnNames;
     }
 
-
-    public ResultSet getResultsOnTable(String tableName)
-    {
+    public ResultSet getResultsOnTable(String tableName) {
         String query = "Select * from " + tableName;
         return execute(query);
+    }
+
+    public Vector<String> handleSQlExceptions( Vector<String> selectFieldName, Vector<String>fromRelationNames,Vector<String> whereClause)
+    {
+        System.out.println(selectFieldName);
+        System.out.println(fromRelationNames);
+        System.out.println(whereClause);
+
+        Schema myRelationSchema = getSchema();
+        LinkedList<MyRelation> myRelations = myRelationSchema.getRelations();
+        LinkedList<String> myRelationName = new LinkedList<>();
+        Vector<String> errorMessages = new Vector<>();
+
+        //Get the names of all the relations in lowerCase letters
+        for (MyRelation relation: myRelations)
+            myRelationName.add(relation.getRelationName().toLowerCase());
+
+
+        String missingTableError = "This set of tables is missing from the Database and cannot be used in the \"FROM\" Clause: ";
+        StringBuilder errorTable = new StringBuilder();
+
+        //Make them to loweCase because SQLite it is not case sensitive. if the index is minus one this this table does not belong in the schema
+        LinkedList<String> relationsInStatement = new LinkedList<>();
+        for(int i=0 ; i<fromRelationNames.size();i++)
+            if(myRelationName.indexOf(fromRelationNames.get(i).toLowerCase()) == -1)
+                errorTable.append(fromRelationNames.get(i)).append(" ,");
+            else
+                relationsInStatement.add(myRelationName.get(myRelationName.indexOf(fromRelationNames.get(i).toLowerCase())));
+
+            if(errorTable.length() >0) {
+                errorTable.deleteCharAt(errorTable.length()-1);
+                errorMessages.add(missingTableError + "{ " + errorTable + "}");
+            }
+
+        errorMessages = selectANDWhereClauseErrors(selectFieldName,relationsInStatement,myRelationSchema,errorMessages);
+        errorMessages = moreThanOne(relationsInStatement,myRelationName,errorMessages);
+        if(!whereClause.isEmpty())
+            errorMessages = selectANDWhereClauseErrors(whereClause,relationsInStatement,myRelationSchema,errorMessages);
+
+        return errorMessages;
+    }
+
+    public Vector<String> moreThanOne( LinkedList<String> relationsInStatement, LinkedList<String> myRelationName,Vector<String>errorMessages )
+    {
+        //Convert the list into a set. IF they are not of the same size it means that a table appears more than once in the from clause.
+        Set<String> myRelationSet  = new LinkedHashSet<>(relationsInStatement);
+        if(myRelationSet.size() != relationsInStatement.size())
+            errorMessages.add("A table appears more than once in the \"FROM\" Clause: ");
+
+        return errorMessages;
+    }
+    public Vector<String> selectANDWhereClauseErrors(Vector<String> clauseToCheck, LinkedList<String> relationsInStatement,Schema myRelationSchema, Vector<String> errorMessages)
+    {
+
+        String[] symbols = {"<=" ,">=","<",">","==","=","!="};
+        boolean previousIsSymbol = false;
+
+        //if is not only the star!
+        if(!clauseToCheck.get(0).equalsIgnoreCase("*")) {
+            int i=0;
+            while (i<clauseToCheck.size()){
+                if(Arrays.asList(symbols).contains(clauseToCheck.get(i))){
+                    previousIsSymbol = true;
+                    i++;
+                    continue;
+                }else if(clauseToCheck.get(i).equalsIgnoreCase("and") || clauseToCheck.get(i).equalsIgnoreCase("or")){
+                    i++;
+                    System.out.println(12345648);
+                    continue;
+                }
+
+                 /*(1)if there is a referencing table and the table used to call a field is part of the from clause
+                     then Check if the referencing table has that field.
+                     (2)if the referencing Table is not part of the from clause add message.
+                    */
+                if(clauseToCheck.size() > i+1 && clauseToCheck.get(i+1).equals(".")){
+                    if( relationsInStatement.contains(clauseToCheck.get(i).toLowerCase())){
+                        if(myRelationSchema.getRelationOnName(clauseToCheck.get(i)).getFieldOnName(clauseToCheck.get(i+2)) == null)
+                            errorMessages.add("Table " + clauseToCheck.get(i) + " does not have a field called " + clauseToCheck.get(i+2));
+                        i = i+3;
+                    }else if(!relationsInStatement.contains(clauseToCheck.get(i).toLowerCase())) {
+                        errorMessages.add("Table " + clauseToCheck.get(i) + " is not part of the \" FROM \" and thus it can not be used to reference field " + clauseToCheck.get(i+2));
+                        i=i+3;
+                    }
+                } /* Check if the field belongs to any of the table if not add message.
+                   If it appears more than once print message as well
+                 */
+                else if ((clauseToCheck.size()> i+1 && !clauseToCheck.get(i+1).equals("."))|| clauseToCheck.size()<=i+1){
+                    boolean needMoreCheck = true;
+                    if(previousIsSymbol ) {
+                        if(clauseToCheck.get(i).startsWith("\"") && clauseToCheck.get(i).endsWith("\""))
+                            needMoreCheck = false;
+                        else {
+                            char[] temp = clauseToCheck.get(i).toCharArray();
+                            for (Character c : temp)
+                                if (!Character.isDigit(c)) {
+                                    needMoreCheck = false;
+                                    break;
+                                }
+                        }
+                    }
+                    if(needMoreCheck){
+                        int counter = 0;
+                        for (String relationName: relationsInStatement) {
+                            if(myRelationSchema.getRelationOnName(relationName).getFieldOnName(clauseToCheck.get(i)) != null)
+                                counter ++;
+                            if(counter>1)break;
+                        }
+                        if(counter>1)
+                            errorMessages.add("Ambiguous field name: " + clauseToCheck.get(i) + " The same field name exists in more than one relation \n" + "Try tableName.columnName");
+                        else if(counter == 0)
+                            errorMessages.add("Unknown field " + clauseToCheck.get(i) + " It does not belong to any of the tables used in the \" FROM \" clause  ");
+                    }
+                    i++;
+                }
+                previousIsSymbol = false;
+            }
+        }
+        return errorMessages;
     }
 
     public Vector<String> getNewTablesCreated()

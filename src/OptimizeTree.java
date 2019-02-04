@@ -2,7 +2,7 @@ import java.util.*;
 
 public class OptimizeTree {
 
-    private HashMap<String,LinkedList<String>> optimizedWhere;
+    private HashMap<String,LinkedList<String>> optimizedWhere,newTablesFromCanonical;
     private LinkedList<String> associatedRelations;
     private TreeStructure<String> canonicalTree;
     private Vector<String> whereClause;
@@ -12,14 +12,15 @@ public class OptimizeTree {
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
     private static final int WHERE_NODE_STATUS = 2;
-    private static final int ACTION_NODE_STATUS = 3;
     private static final int OPT_COND_NODE_STATUS = 4;
     private static final int JOIN_NODE_STATUS = 5;
 
-    public OptimizeTree(TreeStructure<String> canonicalTree1, Schema schema, Vector<String> whereClause) {
+    public OptimizeTree(TreeStructure<String> canonicalTree1, Schema schema, Vector<String> whereClause,HashMap<String, LinkedList<String>> newTablesFromCanonical, HashMap<String,LinkedList<String>> optimizedWhere) {
         this.canonicalTree = canonicalTree1;
         this.whereClause = whereClause;
         this.schema = schema;
+        this.newTablesFromCanonical = newTablesFromCanonical;
+        this.optimizedWhere = optimizedWhere;
         myHelper = new MyHelper();
         associatedRelations = new LinkedList<>();
     }
@@ -38,7 +39,6 @@ public class OptimizeTree {
             switch (popNode.getNodeStatus()) {
                 case RELATION_NODE_STATUS:{
                     conditionAlready = false;
-                    System.out.println(optimizedWhere.size() + " " + optimizedWhere);
                     /*if there is a condition associated with that relation then call the method. and set set conditionAlready to TRue so that
                     if a node is associated with more than one conditions all the associated conditions will be added to it's parent node.
                     after every iteration of the loop the popNode is becoming the node that holds the condition if any so need to make pop node to hold the
@@ -194,11 +194,10 @@ public class OptimizeTree {
         LinkedList<String> where = new LinkedList<>(whereClause);
         LinkedList<String> referencingRelations;
         LinkedList<MyRelation> relations;
-        String temp ,operator;
+        String temp;
         optimizedWhere = new HashMap<>();
 
         String whereString = new String(myHelper.getWhereFields(where));
-        //String[] whereParts = whereString.split("(?i)and");
         String[] whereParts = whereString.split("(?i)and");
 
         //Iterates through all the parts divided by "AND"
@@ -224,7 +223,7 @@ public class OptimizeTree {
                     }else {
                         //if no "."  p simeni en ksero se pio relation kamni reference enna to psaxo p to schema !!
                         relations = schema.getRelations();
-                        String name = myHelper.getRelationNameOnField(equationParts[j],relations);
+                        String name = myHelper.getRelationNameOnField(equationParts[j],relations,newTablesFromCanonical);
 
                         //if name is a field name add the table name to the referencing
                         if(name != null) {
@@ -238,7 +237,6 @@ public class OptimizeTree {
                         condition = temp + symbol;
                     else condition = condition + temp;
                 }
-                System.out.println(referencingRelations);
                 optimizedWhere.put(condition,referencingRelations);
             }
         }

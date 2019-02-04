@@ -54,46 +54,12 @@ public class MyListener {
         }
 
         @Override
-        public void enterGetNewTableName(sqliteParser.GetNewTableNameContext ctx) {
-            myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
-        }
-
-        @Override
         public void enterGetColumnName(sqliteParser.GetColumnNameContext ctx) {
-            myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
-        }
-        @Override
-        public void enterGetForeignTableName(sqliteParser.GetForeignTableNameContext ctx) {
             myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
         }
         @Override
         public void enterGetTableAlias(sqliteParser.GetTableAliasContext ctx) {
             myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
-        }
-
-        @Override
-        public void enterAlterTable(sqliteParser.AlterTableContext ctx) {
-
-            status.add(0);
-
-            if(ctx.K_ALTER() != null)
-                myStatement.put(ctx.K_ALTER().getSourceInterval().hashCode(),ctx.K_ALTER().toString());
-
-            if(ctx.K_TABLE()!= null)
-                myStatement.put(ctx.K_TABLE().getSourceInterval().hashCode(),ctx.K_TABLE().toString());
-
-            if(ctx.K_RENAME() != null)
-                myStatement.put(ctx.K_RENAME().getSourceInterval().hashCode(),ctx.K_RENAME().toString());
-
-            if(ctx.K_TO() != null)
-                myStatement.put(ctx.K_TO().getSourceInterval().hashCode(),ctx.K_TO().toString());
-
-            if(ctx.K_ADD() != null)
-                myStatement.put(ctx.K_ADD().getSourceInterval().hashCode(), ctx.K_ADD().toString());
-
-            if(ctx.K_COLUMN() != null)
-                myStatement.put(ctx.K_COLUMN().getSourceInterval().hashCode(), ctx.K_COLUMN().toString());
-
         }
 
         @Override // theli allama se type name
@@ -175,70 +141,6 @@ public class MyListener {
                 myStatement.put(ctx.MINUS().getSourceInterval().hashCode(), ctx.MINUS().toString());
 
             myStatement.put(ctx.NUMERIC_LITERAL().getSourceInterval().hashCode(),ctx.NUMERIC_LITERAL().toString());
-        }
-
-        public void enterPrimaryKey(sqliteParser.PrimaryKeyContext ctx) {
-            if(ctx.K_PRIMARY() !=null )
-                myStatement.put(ctx.K_PRIMARY().getSourceInterval().hashCode(), ctx.K_PRIMARY().toString());
-
-            if(ctx.K_KEY() != null)
-                myStatement.put(ctx.K_KEY().getSourceInterval().hashCode(),ctx.K_KEY().toString());
-
-            if(ctx.K_ASC() != null)
-                myStatement.put(ctx.K_ASC().getSourceInterval().hashCode(),ctx.K_ASC().toString());
-
-            if(ctx.K_DESC() != null)
-                myStatement.put(ctx.K_DESC().getSourceInterval().hashCode(),ctx.K_DESC().toString());
-
-            if(ctx.K_AUTOINCREMENT() != null)
-                myStatement.put(ctx.K_AUTOINCREMENT().getSourceInterval().hashCode(),ctx.K_AUTOINCREMENT().toString());
-        }
-
-        public void enterNullOrNot(sqliteParser.NullOrNotContext ctx) {
-            if(ctx.K_NOT() != null)
-                myStatement.put(ctx.K_NOT().getSourceInterval().hashCode(), ctx.K_NOT().toString());
-
-            if(ctx.K_NULL() != null)
-                myStatement.put(ctx.K_NULL().getSourceInterval().hashCode(),ctx.K_NULL().toString());
-        }
-
-        public void enterUnique(sqliteParser.UniqueContext ctx) {
-            myStatement.put(ctx.K_UNIQUE().getSourceInterval().hashCode(),ctx.K_UNIQUE().toString());
-        }
-
-        public void enterReferences (sqliteParser.ReferencesContext ctx) {
-            myStatement.put(ctx.K_REFERENCES().getSourceInterval().hashCode(),ctx.K_REFERENCES().toString());
-        }
-
-        public void enterCreateTable (sqliteParser.CreateTableContext ctx) {
-            status.add(2);
-            myStatement.put(ctx.K_CREATE().getSourceInterval().hashCode(),ctx.K_CREATE().toString());
-            myStatement.put(ctx.K_TABLE().getSourceInterval().hashCode(),ctx.K_TABLE().toString());
-
-            if(ctx.K_AS() != null)
-                myStatement.put(ctx.K_AS().getSourceInterval().hashCode(), ctx.K_AS().toString());
-        }
-
-        public void enterTableConstraint (sqliteParser.TableConstraintContext ctx) {
-            if(ctx.K_PRIMARY() !=null )
-                myStatement.put(ctx.K_PRIMARY().getSourceInterval().hashCode(),ctx.K_PRIMARY().toString());
-
-            if(ctx.K_KEY() != null)
-                myStatement.put(ctx.K_KEY().getSourceInterval().hashCode(),ctx.K_KEY().toString());
-
-            if(ctx.K_UNIQUE() !=null )
-                myStatement.put(ctx.K_UNIQUE().getSourceInterval().hashCode(),ctx.K_UNIQUE().toString());
-
-            if(ctx.K_FOREIGN() != null)
-                myStatement.put(ctx.K_FOREIGN().getSourceInterval().hashCode(),ctx.K_FOREIGN().toString());
-        }
-
-        public void enterIndexedColumn (sqliteParser.IndexedColumnContext ctx) {
-            if(ctx.K_ASC() != null)
-                myStatement.put(ctx.K_ASC().getSourceInterval().hashCode(), ctx.K_ASC().toString());
-
-            else if(ctx.K_DESC() !=null)
-                myStatement.put(ctx.K_DESC().getSourceInterval().hashCode(), ctx.K_DESC().toString());
         }
 
         public void enterSelectStatement(sqliteParser.SelectStatementContext ctx) {
@@ -485,43 +387,6 @@ public class MyListener {
             }
         }
 
-        public void enterDeleteStatement(sqliteParser.DeleteStatementContext ctx) {
-            status.add(3);
-
-            myStatement.put(ctx.K_DELETE().getSourceInterval().hashCode(),ctx.K_DELETE().toString());
-            myStatement.put(ctx.K_FROM().getSourceInterval().hashCode(),ctx.K_FROM().toString());
-
-            if(ctx.K_WHERE() != null)
-                myStatement.put(ctx.K_WHERE().getSourceInterval().hashCode(), ctx.K_WHERE().toString());
-
-        }
-
-        public void enterWithClause (sqliteParser.WithClauseContext ctx) {
-            if(ctx.K_AS(0) != null)
-                myStatement.put(ctx.K_AS(0).getSourceInterval().hashCode(), ctx.K_AS().toString());
-        }
-
-
-        public void enterDeleteLimited(sqliteParser.DeleteLimitedContext ctx) {
-            status.add(4);
-            myStatement.put(ctx.K_FROM().getSourceInterval().hashCode(),ctx.K_FROM().toString());
-
-            if(ctx.K_WHERE() != null)
-                myStatement.put(ctx.K_WHERE().getSourceInterval().hashCode(), ctx.K_WHERE().toString());
-
-            if(ctx.K_ORDER() != null)
-                myStatement.put(ctx.K_ORDER().getSourceInterval().hashCode(),ctx.K_ORDER().toString());
-
-            if(ctx.K_BY() != null)
-                myStatement.put(ctx.K_BY().getSourceInterval().hashCode(), ctx.K_BY().toString());
-
-            if(ctx.K_LIMIT() != null)
-                myStatement.put(ctx.K_LIMIT().getSourceInterval().hashCode(), ctx.K_LIMIT().toString());
-
-            if(ctx.K_OFFSET() != null)
-                myStatement.put(ctx.K_OFFSET().getSourceInterval().hashCode(), ctx.K_OFFSET().toString());
-        }
-
         public void enterDropTable(sqliteParser.DropTableContext ctx) {
             status.add(5);
             if(ctx.K_DROP() != null)
@@ -595,25 +460,6 @@ public class MyListener {
                 myStatement.put(ctx.K_EXCEPT().getSourceInterval().hashCode(), ctx.K_EXCEPT().toString());
         }
 
-        @Override
-        public void enterInsertStatement(sqliteParser.InsertStatementContext ctx) {
-            status.add(7);
-            if(ctx.K_INSERT() != null)
-                myStatement.put(ctx.K_INSERT().getSourceInterval().hashCode(), ctx.K_INSERT().toString());
-
-            if(ctx.K_REPLACE() != null)
-                myStatement.put(ctx.K_REPLACE().getSourceInterval().hashCode(), ctx.K_REPLACE().toString());
-
-            if(ctx.K_INTO() != null)
-                myStatement.put(ctx.K_INTO().getSourceInterval().hashCode(), ctx.K_INTO().toString());
-
-            if(ctx.K_INTO() != null)
-                myStatement.put(ctx.K_INTO().getSourceInterval().hashCode(), ctx.K_INTO().toString());
-
-            if(ctx.K_VALUES() != null)
-                myStatement.put(ctx.K_VALUES().getSourceInterval().hashCode(), ctx.K_VALUES().toString());
-        }
-
         public  void enterSimpleSelectStatement (sqliteParser.SimpleSelectStatementContext ctx) {
             status.add(8);
             if(ctx.K_WITH() != null)
@@ -629,43 +475,6 @@ public class MyListener {
                 myStatement.put(ctx.K_LIMIT().getSourceInterval().hashCode(), ctx.K_LIMIT().toString());
 
             if(ctx.K_WITH() != null)
-                myStatement.put(ctx.K_OFFSET().getSourceInterval().hashCode(), ctx.K_OFFSET().toString());
-        }
-
-        @Override
-        public void enterUpdateStatement(sqliteParser.UpdateStatementContext ctx) {
-            status.add(10);
-            if(ctx.K_UPDATE() != null)
-                myStatement.put(ctx.K_UPDATE().getSourceInterval().hashCode(),ctx.K_UPDATE().toString());
-
-            if(ctx.K_SET() != null)
-                myStatement.put(ctx.K_SET().getSourceInterval().hashCode(), ctx.K_SET().toString());
-
-            if(ctx.K_WHERE() != null)
-                myStatement.put(ctx.K_WHERE().getSourceInterval().hashCode(), ctx.K_WHERE().toString());
-        }
-
-        public void enterUpdateStatementLimited(sqliteParser.UpdateStatementLimitedContext ctx) {
-            status.add(11);
-            if(ctx.K_UPDATE() != null)
-                myStatement.put(ctx.K_UPDATE().getSourceInterval().hashCode(), ctx.K_UPDATE().toString());
-
-            if(ctx.K_SET() != null)
-                myStatement.put(ctx.K_SET().getSourceInterval().hashCode(), ctx.K_SET().toString());
-
-            if(ctx.K_WHERE() != null)
-                myStatement.put(ctx.K_WHERE().getSourceInterval().hashCode(), ctx.K_WHERE().toString());
-
-            if(ctx.K_ORDER() != null)
-                myStatement.put(ctx.K_ORDER().getSourceInterval().hashCode(), ctx.K_ORDER().toString());
-
-            if(ctx.K_BY() != null)
-                myStatement.put(ctx.K_BY().getSourceInterval().hashCode(), ctx.K_BY().toString());
-
-            if(ctx.K_LIMIT() != null)
-                myStatement.put(ctx.K_LIMIT().getSourceInterval().hashCode(), ctx.K_LIMIT().toString());
-
-            if(ctx.K_OFFSET() != null)
                 myStatement.put(ctx.K_OFFSET().getSourceInterval().hashCode(), ctx.K_OFFSET().toString());
         }
 

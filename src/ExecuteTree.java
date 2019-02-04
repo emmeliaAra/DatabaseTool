@@ -13,7 +13,7 @@ public class ExecuteTree {
     private TreeStructure<String> canonicalTree;
     private MySQLite mySQLite;
     private MyHelper myHelper;
-    private String finalTable;
+    private String finalTable,canonicalCondition;
 
     private static final int RELATION_NODE_STATUS = 0;
     private static final int CARTESIAN_NODE_STATUS = 1;
@@ -75,6 +75,7 @@ public class ExecuteTree {
                 }
                 case JOIN_NODE_STATUS:{
                     isJoinCond(popNode);
+                    break;
                 }
             }
         }
@@ -83,7 +84,6 @@ public class ExecuteTree {
             canonicalTree.createStack(canonicalTree.getRootNode());
             execute(canonicalTree.getStack());
         }
-        //mySQLite.undoTables();
     }
 
     public void isCartesian(TreeStructure.Node<String> popNode) throws IllegalAccessException {
@@ -157,6 +157,7 @@ public class ExecuteTree {
 
             //Create a relation holding the final result but do not create a relation node. Also add the relation name to the list.
             mySQLite.createAsStatement(fromF,selectF,tableName);
+            newTablesCreated.put(tableName,temp);
             nodeIdInOrder.add(tableName);
             finalTable = tableName;
             canonicalTree.deleteNode(popNode);
@@ -192,6 +193,7 @@ public class ExecuteTree {
             whereC = myHelper.getWhereFields(where);
             whereC = whereException(whereC.toString(), fromF.toString());
             mySQLite.whereSelect(selectF,fromF,whereC);
+            canonicalCondition = whereC.toString();
 
             //If where node then create the new relation and remove the nodes from the holdNodes if not then replace the new relation with the onw that the condition is applied to.
             if(popNode.getNodeStatus() == WHERE_NODE_STATUS){
@@ -375,4 +377,9 @@ public class ExecuteTree {
         return nodeIdInOrder;
     }
     public String getFinalTable(){ return finalTable;}
+    public String getCanonicalCondition(){ return canonicalCondition; }
+
+    public HashMap<String, LinkedList<String>> getNewTablesCreated() {
+        return newTablesCreated;
+    }
 }

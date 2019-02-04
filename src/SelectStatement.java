@@ -1,5 +1,4 @@
 import java.util.LinkedList;
-import java.util.Stack;
 import java.util.Vector;
 
 public class SelectStatement {
@@ -30,7 +29,8 @@ public class SelectStatement {
         TreeStructure.Node<String> tempNode = rootNode;
 
         if (whereClause.size() != 0)
-           tempNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS,NODE_INITIAL_ID);
+            tempNode = canonicalTree.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS, NODE_INITIAL_ID);
+
 
         //If there are more than 3 relations
         if (numOfRelations > 3) {

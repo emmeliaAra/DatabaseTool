@@ -12,53 +12,18 @@ error
  ;
 
 sql_stmt
-  :  alter_table_stmt //status0
-   | compound_select_stmt //status 1 //en tou ekama label.
-   | create_table_stmt //status 2
-   | delete_stmt       //status 3
-   | delete_stmt_limited //status 4
-   | drop_table_stmt  //status 5
-   | factored_select_stmt //status 6
-   | insert_stmt //status 7
-   | simple_select_stmt //status 8
-   | select_stmt //status 9
-   | update_stmt //status 10
-   | update_stmt_limited //status 11
+  :  compound_select_stmt
+   | drop_table_stmt
+   | factored_select_stmt
+   | simple_select_stmt
+   | select_stmt
   ;
 
-alter_table_stmt
- : K_ALTER K_TABLE ( database_name dot_symbol )? table_name
-   ( K_RENAME K_TO new_table_name
-   | K_ADD K_COLUMN? column_def //column def en to ekama store ! gt prepi na allakso ta types.
-   ) #alterTable
- ;
-//skip it pros to paron !
 compound_select_stmt
  : (K_WITH common_table_expression ( comma_symbol common_table_expression )* )?
    select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
    ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | comma_symbol) expr )? )?
- ;
-
-create_table_stmt
- : K_CREATE  K_TABLE /*( K_IF K_NOT K_EXISTS )?*/
-   ( database_name dot_symbol )? table_name
-   ( open_paren column_def ( comma_symbol column_def )* ( comma_symbol table_constraint )* close_paren
-   | K_AS select_stmt
-   ) #createTable
- ;
-
-delete_stmt
- : with_clause? K_DELETE K_FROM qualified_table_name
-   ( K_WHERE expr )? #deleteStatement
- ;
-
-delete_stmt_limited
- : with_clause? K_DELETE K_FROM qualified_table_name
-   ( K_WHERE expr )?
-   ( ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
-     K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )?
-   )? #deleteLimited
  ;
 
 drop_table_stmt
@@ -70,15 +35,6 @@ factored_select_stmt
    select_core ( compound_operator select_core )*
    ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )? )? #factoredSelectStatement
- ;
-
-insert_stmt
- : with_clause? ( K_INSERT
-                | K_REPLACE ) K_INTO
-   ( database_name dot_symbol )? table_name ( open_paren column_name ( comma_symbol column_name )* close_paren )?
-   ( K_VALUES open_paren expr (comma_symbol expr )* close_paren ( comma_symbol open_paren expr ( comma_symbol expr )* close_paren )*
-   | select_stmt
-   )#insertStatement
  ;
 
 simple_select_stmt
@@ -102,40 +58,10 @@ select_or_values
  //| K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
 
-update_stmt
- : with_clause? K_UPDATE qualified_table_name
-   K_SET column_name assign_symbol expr ( comma_symbol column_name assign_symbol expr )* ( K_WHERE expr )? #updateStatement
- ;
-
-update_stmt_limited
- : with_clause? K_UPDATE  qualified_table_name
-   K_SET column_name assign_symbol expr ( comma_symbol column_name assign_symbol expr )* ( K_WHERE expr )?
-   ( ( K_ORDER K_BY ordering_term ( comma_symbol ordering_term )* )?
-     K_LIMIT expr ( ( K_OFFSET | comma_symbol ) expr )?
-   )? #updateStatementLimited
- ;
-
-column_def
- : column_name type_name? column_constraint*
- ;
-
-/*type_name
- : name+ ( '(' signed_number ')'
-         | '(' signed_number ',' signed_number ')' )?
- ;*/
-
  type_name
  : name
  | name_with_brackets + ( open_paren signed_number close_paren
                        | open_paren signed_number comma_symbol signed_number close_paren )?
- ;
-
-column_constraint
- : K_PRIMARY K_KEY ( K_ASC | K_DESC )? K_AUTOINCREMENT? #primaryKey
- | K_NOT? K_NULL #nullOrNot
- | K_UNIQUE  #unique
-// | K_DEFAULT (signed_number | literal_value | '(' expr ')')
- | foreign_key_clause #foreignKey
  ;
 
 expr
@@ -165,29 +91,6 @@ expr
                     | ( database_name dot_symbol )? table_name ) #myExpression
  | ( ( K_NOT )? K_EXISTS )? open_paren select_stmt close_paren #myExpression
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END #myExpression
- ;
-
-//// nmz prei na fii kati!!!
-foreign_key_clause
- : K_REFERENCES foreign_table ( open_paren column_name ( comma_symbol column_name )* close_paren )? #references
- ;
-
-//nmz touto ptrpi na fi alla prepi prota na fi to allo!!
-indexed_column
- : column_name  ( K_ASC | K_DESC )? #indexedColumn
- ;
-//kati prpi na allaksi alla afisto pros to paron!
-table_constraint
- : ( ( K_PRIMARY K_KEY | K_UNIQUE ) open_paren indexed_column ( comma_symbol indexed_column )* close_paren
-   | K_FOREIGN K_KEY open_paren column_name ( comma_symbol column_name )* close_paren foreign_key_clause
-   ) #tableConstraint
- ;
-
-with_clause
-  : cte_table_name K_AS open_paren select_stmt close_paren ( comma_symbol cte_table_name K_AS open_paren select_stmt close_paren )* #withClause
-  ;
-qualified_table_name
- : ( database_name dot_symbol )? table_name #qualifiedTableName
  ;
 
 ordering_term
@@ -239,10 +142,6 @@ compound_operator
  | K_UNION K_ALL #compoundOperator
  | K_INTERSECT #compoundOperator
  | K_EXCEPT #compoundOperator
- ;
-
-cte_table_name
- : table_name ( open_paren column_name ( comma_symbol column_name )* close_paren )? #cteTableName
  ;
 
 signed_number
@@ -416,16 +315,8 @@ table_name
  : any_name #getTableName
  ;
 
-new_table_name
- : any_name #getNewTableName
- ;
-
 column_name
  : any_name #getColumnName
- ;
-
-foreign_table
- : any_name #getForeignTableName
  ;
 
 table_alias

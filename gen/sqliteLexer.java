@@ -1,4 +1,4 @@
-// Generated from C:/Users/emmel/Desktop/SCC 2016-2017/2018-2019/SCC 300 - Third Year Project/DatabaseTool/src\sqlite.g4 by ANTLR 4.7
+// Generated from C:/Users/emmel/Desktop/SCC 2016-2017/2018-2019/SCC 300 - Third Year Project/DatabaseTool/src\sqlite.g4 by ANTLR 4.7.2
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class sqliteLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -46,58 +46,69 @@ public class sqliteLexer extends Lexer {
 		"DEFAULT_MODE"
 	};
 
-	public static final String[] ruleNames = {
-		"SCOL", "DOT", "OPEN_PAR", "CLOSE_PAR", "COMMA", "ASSIGN", "STAR", "PLUS", 
-		"MINUS", "TILDE", "PIPE2", "DIV", "MOD", "LT2", "GT2", "AMP", "PIPE", 
-		"LT", "LT_EQ", "GT", "GT_EQ", "EQ", "NOT_EQ1", "NOT_EQ2", "UNDERSCORE", 
-		"K_ADD", "K_ALL", "K_ALTER", "K_AND", "K_AS", "K_ASC", "K_AUTOINCREMENT", 
-		"K_BETWEEN", "K_BY", "K_CASE", "K_CAST", "K_COLUMN", "K_CREATE", "K_CROSS", 
-		"K_CURRENT_DATE", "K_CURRENT_TIME", "K_CURRENT_TIMESTAMP", "K_DATABASE", 
-		"K_DEFAULT", "K_DELETE", "K_DESC", "K_DISTINCT", "K_DROP", "K_ELSE", "K_END", 
-		"K_EXCEPT", "K_EXISTS", "K_FOR", "K_FOREIGN", "K_FROM", "K_FULL", "K_GLOB", 
-		"K_GROUP", "K_HAVING", "K_IF", "K_IN", "K_INNER", "K_INSERT", "K_INTERSECT", 
-		"K_INTO", "K_IS", "K_ISNULL", "K_JOIN", "K_KEY", "K_LEFT", "K_LIKE", "K_LIMIT", 
-		"K_NATURAL", "K_NO", "K_NOT", "K_NOTNULL", "K_NULL", "K_OF", "K_OFFSET", 
-		"K_ON", "K_OR", "K_ORDER", "K_OUTER", "K_PRIMARY", "K_REFERENCES", "K_RENAME", 
-		"K_REPLACE", "K_RIGHT", "K_ROW", "K_SELECT", "K_SET", "K_TABLE", "K_THEN", 
-		"K_TO", "K_UNION", "K_UNIQUE", "K_UPDATE", "K_USING", "K_VALUES", "K_VIEW", 
-		"K_WHEN", "K_WHERE", "K_WITH", "INT", "INTEGER", "TINYINT", "SMALLINT", 
-		"MEDIUMINT", "BIGINT", "UNSIGNED", "BIG", "TEXT", "BLOB", "REAL", "DOUBLE", 
-		"FLOAT", "NUMERIC", "BOOLEAN", "DATE", "DATETIME", "CHARACTER", "VARCHAR", 
-		"NCHAR", "NVARCHAR", "DECIMAL", "IDENTIFIER", "NUMERIC_LITERAL", "BIND_PARAMETER", 
-		"STRING_LITERAL", "BLOB_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", 
-		"SPACES", "UNEXPECTED_CHAR", "DIGIT", "A", "B", "C", "D", "E", "F", "G", 
-		"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", 
-		"V", "W", "X", "Y", "Z"
-	};
+	private static String[] makeRuleNames() {
+		return new String[] {
+			"SCOL", "DOT", "OPEN_PAR", "CLOSE_PAR", "COMMA", "ASSIGN", "STAR", "PLUS", 
+			"MINUS", "TILDE", "PIPE2", "DIV", "MOD", "LT2", "GT2", "AMP", "PIPE", 
+			"LT", "LT_EQ", "GT", "GT_EQ", "EQ", "NOT_EQ1", "NOT_EQ2", "UNDERSCORE", 
+			"K_ADD", "K_ALL", "K_ALTER", "K_AND", "K_AS", "K_ASC", "K_AUTOINCREMENT", 
+			"K_BETWEEN", "K_BY", "K_CASE", "K_CAST", "K_COLUMN", "K_CREATE", "K_CROSS", 
+			"K_CURRENT_DATE", "K_CURRENT_TIME", "K_CURRENT_TIMESTAMP", "K_DATABASE", 
+			"K_DEFAULT", "K_DELETE", "K_DESC", "K_DISTINCT", "K_DROP", "K_ELSE", 
+			"K_END", "K_EXCEPT", "K_EXISTS", "K_FOR", "K_FOREIGN", "K_FROM", "K_FULL", 
+			"K_GLOB", "K_GROUP", "K_HAVING", "K_IF", "K_IN", "K_INNER", "K_INSERT", 
+			"K_INTERSECT", "K_INTO", "K_IS", "K_ISNULL", "K_JOIN", "K_KEY", "K_LEFT", 
+			"K_LIKE", "K_LIMIT", "K_NATURAL", "K_NO", "K_NOT", "K_NOTNULL", "K_NULL", 
+			"K_OF", "K_OFFSET", "K_ON", "K_OR", "K_ORDER", "K_OUTER", "K_PRIMARY", 
+			"K_REFERENCES", "K_RENAME", "K_REPLACE", "K_RIGHT", "K_ROW", "K_SELECT", 
+			"K_SET", "K_TABLE", "K_THEN", "K_TO", "K_UNION", "K_UNIQUE", "K_UPDATE", 
+			"K_USING", "K_VALUES", "K_VIEW", "K_WHEN", "K_WHERE", "K_WITH", "INT", 
+			"INTEGER", "TINYINT", "SMALLINT", "MEDIUMINT", "BIGINT", "UNSIGNED", 
+			"BIG", "TEXT", "BLOB", "REAL", "DOUBLE", "FLOAT", "NUMERIC", "BOOLEAN", 
+			"DATE", "DATETIME", "CHARACTER", "VARCHAR", "NCHAR", "NVARCHAR", "DECIMAL", 
+			"IDENTIFIER", "NUMERIC_LITERAL", "BIND_PARAMETER", "STRING_LITERAL", 
+			"BLOB_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", 
+			"UNEXPECTED_CHAR", "DIGIT", "A", "B", "C", "D", "E", "F", "G", "H", "I", 
+			"J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", 
+			"X", "Y", "Z"
+		};
+	}
+	public static final String[] ruleNames = makeRuleNames();
 
-	private static final String[] _LITERAL_NAMES = {
-		null, "';'", "'.'", "'('", "')'", "','", "'='", "'*'", "'+'", "'-'", "'~'", 
-		"'||'", "'/'", "'%'", "'<<'", "'>>'", "'&'", "'|'", "'<'", "'<='", "'>'", 
-		"'>='", "'=='", "'!='", "'<>'", "'_'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, "SCOL", "DOT", "OPEN_PAR", "CLOSE_PAR", "COMMA", "ASSIGN", "STAR", 
-		"PLUS", "MINUS", "TILDE", "PIPE2", "DIV", "MOD", "LT2", "GT2", "AMP", 
-		"PIPE", "LT", "LT_EQ", "GT", "GT_EQ", "EQ", "NOT_EQ1", "NOT_EQ2", "UNDERSCORE", 
-		"K_ADD", "K_ALL", "K_ALTER", "K_AND", "K_AS", "K_ASC", "K_AUTOINCREMENT", 
-		"K_BETWEEN", "K_BY", "K_CASE", "K_CAST", "K_COLUMN", "K_CREATE", "K_CROSS", 
-		"K_CURRENT_DATE", "K_CURRENT_TIME", "K_CURRENT_TIMESTAMP", "K_DATABASE", 
-		"K_DEFAULT", "K_DELETE", "K_DESC", "K_DISTINCT", "K_DROP", "K_ELSE", "K_END", 
-		"K_EXCEPT", "K_EXISTS", "K_FOR", "K_FOREIGN", "K_FROM", "K_FULL", "K_GLOB", 
-		"K_GROUP", "K_HAVING", "K_IF", "K_IN", "K_INNER", "K_INSERT", "K_INTERSECT", 
-		"K_INTO", "K_IS", "K_ISNULL", "K_JOIN", "K_KEY", "K_LEFT", "K_LIKE", "K_LIMIT", 
-		"K_NATURAL", "K_NO", "K_NOT", "K_NOTNULL", "K_NULL", "K_OF", "K_OFFSET", 
-		"K_ON", "K_OR", "K_ORDER", "K_OUTER", "K_PRIMARY", "K_REFERENCES", "K_RENAME", 
-		"K_REPLACE", "K_RIGHT", "K_ROW", "K_SELECT", "K_SET", "K_TABLE", "K_THEN", 
-		"K_TO", "K_UNION", "K_UNIQUE", "K_UPDATE", "K_USING", "K_VALUES", "K_VIEW", 
-		"K_WHEN", "K_WHERE", "K_WITH", "INT", "INTEGER", "TINYINT", "SMALLINT", 
-		"MEDIUMINT", "BIGINT", "UNSIGNED", "BIG", "TEXT", "BLOB", "REAL", "DOUBLE", 
-		"FLOAT", "NUMERIC", "BOOLEAN", "DATE", "DATETIME", "CHARACTER", "VARCHAR", 
-		"NCHAR", "NVARCHAR", "DECIMAL", "IDENTIFIER", "NUMERIC_LITERAL", "BIND_PARAMETER", 
-		"STRING_LITERAL", "BLOB_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", 
-		"SPACES", "UNEXPECTED_CHAR"
-	};
+	private static String[] makeLiteralNames() {
+		return new String[] {
+			null, "';'", "'.'", "'('", "')'", "','", "'='", "'*'", "'+'", "'-'", 
+			"'~'", "'||'", "'/'", "'%'", "'<<'", "'>>'", "'&'", "'|'", "'<'", "'<='", 
+			"'>'", "'>='", "'=='", "'!='", "'<>'", "'_'"
+		};
+	}
+	private static final String[] _LITERAL_NAMES = makeLiteralNames();
+	private static String[] makeSymbolicNames() {
+		return new String[] {
+			null, "SCOL", "DOT", "OPEN_PAR", "CLOSE_PAR", "COMMA", "ASSIGN", "STAR", 
+			"PLUS", "MINUS", "TILDE", "PIPE2", "DIV", "MOD", "LT2", "GT2", "AMP", 
+			"PIPE", "LT", "LT_EQ", "GT", "GT_EQ", "EQ", "NOT_EQ1", "NOT_EQ2", "UNDERSCORE", 
+			"K_ADD", "K_ALL", "K_ALTER", "K_AND", "K_AS", "K_ASC", "K_AUTOINCREMENT", 
+			"K_BETWEEN", "K_BY", "K_CASE", "K_CAST", "K_COLUMN", "K_CREATE", "K_CROSS", 
+			"K_CURRENT_DATE", "K_CURRENT_TIME", "K_CURRENT_TIMESTAMP", "K_DATABASE", 
+			"K_DEFAULT", "K_DELETE", "K_DESC", "K_DISTINCT", "K_DROP", "K_ELSE", 
+			"K_END", "K_EXCEPT", "K_EXISTS", "K_FOR", "K_FOREIGN", "K_FROM", "K_FULL", 
+			"K_GLOB", "K_GROUP", "K_HAVING", "K_IF", "K_IN", "K_INNER", "K_INSERT", 
+			"K_INTERSECT", "K_INTO", "K_IS", "K_ISNULL", "K_JOIN", "K_KEY", "K_LEFT", 
+			"K_LIKE", "K_LIMIT", "K_NATURAL", "K_NO", "K_NOT", "K_NOTNULL", "K_NULL", 
+			"K_OF", "K_OFFSET", "K_ON", "K_OR", "K_ORDER", "K_OUTER", "K_PRIMARY", 
+			"K_REFERENCES", "K_RENAME", "K_REPLACE", "K_RIGHT", "K_ROW", "K_SELECT", 
+			"K_SET", "K_TABLE", "K_THEN", "K_TO", "K_UNION", "K_UNIQUE", "K_UPDATE", 
+			"K_USING", "K_VALUES", "K_VIEW", "K_WHEN", "K_WHERE", "K_WITH", "INT", 
+			"INTEGER", "TINYINT", "SMALLINT", "MEDIUMINT", "BIGINT", "UNSIGNED", 
+			"BIG", "TEXT", "BLOB", "REAL", "DOUBLE", "FLOAT", "NUMERIC", "BOOLEAN", 
+			"DATE", "DATETIME", "CHARACTER", "VARCHAR", "NCHAR", "NVARCHAR", "DECIMAL", 
+			"IDENTIFIER", "NUMERIC_LITERAL", "BIND_PARAMETER", "STRING_LITERAL", 
+			"BLOB_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", 
+			"UNEXPECTED_CHAR"
+		};
+	}
+	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**

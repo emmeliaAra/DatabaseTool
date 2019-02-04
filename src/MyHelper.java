@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class MyHelper {
@@ -52,20 +53,23 @@ public class MyHelper {
 
 
 
-    public String getRelationNameOnField(String fieldName, LinkedList<MyRelation> relations) {
+    public String getRelationNameOnField(String fieldName, LinkedList<MyRelation> relations, HashMap<String, LinkedList<String>> newTables) {
         String relationName = null;
         boolean found = false;
         //get the relation that the field is in !
         for (MyRelation tempRelation : relations) {
-            LinkedList<MyField> tempField = tempRelation.getFields();
-            for(MyField field : tempField) {
-                if (field.getFieldName().equalsIgnoreCase(fieldName)) {
-                    relationName = tempRelation.getRelationName();
-                    found = true;
-                    break;
+            //System.out.println(tempRelation.getRelationName() + " this is the relatin" + newTables);
+            if(!newTables.containsKey(tempRelation.getRelationName())){
+                LinkedList<MyField> tempField = tempRelation.getFields();
+                for(MyField field : tempField) {
+                    if (field.getFieldName().equalsIgnoreCase(fieldName)) {
+                        relationName = tempRelation.getRelationName();
+                        found = true;
+                        break;
+                    }
                 }
+                if(found) break;
             }
-            if(found) break;
         }
         return relationName;
     }

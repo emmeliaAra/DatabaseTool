@@ -70,6 +70,7 @@ public class MyFileChooser extends GraphicalUserInterface{
             try {
                 Files.delete(copyPath);
             } catch (IOException e) {
+                System.out.println(e);
                 e.printStackTrace();
             }
         }
