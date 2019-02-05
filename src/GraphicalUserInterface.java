@@ -17,6 +17,7 @@ import javafx.util.Callback;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
 public class GraphicalUserInterface extends Application {
@@ -42,7 +43,7 @@ public class GraphicalUserInterface extends Application {
     private MyFileChooser fileChooser;
     private int gridRows=0,gridColumns=0;
     private TextField statementField;
-    private LinkedList<Integer> rowItemCount;
+    private LinkedList<LinkedList<Button>> rowItemCount;
 
     public static void main(String[]args) {
 
@@ -115,8 +116,8 @@ public class GraphicalUserInterface extends Application {
         leftScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         rightScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         rightScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-    //    leftScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
-      //  rightScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        leftScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        rightScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
         leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
         rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
@@ -188,18 +189,18 @@ public class GraphicalUserInterface extends Application {
                             makeTReeVertical(buttonCanonicalTree.getRoot(),1,gridColumns/2,leftGrid);gridRows = 0; gridColumns = 0;
                             addActionToTree(buttonCanonicalTree.getRoot(),canonicalInOrder,mySQLite,canonicalButtonsInOrder);
 
-                            leftGrid.add(canonicalLabel,4,0,6,1);
-
                             TreeStructure<String> optimizesTree = myTreeParser.getOptimizedTree();
                             if(optimizesTree!= null) {
                                 optimizesTree = myTreeParser.setNodeID(optimizesTree);
                                 LinkedList<String> optimalInOrder = myTreeParser.getNodeIdInOrderOptimal();
                                 createTreeView(optimizesTree.getRootNode(), null, OPTIMIZED_TREE_STATUS, 0);
                                 addActionToTree(buttonOptimizedTree.getRoot(), optimalInOrder, mySQLite, optimalButtonsInOrder);
+
                                 checkMinGridContraints();
                                 setGridConstraints(rightGrid, gridColumns, gridRows);
                                 makeTReeVertical(buttonOptimizedTree.getRoot(), 1, gridColumns / 2, rightGrid);
                                 rightGrid.add(optimizedLabel,4,0,6,1);
+
                             }else{
                                 Label label = new Label("There is no Optimal Tree to display when the Statement contains the operator 'OR'");
                                 label.setFont(Font.font(15));
@@ -313,7 +314,9 @@ public class GraphicalUserInterface extends Application {
         if(treeItem == null && node.getParentNode() == null ) {
             gridColumns++;
             gridRows++;
-            rowItemCount.add(1);
+            LinkedList<Button> b = new LinkedList<>();
+            b.add(newButton);
+            rowItemCount.add(b);
             if(treeType == CANONICAL_TREE_STATUS) {
                 buttonCanonicalTree = new TreeView<>(newItem);
                 canonicalButtonsInOrder.put(newButton,node.getNodeID());
@@ -330,17 +333,28 @@ public class GraphicalUserInterface extends Application {
 
             if(node.getParentNode().getChildren().size()==1) {
                 gridRows++;
-                rowItemCount.add(1);
+                LinkedList<Button> b = new LinkedList<>();
+                b.addLast(newButton);
+                rowItemCount.add(b);
             }else
                 if(node.getParentNode().getChildren().get(0) == node) {
                     gridRows++;
                     gridColumns+=2;
-                    if(rowItemCount.size()> rowPos)
-                        rowItemCount.set(rowPos, rowItemCount.get(rowPos) + 1);
-                    else
-                        rowItemCount.add(1);
-                }else
-                    rowItemCount.set(rowPos,rowItemCount.get(rowPos)+1);
+                    if(rowItemCount.size()> rowPos){
+                        LinkedList<Button> b = rowItemCount.get(rowPos);
+                        b.addLast(newButton);
+                        rowItemCount.set(rowPos, b);
+                    }
+                    else {
+                        LinkedList<Button> b = new LinkedList<>();
+                        b.addLast(newButton);
+                        rowItemCount.add(b);
+                    }
+                }else {
+                    LinkedList<Button> b = rowItemCount.get(rowPos);
+                    b.addLast(newButton);
+                    rowItemCount.set(rowPos, b);
+                }
         }
         rowPos++;
         int finalRowPos = rowPos;
@@ -388,6 +402,33 @@ public class GraphicalUserInterface extends Application {
         //place the item in the center.
         grid.setHalignment(item.getValue(),HPos.CENTER);
         item.getChildren().forEach(each -> makeTReeVertical(each, finalX, finalY,grid));
+    }
+
+    public void pleaseWork(GridPane gridPane)
+    {
+        int max = 0;
+        int maxPos =0;
+        for(int i=0; i<rowItemCount.size(); i++)
+        {
+            if(rowItemCount.get(i).size() > max) {
+                maxPos = i;
+                max = rowItemCount.get(i).size();
+            }
+        }
+        int columns = rowItemCount.get(maxPos).size()*2 +5;
+        setGridConstraints(gridPane,columns,rowItemCount.size() +10);
+
+        //Add to the grid the line with the more nodes.
+        int y =( columns - (rowItemCount.get(maxPos).size()*2 -1))/2;
+        int i=0;
+        LinkedList<Button> temp = rowItemCount.get(maxPos);
+        while (i<max)
+        {
+            gridPane.add(temp.get(i),y,maxPos);
+            y = y+2;
+            i++;
+        }
+
     }
 
 

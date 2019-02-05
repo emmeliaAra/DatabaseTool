@@ -322,10 +322,6 @@ public class MySQLite extends DatabaseBasic{
 
     public Vector<String> handleSQlExceptions( Vector<String> selectFieldName, Vector<String>fromRelationNames,Vector<String> whereClause)
     {
-        System.out.println(selectFieldName);
-        System.out.println(fromRelationNames);
-        System.out.println(whereClause);
-
         Schema myRelationSchema = getSchema();
         LinkedList<MyRelation> myRelations = myRelationSchema.getRelations();
         LinkedList<String> myRelationName = new LinkedList<>();
@@ -385,7 +381,6 @@ public class MySQLite extends DatabaseBasic{
                     continue;
                 }else if(clauseToCheck.get(i).equalsIgnoreCase("and") || clauseToCheck.get(i).equalsIgnoreCase("or")){
                     i++;
-                    System.out.println(12345648);
                     continue;
                 }
 

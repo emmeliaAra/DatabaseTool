@@ -58,7 +58,6 @@ public class TreeParser {
                 parserStatus = SELECT_STATUS;
                 operations();
             }
-        System.out.println("whyyyy " + messages.size());
         }
 
     }
@@ -68,12 +67,12 @@ public class TreeParser {
 
             SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
             //creates and executes the trees to present the results.
-            TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
+            TreeStructure<String> canonicalTree = selectStatementToTree.secondAttempt();
             ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
             canonicalTree.createStack(canonicalTree.getRootNode());
             executeCanonicalTree.execute(canonicalTree.getStack());
+           // selectStatementToTree.secondAttempt();
 
-            mySQLite.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
             boolean  hasOr = false;
 
             if(charStream.toString().toLowerCase().contains(" or "))
@@ -81,7 +80,7 @@ public class TreeParser {
 
             //keep a copy of the original tree so that can be optimised.
             SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-            TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.buildSelectTree();
+            TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.secondAttempt();
 
             if(!hasOr) {
 
@@ -92,6 +91,8 @@ public class TreeParser {
 
                 if (!optimizeTree.splitWhere().isEmpty() && fromRelationNames.size() > 1)
                     canonicalTreeForOpt = optimizeTree.optimiseTree();
+
+                canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
 
                 ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
                 canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
@@ -161,7 +162,7 @@ public class TreeParser {
         String project = temp.toLowerCase().substring(temp.indexOf("select") +6,temp.indexOf("from"));
         TreeStructure<String> canonicalTree = null;
         try {
-            canonicalTree = selectStatement.buildSelectTree();
+            canonicalTree = selectStatement.secondAttempt();
             if(statement.toString().toLowerCase().contains("where")) {
                 canonicalTree.getRootNode().setNodeData("π[" + project + "]");
                 canonicalTree.getRootNode().getChildren().get(0).setNodeData("σ[" + condition + "]");

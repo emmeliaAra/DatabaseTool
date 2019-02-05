@@ -89,6 +89,23 @@ public class TreeStructure<T> {
             throw new IllegalAccessException("The parent node provided is not part of this tree.");
     }
 
+    public Node<T> addChildNode1(Node<T> parentNode, T data, int nodeStatus, int nodeID,int index) throws IllegalAccessException {
+
+
+        if(parentNode != null && parentNode.hostingTree == this)
+        {
+            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data,nodeStatus, nodeID);
+            parentNode.getChildren().add(index,newNode);
+            return newNode;
+        }
+        else if(parentNode == null)
+            throw new NullPointerException("Cannot add a child to a null parent");
+        else
+            throw new IllegalAccessException("The parent node provided is not part of this tree.");
+    }
+
+
+
     public void deleteNode(Node<T> node) throws IllegalAccessException
     {
         if(node != null)
@@ -103,7 +120,6 @@ public class TreeStructure<T> {
         }
         else if(node == null)
             throw  new NullPointerException("Cannot delete an empty node!!");
-
         else
             throw  new IllegalAccessException("The node is not part of the Tree!! ");
     }

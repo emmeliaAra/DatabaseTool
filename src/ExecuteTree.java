@@ -41,6 +41,8 @@ public class ExecuteTree {
 
         TreeStructure.Node<String> popNode;
         holdNodes = new LinkedList<>();
+
+        System.out.println(stack.size());
         //pops the nodes from the stack
         while (!stack.empty() )
         {
@@ -95,7 +97,6 @@ public class ExecuteTree {
 
         if(holdNodes.size() ==2 || holdNodes.size() == 3 )
         {
-
             popNode.setNodeID(nodeIdInOrder.size());
             //if there are 2 nodes on hold -> produce cartesian product on those relations.
             if(holdNodes.size() == 2) {
@@ -211,13 +212,21 @@ public class ExecuteTree {
         LinkedList<String> tempFrom = new LinkedList<>();
         LinkedList<String> tempOnClause = new LinkedList<>();
 
-        if(holdNodes.size() == 2 )
+        if(holdNodes.size() == 2 || holdNodes.size() == 3)
         {
             popNode.setNodeID(nodeIdInOrder.size());
             tempFrom.addFirst(holdNodes.getFirst().getData());
-            tempFrom.addFirst(holdNodes.getLast().getData());
-
-            String tableName = "Join" + holdNodes.getFirst().getData() + "_" + holdNodes.getLast().getData();
+            String secondName;
+            if(holdNodes.size() == 2){
+                tempFrom.addFirst(holdNodes.getLast().getData());
+                secondName = holdNodes.getLast().getData();
+            }
+            else {
+                tempFrom.addFirst(holdNodes.get(1).getData());
+                secondName = holdNodes.get(1).getData();
+            }
+            System.out.println(secondName);
+            String tableName = "Join" + holdNodes.getFirst().getData() + "_" + secondName;
             tempSelect.addFirst("*");
 
             //To remove the join symbol
@@ -229,6 +238,7 @@ public class ExecuteTree {
 
             mySQLite.joinStatement(selectF,tempFrom,onClause);
             createNewRelation(popNode,selectF,tempFrom,null,tableName,onClause,IS_TWO_METHOD_NUM);
+            holdNodes = new LinkedList<>();
         }
     }
 

@@ -17,6 +17,42 @@ public class SelectStatement {
         this.whereClause = whereClause;
     }
 
+
+    public  TreeStructure<String> secondAttempt() throws IllegalAccessException {
+
+        //Create the Tree and the root node.
+        TreeStructure<String> c = new TreeStructure<>();
+        c.addRootNode("π" + selectFieldName, ACTION_NODE_STATUS,NODE_INITIAL_ID);
+        TreeStructure.Node<String> rootNode = c.getRootNode();
+        TreeStructure.Node<String> tempNode = c.getRootNode();
+
+        if (whereClause.size() != 0)
+            tempNode = c.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS, NODE_INITIAL_ID);
+
+        for(String relation: fromRelationNames)
+            c.addChildNode(tempNode,relation,RELATION_NODE_STATUS,NODE_INITIAL_ID);
+
+        int i=0;
+        while (tempNode.getChildren().size() >1)
+        {
+            if(!(i+1 < tempNode.getChildren().size()))
+                i=0;
+
+            TreeStructure.Node<String> tempC1 = tempNode.getChildren().get(i);
+            TreeStructure.Node<String> tempC2 = tempNode.getChildren().get(i+1);
+
+            tempNode.getChildren().remove(i);
+            tempNode.getChildren().remove(i);
+            c.addChildNode1(tempNode,"X",CARTESIAN_NODE_STATUS,NODE_INITIAL_ID,i);
+            tempC1.setParentNode(tempNode.getChildren().get(i));
+            tempC2.setParentNode(tempNode.getChildren().get(i));
+
+            i=i+1;
+        }
+        c.printTree(c.getRootNode(), " ");
+        return c;
+    }
+
     public TreeStructure<String> buildSelectTree() throws IllegalAccessException {
 
         /*Create the tree and add the root node. If I have 7 relations 6 helper nodes will be needed.*/
@@ -141,4 +177,6 @@ public class SelectStatement {
 
         node.getChildren().forEach(each -> getLeafNodes(each, canonicalTree));
     }
+
+
 }

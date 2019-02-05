@@ -58,7 +58,6 @@ public class MyHelper {
         boolean found = false;
         //get the relation that the field is in !
         for (MyRelation tempRelation : relations) {
-            //System.out.println(tempRelation.getRelationName() + " this is the relatin" + newTables);
             if(!newTables.containsKey(tempRelation.getRelationName())){
                 LinkedList<MyField> tempField = tempRelation.getFields();
                 for(MyField field : tempField) {
