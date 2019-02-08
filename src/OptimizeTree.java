@@ -66,10 +66,13 @@ public class OptimizeTree {
         }
         //Delete node that holds the condition if any from the initial tree
         if(whereNodeToDelete!=null){
+            //The condition node will be removed so the root node level must become the condition node's level
+            canonicalTree.getRootNode().setNodeLevel(whereNodeToDelete.getNodeLevel());
             whereNodeToDelete.getChildren().get(0).setParentNode(whereNodeToDelete.getParentNode());
             canonicalTree.deleteNode(whereNodeToDelete);
         }
         convertCartesianToJoin();
+
 
         return canonicalTree;
     }
@@ -85,8 +88,9 @@ public class OptimizeTree {
             String tempData = node.getData();
             node.setNodeData(condition);
             node.setNodeStatus(OPT_COND_NODE_STATUS);
+
             try {
-                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, tempData, RELATION_NODE_STATUS,-1,node.getNodeLevel() +1);
+                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, tempData, RELATION_NODE_STATUS,-1,node.getNodeLevel()-1);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

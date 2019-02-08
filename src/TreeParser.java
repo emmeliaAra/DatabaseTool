@@ -59,7 +59,6 @@ public class TreeParser {
                 operations();
             }
         }
-
     }
 
     public void operations()throws IllegalAccessException {
@@ -69,7 +68,6 @@ public class TreeParser {
             //creates and executes the trees to present the results.
             TreeStructure<String> canonicalTree = selectStatementToTree.secondAttempt();
             ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
-            canonicalTree.printTree(canonicalTree.getRootNode(), " ");
             canonicalTree.createStack(canonicalTree.getRootNode());
             executeCanonicalTree.execute(canonicalTree.getStack());
 
@@ -96,6 +94,7 @@ public class TreeParser {
 
                 ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
                 canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
+                canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
                 executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
 
                 nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();

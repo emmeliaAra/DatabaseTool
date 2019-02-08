@@ -24,6 +24,7 @@ import static java.lang.Math.abs;
 public class GraphicalUserInterface extends Application {
 
     private static Main myMain;
+    private static MySQLite mySQLite = null;
     private TreeParser myTreeParser;
     private static final int COLUMN_NUM= 8 ;
     private static final int ROWS_NUM = 20 ;
@@ -33,20 +34,17 @@ public class GraphicalUserInterface extends Application {
     private final int DROP_STATUS = 0;
     private final int SELECT_STATUS = 1;
     private TreeView<Button> buttonCanonicalTree, buttonOptimizedTree;
-    private HashMap<Button,Integer> canonicalButtonsInOrder = new HashMap<>();
-    private HashMap<Button,Integer> optimalButtonsInOrder = new HashMap<>();
-    private String thisIsTheInput = null, path;
-    private static MySQLite mySQLite = null;
     private TableView<Object> tableView;
-    private Label messageArea;
-    private LinkedList<Stage> newStages = new LinkedList<>();
+    private String thisIsTheInput = null, path;
     private GridPane leftGrid,rightGrid;
-    private MyFileChooser fileChooser;
-    private int gridRows=0,gridColumns=0;
     private TextField statementField;
-    private LinkedList<LinkedList<Button>> rowItemCountButton;
+    private MyFileChooser fileChooser;
+    private Label messageArea;
     private HashMap<Integer,LinkedList<Button>> buttonsInLevel;
-    private int conditionalNodesNum =0;
+    private HashMap<Button,Integer> canonicalButtonsInOrder ,optimalButtonsInOrder;
+    private LinkedList<Integer> conditionalNodesNum = new LinkedList<>();
+    private LinkedList<Stage> newStages = new LinkedList<>();
+
 
     public static void main(String[]args) {
 
@@ -58,8 +56,10 @@ public class GraphicalUserInterface extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        rowItemCountButton = new LinkedList<>();
         buttonsInLevel = new LinkedHashMap<>();
+        canonicalButtonsInOrder = new HashMap<>();
+        optimalButtonsInOrder = new HashMap<>();
+
         //Create a boarderPane to build on
         BorderPane borderPane = new BorderPane();
 
@@ -81,7 +81,6 @@ public class GraphicalUserInterface extends Application {
         MenuItem resetDatabase  = new MenuItem("Reset Database");
         MenuItem saveDatabase = new MenuItem("Save Database");
         options.getItems().addAll(resetDatabase,saveDatabase);
-
 
         //ADD ALL ITEMS TO THE topHBox
         menuHBox.getChildren().addAll(menuBar);
@@ -105,23 +104,22 @@ public class GraphicalUserInterface extends Application {
 
         //Create GridPanes for the trees.
         leftGrid = new GridPane();
-        setGridConstraints(leftGrid,COLUMN_NUM,ROWS_NUM);
         rightGrid = new GridPane();
-        setGridConstraints(rightGrid,COLUMN_NUM,ROWS_NUM);
 
         Screen myScreen = Screen.getPrimary();
         Rectangle2D bounds = myScreen.getVisualBounds();
-
 
         ScrollPane leftScrollPane = new ScrollPane(leftGrid);
         ScrollPane rightScrollPane = new ScrollPane(rightGrid);
 
         leftScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         leftScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        leftScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+
         rightScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         rightScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        leftScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
         rightScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+
         leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
         rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
@@ -177,33 +175,30 @@ public class GraphicalUserInterface extends Application {
                             clearStage(true);
                             safeCloseConnection(mySQLite);
                         }
-                        buttonsInLevel = new HashMap<>();
-                        gridColumns = 0; gridRows = 0;
+
+                        //If this is a select statement
                         myTreeParser = myMain.main(charStream,path);
                         if(myTreeParser.getParserStatus() == SELECT_STATUS){
+
+                            //Build the tree and add action to the buttons.
                             TreeStructure<String> canonicalTree = myTreeParser.getCanonicalTree();
                             canonicalTree =  myTreeParser.setNodeID(canonicalTree);
                             mySQLite = myTreeParser.getMySQLite();
 
                             LinkedList<String> canonicalInOrder = myTreeParser.getNodeIdInOrderCanonical();
                             createTreeView(canonicalTree.getRootNode(), null, CANONICAL_TREE_STATUS);
-                            checkMinGridContraints();
-                            setGridConstraints(leftGrid,gridColumns,gridRows);
-                            buildMyTree(leftGrid);
-                            //  makeTReeVertical(buttonCanonicalTree.getRoot(),1,gridColumns/2,leftGrid);gridRows = 0; gridColumns = 0;
+                            buildMyTree(leftGrid,canonicalLabel);
                             addActionToTree(buttonCanonicalTree.getRoot(),canonicalInOrder,mySQLite,canonicalButtonsInOrder);
 
+                            //If their is an optimized tree for this statement build the tree
                             TreeStructure<String> optimizesTree = myTreeParser.getOptimizedTree();
                             if(optimizesTree!= null) {
-                                optimizesTree = myTreeParser.setNodeID(optimizesTree);
                                 LinkedList<String> optimalInOrder = myTreeParser.getNodeIdInOrderOptimal();
+                                optimizesTree = myTreeParser.setNodeID(optimizesTree);
+                                buttonsInLevel = new HashMap<>(); //clear the contexts because the same hashMap was used for the canonical tree.
                                 createTreeView(optimizesTree.getRootNode(), null, OPTIMIZED_TREE_STATUS);
                                 addActionToTree(buttonOptimizedTree.getRoot(), optimalInOrder, mySQLite, optimalButtonsInOrder);
-
-                                checkMinGridContraints();
-                                setGridConstraints(rightGrid, gridColumns, gridRows);
-                                makeTReeVertical(buttonOptimizedTree.getRoot(), 1, gridColumns / 2, rightGrid);
-                                rightGrid.add(optimizedLabel,4,0,6,1);
+                                buildMyTree(rightGrid,optimizedLabel);
 
                             }else{
                                 Label label = new Label("There is no Optimal Tree to display when the Statement contains the operator 'OR'");
@@ -211,17 +206,20 @@ public class GraphicalUserInterface extends Application {
                                 setGridConstraints(rightGrid,COLUMN_NUM,ROWS_NUM);
                                 rightGrid.add(label,1,2,10,5);
                             }
+                            //Present the result in a table.
                             thisIsTheInput = charStream;
                             tableView = displayResults(mySQLite,myTreeParser.getFinalTable());
                             mySQLite.getSchema();
                             borderPane.setBottom(tableView);
                         }
+                        //If the is a drop table statement
                         else if(myTreeParser.getParserStatus() == DROP_STATUS){
                             messageArea.setText("Table " + myTreeParser.getDropTableName() + " is dropped successfully ");
                             borderPane.setBottom(null);
                             borderPane.setBottom(messageArea);
                             safeCloseConnection(myTreeParser.getMySQLite());
-                        }else{
+                        }else {
+                            // If the statement is not correct print the error messages.
                             VBox messageBox = new VBox();
                             ScrollPane messageScrollPane = new ScrollPane(messageBox);
                             messageScrollPane.setPrefHeight(bounds.getHeight()/4);
@@ -232,7 +230,6 @@ public class GraphicalUserInterface extends Application {
                                 newLabel.setFont(Font.font(15));
                                 messageBox.getChildren().add(newLabel);
                             }
-
                             borderPane.setBottom(messageScrollPane);
                             safeCloseConnection(myTreeParser.getMySQLite());
                         }
@@ -292,6 +289,11 @@ public class GraphicalUserInterface extends Application {
 
         gridPane.getColumnConstraints().clear();
         gridPane.getRowConstraints().clear();
+        if(gridColumns < COLUMN_NUM)
+            gridColumns = COLUMN_NUM;
+        if(gridRows < ROWS_NUM)
+            gridRows = ROWS_NUM;
+        
         for (int i = 0; i < gridColumns; i++) {
             ColumnConstraints colConst = new ColumnConstraints();
             colConst.setPercentWidth(100.0 / gridColumns);
@@ -305,8 +307,10 @@ public class GraphicalUserInterface extends Application {
         gridPane.setGridLinesVisible(true);
     }
 
+    //Creates the tree view that will be used later to add action to the tree and divides the nodes based on their level
     public void createTreeView(TreeStructure.Node<String> node,TreeItem<Button> treeItem,int treeType){
 
+        //Creates the new treeItem and the button
         TreeItem<Button> newItem;
         Button newButton = new Button(node.getData());
         newButton.setPrefWidth(BUTTON_PREFERRED_SIZE);
@@ -314,6 +318,7 @@ public class GraphicalUserInterface extends Application {
         Tooltip tooltip = new Tooltip(node.getData());
         newButton.setTooltip(tooltip);
 
+        //If a list for that level is already created then add the item to that list if not create a new entry
         int level = node.getNodeLevel();
         if(buttonsInLevel.containsKey(level))
             buttonsInLevel.get(level).add(newButton);
@@ -323,14 +328,14 @@ public class GraphicalUserInterface extends Application {
             buttonsInLevel.put(level, temp);
         }
 
-        if(node.getNodeStatus() == 4)
-            conditionalNodesNum ++;
+        //Keep track of the position of the optional_condition node so that the relations can be added later below.
+        if(node.getNodeStatus() == 4) {
+            int posOfOptimal = buttonsInLevel.get(level).size()-1;
+            conditionalNodesNum.add(posOfOptimal);
+        }
 
         //If the rootNode is passed initialise the treeView using the rootNode. If not add the new node to the treeItem and call this method for every node's child
         if(treeItem == null && node.getParentNode() == null ) {
-            LinkedList<Button> b = new LinkedList<>();
-            b.add(newButton);
-
             if(treeType == CANONICAL_TREE_STATUS) {
                 buttonCanonicalTree = new TreeView<>(newItem);
                 canonicalButtonsInOrder.put(newButton,node.getNodeID());
@@ -348,127 +353,134 @@ public class GraphicalUserInterface extends Application {
         node.getChildren().forEach(each -> createTreeView(each,newItem,treeType));
     }
 
-    public void buildMyTree(GridPane gridPane) {
+    public void buildMyTree(GridPane gridPane,Label label) {
 
         TreeMap<Integer, LinkedList<Button>> treeMap = new TreeMap<>(buttonsInLevel);
+        LinkedList<Integer> positions = new LinkedList<>();
+        LinkedHashMap<Integer,Integer> holdPos = new LinkedHashMap<>();
+        LinkedList<Button> line;
+        int gridColumns, gridRows;
+        boolean hasCondition = false;
+        int column =1 ,i=0 , addX = 30, addY = 25;
+
         //If there is no optimized condition and the number of relation nodes is even then the relation nodes are all in the last list.
-        if(conditionalNodesNum == 0)
-        {
+        if(conditionalNodesNum.size()!= 0 ) {
+            hasCondition = true;
+            gridColumns = treeMap.get(0).size() *2 +1;
+            gridRows= treeMap.size() * 2 -2 ;
+        }else{
             //mean that all the relations are in the last element of the list
-            int gridColumns = treeMap.firstEntry().getValue().size() *2 +1;
-            int gridRows = treeMap.size() * 2 +1;
+            gridColumns = treeMap.firstEntry().getValue().size() *2 +1;
+            gridRows= treeMap.size() * 2  ;
+        }
 
-          //  setGridConstraints(gridPane,gridColumns,ROWS_NUM);
-            //gridPane.setGridLinesVisible(true);
+        //add the label and set the columns and rows of the trees.
+        gridPane.add(label,gridColumns/2, 1,6,1);
+        setGridConstraints(gridPane,gridColumns,ROWS_NUM);
+        gridPane.setGridLinesVisible(true);
 
-            int row = gridRows;
-            int column =1;
-            LinkedList<Integer> positions = new LinkedList<>();
-            LinkedList<Integer> holdPos = new LinkedList<>();
-            int i=0;
+        /*Add the relation nodes/ opt_cond nodes first and then add the other nodes to them
+          If k is an even number then hold the position of the current button
+          If k i odd then use the last item added in the holdPos list and calculate the position of their parent*/
+        line = treeMap.get(i);
+        for(int k=0;  k<line.size(); k++) {
+            gridPane.add(line.get(k),column,gridRows);
+            //If this is a condition node then add the relation below
+            if(conditionalNodesNum.size() != 0 && conditionalNodesNum.contains(k)) {
+                gridPane.add(treeMap.get(-1).getFirst(), column, gridRows + 2);
+                treeMap.get(-1).removeFirst();
+                conditionalNodesNum.remove(conditionalNodesNum.indexOf(k));
 
-            for(int k=0;  k<treeMap.get(i).size(); k++) {
-                gridPane.add(treeMap.get(i).get(k),column,row);
-
-                if((k%2)==0) holdPos.add(column);
-                else {
-                    int temp;
-                    temp = abs( column - holdPos.getLast())/2;
-                    if(column > holdPos.getLast())
-                        temp = holdPos.getLast() + temp;
-                    else
-                        temp = column +temp;
-
-                    positions.add(temp);
-                    holdPos.removeLast();
-                }
-                column = column +2;
+                Line l = new Line(0,0,0,25);
+                gridPane.setHalignment(l,HPos.CENTER);
+                gridPane.add(l,column,gridRows+1, 1,1);
             }
+            if((k%2)==0) holdPos.put(column,gridRows);
+            else {
+                int thisHoldPos = new LinkedList<>(holdPos.keySet()).getLast();
+                int temp = abs( column - thisHoldPos)/2;
+                int row = holdPos.get(thisHoldPos)  - (gridRows -2) -1;
+                temp = thisHoldPos + temp;
+                drawLine(30,0,0,30,temp-thisHoldPos, row,gridPane,HPos.RIGHT,thisHoldPos,holdPos.get(thisHoldPos)-1);
+                drawLine(0,0,30,30,column-temp,1,gridPane,HPos.LEFT,temp+1,gridRows-1);
+                positions.add(temp);
+                holdPos.remove(thisHoldPos);
+                //holdPos.removeLast();
+            }
+            column = column +2;
+        }
 
-            i++;
-            row = row-2;
-            while (i<treeMap.size()) {
+        i++;
+        gridRows = gridRows-2;
+        int max = treeMap.size();
+        if(hasCondition) max --;  // if there is a condition then there is one additional list but is already added above.
 
-                LinkedList<Button> line = treeMap.get(i);
-                for(int k=0; k<line.size(); k++)
-                {
-                    if(!positions.isEmpty()){
-                        gridPane.add(line.get(k), positions.getFirst(), row);
+        while (i<max) {
+            line = treeMap.get(i);
+            //for every item in the list of level i
+            for(int k=0; k<line.size(); k++) {
+                //if there is one item stored then add it to the grid
+                if (!positions.isEmpty()) {
+                    gridPane.add(line.get(k), positions.getFirst(), gridRows);
 
-                        //if k is even and is not the last item of the list. then add the column num to the list
-                        if((k%2)==0  && !(k==line.size()-1 && holdPos.size() == 1)) {
-                            holdPos.add(positions.getFirst());
-                            positions.removeFirst();
+                    //if k is even and is not the last item of the list and the holdPos is empty. then add the column num to the list
+                    if ((k % 2) == 0 && !(k == line.size() - 1 && holdPos.size() == 1)) {
+                        holdPos.put(positions.getFirst(),gridRows);
+                        positions.removeFirst();
+                        /*if k is not ever or is even and is the last item in the list and there is one item in the holdPos(from if above)
+                          then calculate a new position*/
+                    } else if ((k % 2) != 0 || ((k % 2) == 0 && k == line.size() - 1)) {
+                        int temp, newPos;
+                        int thisHoldPos = new LinkedList<>(holdPos.keySet()).getLast();
+                        temp = abs(positions.getFirst() - thisHoldPos) / 2;
+
+                        if (positions.getFirst() > thisHoldPos) {
+                            newPos = thisHoldPos + temp;
+                            int columnSpan = newPos - thisHoldPos ;
+                            int row = holdPos.get(thisHoldPos)  - (gridRows -2) -1;
+                            drawLine(40+addX*(columnSpan-1),0,0,30+(row-1)*addY,columnSpan, row,gridPane,HPos.RIGHT,thisHoldPos,holdPos.get(thisHoldPos)-1);
+                            columnSpan = positions.getFirst()-newPos;
+
+                            drawLine(0,0,40+addX*(columnSpan-1),30,columnSpan,row,gridPane,HPos.LEFT,newPos+1,gridRows-1 );
                         }
-                        else if ((k%2)!=0 || ((k%2) == 0 && k == line.size()-1)) {
-                            int temp, newPos;
-                            temp = abs( positions.getFirst() - holdPos.getLast())/2;
-                            if(positions.getFirst() > holdPos.getLast())
-                                newPos = holdPos.getLast() + temp;
+                        else {
+
+                            newPos = positions.getFirst() + temp;
+                            int columnSpan = newPos - positions.getFirst(); int row =1;
+                            drawLine(40+addX*(columnSpan-1),0,0,30,columnSpan, row,gridPane,HPos.RIGHT,positions.getFirst(),gridRows-1);
+
+                            if(holdPos.get(thisHoldPos) == gridRows)
+                                row = 1;
                             else
-                                newPos = positions.getFirst() + temp;
+                                row = (holdPos.get(thisHoldPos))  - gridRows +1;
 
-                            positions.removeFirst();
-                            positions.add(newPos);
-                            holdPos.removeLast();
+                            columnSpan = thisHoldPos - newPos;
+                            drawLine(0,0,40+addX*(columnSpan-1),30+(row-1)*addY,columnSpan,row,gridPane,HPos.LEFT,newPos+1,gridRows-1 );
                         }
-                    }else
-                        gridPane.add(line.get(k), holdPos.getFirst(), row);
+
+                        positions.removeFirst();
+                        positions.add(newPos);
+                        holdPos.remove(thisHoldPos);
+                        //holdPos.removeLast();
+                    }
+                } else { // if there is no element in the position list then add the item above the last one.
+                    int thisHoldPos = new LinkedList<>(holdPos.keySet()).getFirst();
+                    gridPane.add(line.get(k), thisHoldPos, gridRows);
+                    Line l = new Line(0,0,0,25);
+                    gridPane.setHalignment(l,HPos.CENTER);
+                    gridPane.add(l,thisHoldPos,gridRows+1);
                 }
-                row =row-2;
-                i++;
             }
+            gridRows =gridRows-2;
+            i++;
         }
+        System.out.println("_______________________________________________________________");
     }
-
-    public void makeTReeVertical(TreeItem<Button> item,int x, int y,GridPane grid)
-    {
-        if( item.getParent()== null)
-            grid.add(item.getValue(), y,x);
-
-        else if(item.getParent().getChildren().size() == 1) {
-            //create the line to point to the next one and place it at the center.
-            Line line = new Line(0,0,0,25);
-            grid.add(line,y,x+1);
-            grid.setHalignment(line, HPos.CENTER);
-            x+=2;
-            grid.add(item.getValue(),y,x);
-
-        }else if(item.getParent().getChildren().size() == 2)
-        {
-            int startX =0, startY=0, endX, endY;
-            HPos pos;
-            if(item == item.getParent().getChildren().get(0)) {
-                x = x+2;
-                y = y-1;
-                endX = -30;
-                endY = 25;
-                pos = HPos.RIGHT;
-            }else {
-                x = x +2;
-                y = y +1;
-
-                endX = 30;
-                endY = 25;
-                pos = HPos.LEFT;
-            }
-            Line line = new Line(startX,startY,endX,endY);
-            grid.add(line,y,x-1);
-            grid.setHalignment(line,pos);
-            grid.add(item.getValue(),y,x);
-        }
-        int finalX = x;
-        int finalY = y;
-        //place the item in the center.
-        grid.setHalignment(item.getValue(),HPos.CENTER);
-        item.getChildren().forEach(each -> makeTReeVertical(each, finalX, finalY,grid));
-    }
-
 
     //Add action to The button Trees
-    public void addActionToTree(TreeItem<Button> treeItem, LinkedList<String> myList, MySQLite mySQLite,HashMap<Button,Integer> buttonsInOrder)
-    {
+    public void addActionToTree(TreeItem<Button> treeItem, LinkedList<String> myList, MySQLite mySQLite,HashMap<Button,Integer> buttonsInOrder) {
         treeItem.getValue().setOnMouseClicked(e -> {
+            //get the position of the table that this button represents so that the results can be displayed
             int pos = buttonsInOrder.get(treeItem.getValue());
 
             //Create the table , the new stage. keep track of all new stages to close them when a new statement is added
@@ -497,13 +509,11 @@ public class GraphicalUserInterface extends Application {
         for (String columnName :columnNames) {
             final int j = i;
             TableColumn tableColumn = new TableColumn(columnName);
-            tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<ObservableList, String> param) {
-                    if(param.getValue().get(j) == null) // when there are null values in the table!!
-                        return new SimpleStringProperty(null);
-                    else
-                        return new SimpleStringProperty(param.getValue().get(j).toString());
-                }
+            tableColumn.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> {
+                if(param.getValue().get(j) == null) // when there are null values in the table!!
+                    return new SimpleStringProperty(null);
+                else
+                    return new SimpleStringProperty(param.getValue().get(j).toString());
             });
             i++;
             results.getColumns().add(tableColumn);
@@ -517,26 +527,22 @@ public class GraphicalUserInterface extends Application {
 
     public void clearStage(boolean comingFromSubmit)
     {
+        //clear the contents of the stage.
         for (Stage stage: newStages) {
             stage.close();
         }
-
         if(tableView != null) {
             tableView.getItems().clear();
             tableView.getColumns().clear();
         }
-
-        rightGrid.getChildren().clear();
-        leftGrid.getChildren().clear();
-
         if(!comingFromSubmit){
             statementField.clear();
             thisIsTheInput = null;
         }
-
-        rowItemCountButton = new LinkedList<>();
-
-
+        conditionalNodesNum  = new LinkedList<>();
+        buttonsInLevel = new HashMap<>();
+        leftGrid.getChildren().clear();
+        rightGrid.getChildren().clear();
     }
 
     public void safeCloseConnection(MySQLite mySQLite)
@@ -556,6 +562,8 @@ public class GraphicalUserInterface extends Application {
     }
 
     public void askToCommit(Event e) {
+
+        //Create a new stage to ask "save" "dont save" "cancel".
         BorderPane pane = new BorderPane();
         Scene myScene = new Scene(pane);
         Stage stage = new Stage();
@@ -603,10 +611,11 @@ public class GraphicalUserInterface extends Application {
         stage.show();
     }
 
-    public void checkMinGridContraints(){
-        if(gridColumns <COLUMN_NUM)
-            gridColumns = COLUMN_NUM;
-        if(gridRows <ROWS_NUM)
-            gridRows = ROWS_NUM;
+
+    public void drawLine(int startX, int startY, int endX, int endY, int columnSpan, int rowSpan, GridPane gridPane, HPos hPos,int gridC, int gridX)
+    {
+        Line line1 = new Line(startX,startY,endX,endY);
+        gridPane.setHalignment(line1,hPos);
+        gridPane.add(line1, gridC,gridX,columnSpan,rowSpan);
     }
 }

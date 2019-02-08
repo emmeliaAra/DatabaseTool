@@ -31,11 +31,16 @@ public class SelectStatement {
             tempNode = c.addChildNode(rootNode, "σ" + whereClause, WHERE_NODE_STATUS, NODE_INITIAL_ID,-1);
 
         int level = 0;
+        //Add all the relation nodes to the tempNode
         for(String relation: fromRelationNames)
             c.addChildNode(tempNode, relation, RELATION_NODE_STATUS, NODE_INITIAL_ID, level);
 
         level ++;
         int i=0;
+        /*if there are more than one relation and the tempnode has more than one child
+          go through all the children of temp node replace 2 nodes with one.
+          Add the new node to temp.
+         */
         while (tempNode.getChildren().size() >1 && fromRelationNames.size() != 1 )
         {
             if(!(i+1 < tempNode.getChildren().size())) {
@@ -62,9 +67,7 @@ public class SelectStatement {
             rootNode.setNodeLevel(rootNode.getChildren().get(0).getNodeStatus()+1);
         else
             rootNode.setNodeLevel(level+1);
-
         return c;
     }
-
 
 }

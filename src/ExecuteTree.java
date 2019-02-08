@@ -224,7 +224,6 @@ public class ExecuteTree {
                 tempFrom.addFirst(holdNodes.get(1).getData());
                 secondName = holdNodes.get(1).getData();
             }
-            System.out.println(secondName);
             String tableName = "Join" + holdNodes.getFirst().getData() + "_" + secondName;
             tempSelect.addFirst("*");
 
