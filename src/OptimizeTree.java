@@ -86,7 +86,7 @@ public class OptimizeTree {
             node.setNodeData(condition);
             node.setNodeStatus(OPT_COND_NODE_STATUS);
             try {
-                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, tempData, RELATION_NODE_STATUS,-1);
+                TreeStructure.Node<String> newNode1 = canonicalTree.addChildNode(node, tempData, RELATION_NODE_STATUS,-1,node.getNodeLevel() +1);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

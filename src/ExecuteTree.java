@@ -42,7 +42,6 @@ public class ExecuteTree {
         TreeStructure.Node<String> popNode;
         holdNodes = new LinkedList<>();
 
-        System.out.println(stack.size());
         //pops the nodes from the stack
         while (!stack.empty() )
         {
@@ -265,7 +264,7 @@ public class ExecuteTree {
         newTablesCreated.put(tableName,temp);
 
         //Add the node to the tree and return it because its needed for isOptCond method!
-        TreeStructure.Node<String> newNode = canonicalTree.addChildNode(parentNode,tableName,RELATION_NODE_STATUS,RESULTING_RELATION_NODE_STATUS);
+        TreeStructure.Node<String> newNode = canonicalTree.addChildNode(parentNode,tableName,RELATION_NODE_STATUS,RESULTING_RELATION_NODE_STATUS,popNode.getNodeLevel());
         nodeIdInOrder.add(newNode.getData());
         return newNode;
     }

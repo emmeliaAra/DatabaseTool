@@ -69,11 +69,12 @@ public class TreeParser {
             //creates and executes the trees to present the results.
             TreeStructure<String> canonicalTree = selectStatementToTree.secondAttempt();
             ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
+            canonicalTree.printTree(canonicalTree.getRootNode(), " ");
             canonicalTree.createStack(canonicalTree.getRootNode());
             executeCanonicalTree.execute(canonicalTree.getStack());
-           // selectStatementToTree.secondAttempt();
 
-            boolean  hasOr = false;
+
+        boolean  hasOr = false;
 
             if(charStream.toString().toLowerCase().contains(" or "))
                 hasOr = true;
@@ -92,7 +93,6 @@ public class TreeParser {
                 if (!optimizeTree.splitWhere().isEmpty() && fromRelationNames.size() > 1)
                     canonicalTreeForOpt = optimizeTree.optimiseTree();
 
-                canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
 
                 ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
                 canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());

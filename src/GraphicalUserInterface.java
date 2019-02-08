@@ -14,11 +14,12 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import sun.plugin.javascript.navig.Array;
+
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
+
+import static java.lang.Math.abs;
 
 public class GraphicalUserInterface extends Application {
 
@@ -43,7 +44,9 @@ public class GraphicalUserInterface extends Application {
     private MyFileChooser fileChooser;
     private int gridRows=0,gridColumns=0;
     private TextField statementField;
-    private LinkedList<LinkedList<Button>> rowItemCount;
+    private LinkedList<LinkedList<Button>> rowItemCountButton;
+    private HashMap<Integer,LinkedList<Button>> buttonsInLevel;
+    private int conditionalNodesNum =0;
 
     public static void main(String[]args) {
 
@@ -55,7 +58,8 @@ public class GraphicalUserInterface extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        rowItemCount = new LinkedList<>();
+        rowItemCountButton = new LinkedList<>();
+        buttonsInLevel = new LinkedHashMap<>();
         //Create a boarderPane to build on
         BorderPane borderPane = new BorderPane();
 
@@ -173,7 +177,7 @@ public class GraphicalUserInterface extends Application {
                             clearStage(true);
                             safeCloseConnection(mySQLite);
                         }
-
+                        buttonsInLevel = new HashMap<>();
                         gridColumns = 0; gridRows = 0;
                         myTreeParser = myMain.main(charStream,path);
                         if(myTreeParser.getParserStatus() == SELECT_STATUS){
@@ -182,18 +186,18 @@ public class GraphicalUserInterface extends Application {
                             mySQLite = myTreeParser.getMySQLite();
 
                             LinkedList<String> canonicalInOrder = myTreeParser.getNodeIdInOrderCanonical();
-
-                            createTreeView(canonicalTree.getRootNode(), null, CANONICAL_TREE_STATUS,0);
+                            createTreeView(canonicalTree.getRootNode(), null, CANONICAL_TREE_STATUS);
                             checkMinGridContraints();
                             setGridConstraints(leftGrid,gridColumns,gridRows);
-                            makeTReeVertical(buttonCanonicalTree.getRoot(),1,gridColumns/2,leftGrid);gridRows = 0; gridColumns = 0;
+                            buildMyTree(leftGrid);
+                            //  makeTReeVertical(buttonCanonicalTree.getRoot(),1,gridColumns/2,leftGrid);gridRows = 0; gridColumns = 0;
                             addActionToTree(buttonCanonicalTree.getRoot(),canonicalInOrder,mySQLite,canonicalButtonsInOrder);
 
                             TreeStructure<String> optimizesTree = myTreeParser.getOptimizedTree();
                             if(optimizesTree!= null) {
                                 optimizesTree = myTreeParser.setNodeID(optimizesTree);
                                 LinkedList<String> optimalInOrder = myTreeParser.getNodeIdInOrderOptimal();
-                                createTreeView(optimizesTree.getRootNode(), null, OPTIMIZED_TREE_STATUS, 0);
+                                createTreeView(optimizesTree.getRootNode(), null, OPTIMIZED_TREE_STATUS);
                                 addActionToTree(buttonOptimizedTree.getRoot(), optimalInOrder, mySQLite, optimalButtonsInOrder);
 
                                 checkMinGridContraints();
@@ -301,7 +305,7 @@ public class GraphicalUserInterface extends Application {
         gridPane.setGridLinesVisible(true);
     }
 
-    public void createTreeView(TreeStructure.Node<String> node,TreeItem<Button> treeItem,int treeType, int rowPos){
+    public void createTreeView(TreeStructure.Node<String> node,TreeItem<Button> treeItem,int treeType){
 
         TreeItem<Button> newItem;
         Button newButton = new Button(node.getData());
@@ -310,13 +314,23 @@ public class GraphicalUserInterface extends Application {
         Tooltip tooltip = new Tooltip(node.getData());
         newButton.setTooltip(tooltip);
 
+        int level = node.getNodeLevel();
+        if(buttonsInLevel.containsKey(level))
+            buttonsInLevel.get(level).add(newButton);
+        else {
+            LinkedList temp = new LinkedList();
+            temp.add(newButton);
+            buttonsInLevel.put(level, temp);
+        }
+
+        if(node.getNodeStatus() == 4)
+            conditionalNodesNum ++;
+
         //If the rootNode is passed initialise the treeView using the rootNode. If not add the new node to the treeItem and call this method for every node's child
         if(treeItem == null && node.getParentNode() == null ) {
-            gridColumns++;
-            gridRows++;
             LinkedList<Button> b = new LinkedList<>();
             b.add(newButton);
-            rowItemCount.add(b);
+
             if(treeType == CANONICAL_TREE_STATUS) {
                 buttonCanonicalTree = new TreeView<>(newItem);
                 canonicalButtonsInOrder.put(newButton,node.getNodeID());
@@ -330,35 +344,81 @@ public class GraphicalUserInterface extends Application {
                 canonicalButtonsInOrder.put(newButton,node.getNodeID());
             else
                 optimalButtonsInOrder.put(newButton,node.getNodeID());
-
-            if(node.getParentNode().getChildren().size()==1) {
-                gridRows++;
-                LinkedList<Button> b = new LinkedList<>();
-                b.addLast(newButton);
-                rowItemCount.add(b);
-            }else
-                if(node.getParentNode().getChildren().get(0) == node) {
-                    gridRows++;
-                    gridColumns+=2;
-                    if(rowItemCount.size()> rowPos){
-                        LinkedList<Button> b = rowItemCount.get(rowPos);
-                        b.addLast(newButton);
-                        rowItemCount.set(rowPos, b);
-                    }
-                    else {
-                        LinkedList<Button> b = new LinkedList<>();
-                        b.addLast(newButton);
-                        rowItemCount.add(b);
-                    }
-                }else {
-                    LinkedList<Button> b = rowItemCount.get(rowPos);
-                    b.addLast(newButton);
-                    rowItemCount.set(rowPos, b);
-                }
         }
-        rowPos++;
-        int finalRowPos = rowPos;
-        node.getChildren().forEach(each -> createTreeView(each,newItem,treeType, finalRowPos));
+        node.getChildren().forEach(each -> createTreeView(each,newItem,treeType));
+    }
+
+    public void buildMyTree(GridPane gridPane) {
+
+        TreeMap<Integer, LinkedList<Button>> treeMap = new TreeMap<>(buttonsInLevel);
+        //If there is no optimized condition and the number of relation nodes is even then the relation nodes are all in the last list.
+        if(conditionalNodesNum == 0)
+        {
+            //mean that all the relations are in the last element of the list
+            int gridColumns = treeMap.firstEntry().getValue().size() *2 +1;
+            int gridRows = treeMap.size() * 2 +1;
+
+          //  setGridConstraints(gridPane,gridColumns,ROWS_NUM);
+            //gridPane.setGridLinesVisible(true);
+
+            int row = gridRows;
+            int column =1;
+            LinkedList<Integer> positions = new LinkedList<>();
+            LinkedList<Integer> holdPos = new LinkedList<>();
+            int i=0;
+
+            for(int k=0;  k<treeMap.get(i).size(); k++) {
+                gridPane.add(treeMap.get(i).get(k),column,row);
+
+                if((k%2)==0) holdPos.add(column);
+                else {
+                    int temp;
+                    temp = abs( column - holdPos.getLast())/2;
+                    if(column > holdPos.getLast())
+                        temp = holdPos.getLast() + temp;
+                    else
+                        temp = column +temp;
+
+                    positions.add(temp);
+                    holdPos.removeLast();
+                }
+                column = column +2;
+            }
+
+            i++;
+            row = row-2;
+            while (i<treeMap.size()) {
+
+                LinkedList<Button> line = treeMap.get(i);
+                for(int k=0; k<line.size(); k++)
+                {
+                    if(!positions.isEmpty()){
+                        gridPane.add(line.get(k), positions.getFirst(), row);
+
+                        //if k is even and is not the last item of the list. then add the column num to the list
+                        if((k%2)==0  && !(k==line.size()-1 && holdPos.size() == 1)) {
+                            holdPos.add(positions.getFirst());
+                            positions.removeFirst();
+                        }
+                        else if ((k%2)!=0 || ((k%2) == 0 && k == line.size()-1)) {
+                            int temp, newPos;
+                            temp = abs( positions.getFirst() - holdPos.getLast())/2;
+                            if(positions.getFirst() > holdPos.getLast())
+                                newPos = holdPos.getLast() + temp;
+                            else
+                                newPos = positions.getFirst() + temp;
+
+                            positions.removeFirst();
+                            positions.add(newPos);
+                            holdPos.removeLast();
+                        }
+                    }else
+                        gridPane.add(line.get(k), holdPos.getFirst(), row);
+                }
+                row =row-2;
+                i++;
+            }
+        }
     }
 
     public void makeTReeVertical(TreeItem<Button> item,int x, int y,GridPane grid)
@@ -402,33 +462,6 @@ public class GraphicalUserInterface extends Application {
         //place the item in the center.
         grid.setHalignment(item.getValue(),HPos.CENTER);
         item.getChildren().forEach(each -> makeTReeVertical(each, finalX, finalY,grid));
-    }
-
-    public void pleaseWork(GridPane gridPane)
-    {
-        int max = 0;
-        int maxPos =0;
-        for(int i=0; i<rowItemCount.size(); i++)
-        {
-            if(rowItemCount.get(i).size() > max) {
-                maxPos = i;
-                max = rowItemCount.get(i).size();
-            }
-        }
-        int columns = rowItemCount.get(maxPos).size()*2 +5;
-        setGridConstraints(gridPane,columns,rowItemCount.size() +10);
-
-        //Add to the grid the line with the more nodes.
-        int y =( columns - (rowItemCount.get(maxPos).size()*2 -1))/2;
-        int i=0;
-        LinkedList<Button> temp = rowItemCount.get(maxPos);
-        while (i<max)
-        {
-            gridPane.add(temp.get(i),y,maxPos);
-            y = y+2;
-            i++;
-        }
-
     }
 
 
@@ -501,7 +534,7 @@ public class GraphicalUserInterface extends Application {
             thisIsTheInput = null;
         }
 
-        rowItemCount = new LinkedList<>();
+        rowItemCountButton = new LinkedList<>();
 
 
     }

@@ -12,9 +12,9 @@ public class TreeStructure<T> {
         private LinkedList<Node<T>> children;
         private TreeStructure<T> hostingTree;
         private Node<T> parentNode;
-        private int nodeStatus, nodeID;
+        private int nodeStatus, nodeID,nodeLevel;
 
-        public Node(LinkedList<Node<T>> children, TreeStructure<T> hostingTree, Node<T> parentNode, T data, int nodeStatus, int nodeID)
+        public Node(LinkedList<Node<T>> children, TreeStructure<T> hostingTree, Node<T> parentNode, T data, int nodeStatus, int nodeID, int nodeLevel)
         {
             this.children = children;
             this.hostingTree = hostingTree;
@@ -22,6 +22,7 @@ public class TreeStructure<T> {
             this.data = data;
             this.nodeStatus = nodeStatus;
             this.nodeID = nodeID;
+            this.nodeLevel = nodeLevel;
         }
 
         public T getData()
@@ -48,6 +49,9 @@ public class TreeStructure<T> {
 
         public int getNodeID(){return nodeID;}
 
+        public int getNodeLevel() {
+            return nodeLevel;
+        }
         public void setNodeData(T newData)
         {
             data = newData;
@@ -60,6 +64,10 @@ public class TreeStructure<T> {
 
         public void setNodeID(int nID){ nodeID = nID; }
 
+        public void setNodeLevel(int nodeLevel) {
+            this.nodeLevel = nodeLevel;
+        }
+
         public void setParentNode(Node<T> parentNode)
         {
             this.parentNode = parentNode;
@@ -67,19 +75,19 @@ public class TreeStructure<T> {
         }
     }
 
-    public void addRootNode(T data,int nodeStatus, int nodeID) throws IllegalAccessException {
+    public void addRootNode(T data,int nodeStatus, int nodeID,int nodeL) throws IllegalAccessException {
         if(rootNode == null )
-            rootNode = new Node<>(new LinkedList<>(), this, null,data, nodeStatus, nodeID);
+            rootNode = new Node<>(new LinkedList<>(), this, null,data, nodeStatus, nodeID,nodeL);
         else
             throw new IllegalAccessException("A tree can not have more than one root node");
     }
 
-    public Node<T> addChildNode(Node<T> parentNode, T data, int nodeStatus, int nodeID) throws IllegalAccessException {
+    public Node<T> addChildNode(Node<T> parentNode, T data, int nodeStatus, int nodeID,int nodeL) throws IllegalAccessException {
 
 
         if(parentNode != null && parentNode.hostingTree == this)
         {
-            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data,nodeStatus, nodeID);
+            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data,nodeStatus, nodeID,nodeL);
             parentNode.getChildren().addLast(newNode);
             return newNode;
         }
@@ -89,12 +97,12 @@ public class TreeStructure<T> {
             throw new IllegalAccessException("The parent node provided is not part of this tree.");
     }
 
-    public Node<T> addChildNode1(Node<T> parentNode, T data, int nodeStatus, int nodeID,int index) throws IllegalAccessException {
+    public Node<T> addChildNode1(Node<T> parentNode, T data, int nodeStatus, int nodeID,int index,int nodeL) throws IllegalAccessException {
 
 
         if(parentNode != null && parentNode.hostingTree == this)
         {
-            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data,nodeStatus, nodeID);
+            Node<T> newNode = new Node<>(new LinkedList<>(),this,parentNode,data,nodeStatus, nodeID,nodeL);
             parentNode.getChildren().add(index,newNode);
             return newNode;
         }
