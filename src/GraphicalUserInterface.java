@@ -293,7 +293,7 @@ public class GraphicalUserInterface extends Application {
             gridColumns = COLUMN_NUM;
         if(gridRows < ROWS_NUM)
             gridRows = ROWS_NUM;
-        
+
         for (int i = 0; i < gridColumns; i++) {
             ColumnConstraints colConst = new ColumnConstraints();
             colConst.setPercentWidth(100.0 / gridColumns);

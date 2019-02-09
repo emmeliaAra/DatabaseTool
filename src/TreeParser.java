@@ -63,45 +63,37 @@ public class TreeParser {
 
     public void operations()throws IllegalAccessException {
 
+        SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+        //creates and executes the trees to present the results.
+        TreeStructure<String> canonicalTree = selectStatementToTree.secondAttempt();
+        ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
+        canonicalTree.createStack(canonicalTree.getRootNode());
+        executeCanonicalTree.execute(canonicalTree.getStack());
 
-            SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-            //creates and executes the trees to present the results.
-            TreeStructure<String> canonicalTree = selectStatementToTree.secondAttempt();
-            ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
-            canonicalTree.createStack(canonicalTree.getRootNode());
-            executeCanonicalTree.execute(canonicalTree.getStack());
+        boolean hasOr = containsOr(charStream.toString());
+        //keep a copy of the original tree so that can be optimised.
+        SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
+        TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.secondAttempt();
 
+        if(!hasOr) {
+            newTablesCreated = executeCanonicalTree.getNewTablesCreated();
+            //if there is no where condition or only one relation in the statement the tree will be the same as the canonical.
+            OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(), whereClause, newTablesCreated, optimizedWhere);
+            optimizedWhere = optimizeTree.splitWhere();
 
-        boolean  hasOr = false;
+            if (!optimizeTree.splitWhere().isEmpty() && fromRelationNames.size() > 1)
+                canonicalTreeForOpt = optimizeTree.optimiseTree();
 
-            if(charStream.toString().toLowerCase().contains(" or "))
-                hasOr = true;
+            ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
+            canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
+            canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
+            executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
 
-            //keep a copy of the original tree so that can be optimised.
-            SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-            TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.secondAttempt();
-
-            if(!hasOr) {
-
-                newTablesCreated = executeCanonicalTree.getNewTablesCreated();
-                //if there is no where condition or only one relation in the statement the tree will be the same as the canonical.
-                OptimizeTree optimizeTree = new OptimizeTree(canonicalTreeForOpt, mySQLite.getSchema(), whereClause, newTablesCreated, optimizedWhere);
-                optimizedWhere = optimizeTree.splitWhere();
-
-                if (!optimizeTree.splitWhere().isEmpty() && fromRelationNames.size() > 1)
-                    canonicalTreeForOpt = optimizeTree.optimiseTree();
-
-
-                ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
-                canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
-                canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
-                executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
-
-                nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
-            }
-            //Get the relations in the order they are executed.
-            nodeIdInOrderCanonical = executeCanonicalTree.getNodeIdInOrder();
-            finalTable = executeCanonicalTree.getFinalTable();
+            nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
+        }
+        //Get the relations in the order they are executed.
+        nodeIdInOrderCanonical = executeCanonicalTree.getNodeIdInOrder();
+        finalTable = executeCanonicalTree.getFinalTable();
     }
 
     public void dropTableOperation()
@@ -174,7 +166,8 @@ public class TreeParser {
 
     public TreeStructure<String> getOptimizedTree()
     {
-        if(!charStream.toString().toLowerCase().contains("or"))
+        boolean hasOr = containsOr(charStream.toString());
+        if(!hasOr)
         {
             TreeStructure<String> optimizedTree = getCanonicalTree();
             OptimizeTree optimizeTree = new OptimizeTree(optimizedTree, mySQLite.getSchema(),whereClause,newTablesCreated,optimizedWhere);
@@ -190,6 +183,28 @@ public class TreeParser {
             return optimizedTree;
         }
         else return null;
+    }
+
+    public Boolean containsOr(String charStream)
+    {
+         /*index cannot be 0  and or cannot be the last word in the statement  because it means that it will start/end with or
+        and this is not a valid statement so it will break before, thus only check if the next char is space. if not then set to true*/
+
+        boolean hasOr = false;
+
+        String stream = charStream.toLowerCase();
+        int index = 0;
+        while ((index = charStream.indexOf("or",index))!= -1) {
+            char c = stream.charAt(index+2);
+            System.out.println(c);
+            if(c == ' ') {
+                hasOr = true;
+                break;
+            }
+            //because or has 2 characters
+            index = index + 2;
+        }
+        return hasOr;
     }
 
     //Set node id. The first one  popped has nodeId = 0 etc.

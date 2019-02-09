@@ -401,7 +401,7 @@ public class MySQLite extends DatabaseBasic{
                    If it appears more than once print message as well
                  */
                 else if ((clauseToCheck.size()> i+1 && !clauseToCheck.get(i+1).equals("."))|| clauseToCheck.size()<=i+1){
-                    boolean needMoreCheck = true;
+                    boolean needMoreCheck = false;
                     if(previousIsSymbol ) {
                         if(clauseToCheck.get(i).startsWith("\"") && clauseToCheck.get(i).endsWith("\""))
                             needMoreCheck = false;
@@ -409,7 +409,7 @@ public class MySQLite extends DatabaseBasic{
                             char[] temp = clauseToCheck.get(i).toCharArray();
                             for (Character c : temp)
                                 if (!Character.isDigit(c)) {
-                                    needMoreCheck = false;
+                                    needMoreCheck = true;
                                     break;
                                 }
                         }
