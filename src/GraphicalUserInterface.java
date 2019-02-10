@@ -90,7 +90,7 @@ public class GraphicalUserInterface extends Application {
 
         //Create a textField for to enter the statement
         statementField = new TextField();
-        statementField.setPrefColumnCount(85);
+        statementField.setPrefColumnCount(95);
 
         //Create buttons to submit and clear the statement
         Button submitButton = new Button("Submit");
@@ -100,6 +100,7 @@ public class GraphicalUserInterface extends Application {
 
         statementBox.setSpacing(10);
         statementBox.getChildren().addAll(statementLabel,statementField,submitButton,clearButton);
+        statementBox.setAlignment(Pos.CENTER);
         finalHBox.getChildren().addAll(menuHBox,statementBox);
 
         //Create GridPanes for the trees.
@@ -145,6 +146,7 @@ public class GraphicalUserInterface extends Application {
         messageArea.setAlignment(Pos.TOP_LEFT);
         messageArea.setFont(Font.font(15));
         leftGrid.setStyle("-fx-background-color: #336699;");
+        rightGrid.setStyle("-fx-background-color: #336699;");
 
         Label canonicalLabel  = new Label("Canonical Tree");
         Label optimizedLabel  = new Label("Optimized Tree");

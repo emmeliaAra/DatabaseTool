@@ -1,22 +1,34 @@
-import java.io.File;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.io.File;
 
+/**
+ * This Class provides connection to the database
+ * @author Emmeleia Arakleitou
+ */
 public class DatabaseBasic {
 
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private static final String DATABASE_LOCATION = "jdbc:sqlite:";
     protected Connection connection = null;
-    private String databaseName = null;
+    private String databaseName;
 
 
-    public DatabaseBasic(String databaseName)
-    {
+    /**
+     * Constructor of the class
+     * @param databaseName the name of the database to connect to.
+     */
+    public DatabaseBasic(String databaseName) {
         this.databaseName = databaseName;
         open();
     }
 
+    /**
+     * Opens the Database file and calls
+     * getConnection method to connect to the database.
+     * Throws Exception if the file is not found
+     */
     private void open()
     {
         File databaseFile = new File(databaseName);
@@ -34,8 +46,10 @@ public class DatabaseBasic {
         }
     }
 
-    //establish a jdbc connection with the database
-    //Autocommit is turned off delaying updates until commit( ) is called
+    /**
+     * Establishes a JDBC connection with the database
+     * Autocommit is turned off, Delaying updated until commit method is called
+     */
     private void getConnection()
     {
         try{
@@ -49,6 +63,9 @@ public class DatabaseBasic {
 
     }
 
+    /**
+     * This method closes the connection with the databasse an commits the changes..
+     */
     public final void close()
     {
         try {

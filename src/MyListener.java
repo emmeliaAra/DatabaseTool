@@ -62,7 +62,7 @@ public class MyListener {
             myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
         }
 
-        @Override // theli allama se type name
+        @Override
         public void enterTypeName (sqliteParser.TypeNameContext ctx) {
             if(ctx.INT() != null)
                 myStatement.put(ctx.INT().getSourceInterval().hashCode(),ctx.INT().toString());

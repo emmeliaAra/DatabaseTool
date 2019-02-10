@@ -1,11 +1,8 @@
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Label;
+import javafx.collections.FXCollections;
 import javafx.scene.control.TableView;
-
-import javax.management.relation.Relation;
-import java.sql.*;
 import java.util.*;
+import java.sql.*;
 
 public class MySQLite extends DatabaseBasic{
 
