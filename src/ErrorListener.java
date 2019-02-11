@@ -19,11 +19,26 @@ public class ErrorListener  {
             List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
             Collections.reverse(stack);
             System.err.println(msg);
-            StringBuilder error = new StringBuilder(msg.substring(0,msg.indexOf("expecting")));
-         //   StringBuilder temp  = underlineError(recognizer,(Token)offendingSymbol,line,charPositionInLine);
-           // if( temp!= null)
-             //   error.append("\n" + temp);
-                errorMessage.add(error.toString());
+
+            StringBuilder error ;
+
+            if(msg.toLowerCase().contains("extraneous input") || msg.toLowerCase().contains("mismatched input"))
+                error = new StringBuilder("Invalid input " + msg.toLowerCase().substring(msg.indexOf("'"), msg.indexOf("expecting")));
+            else if(msg.toLowerCase().contains("no viable alternative at input"))
+                error = new StringBuilder("Invalid input " + msg.toLowerCase().substring(msg.indexOf("'")));
+            else if(msg.toLowerCase().contains("missing"))
+            {
+                String temp = msg.substring(msg.indexOf("'"), msg.toLowerCase().indexOf("at"));
+                if(msg.toLowerCase().substring(msg.length()-7).equalsIgnoreCase("'<eof>'"))
+                    error = new StringBuilder("Missing input " + temp + "at the end");
+                else
+                    error = new StringBuilder("Missing input " + temp);
+            }else if(msg.toLowerCase().contains("token recognition error at"))
+                error = new StringBuilder("Invalid input " + msg.toLowerCase().substring(msg.toLowerCase().indexOf("'")));
+            else
+                error = new StringBuilder(msg);
+
+            errorMessage.add(error.toString());
         }
 
         protected StringBuilder underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {

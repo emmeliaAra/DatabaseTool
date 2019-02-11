@@ -5,10 +5,11 @@ parse
  ;
 
 error
- : UNEXPECTED_CHAR
-   {
+ : UNEXPECTED_CHAR  {notifyErrorListeners("Unexpected characher found " + $UNEXPECTED_CHAR.text);}
+   /*{
      throw new RuntimeException("UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text);
-   }
+   }*/
+
  ;
 
 sql_stmt

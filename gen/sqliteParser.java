@@ -224,9 +224,7 @@ public class sqliteParser extends Parser {
 			{
 			setState(59);
 			((ErrorContext)_localctx).UNEXPECTED_CHAR = match(UNEXPECTED_CHAR);
-
-			     throw new RuntimeException("UNEXPECTED_CHAR=" + (((ErrorContext)_localctx).UNEXPECTED_CHAR!=null?((ErrorContext)_localctx).UNEXPECTED_CHAR.getText():null));
-			   
+			notifyErrorListeners("Unexpected characher found " + (((ErrorContext)_localctx).UNEXPECTED_CHAR!=null?((ErrorContext)_localctx).UNEXPECTED_CHAR.getText():null));
 			}
 		}
 		catch (RecognitionException re) {

@@ -29,46 +29,54 @@ public class MyListener {
 
         @Override
         public void enterGetClosePar(sqliteParser.GetCloseParContext ctx) {
-            myStatement.put(ctx.CLOSE_PAR().getSourceInterval().hashCode(), ctx.CLOSE_PAR().toString());
+            if(ctx.CLOSE_PAR() != null)
+                myStatement.put(ctx.CLOSE_PAR().getSourceInterval().hashCode(), ctx.CLOSE_PAR().toString());
         }
 
         @Override
         public void enterGetSCOL(sqliteParser.GetSCOLContext ctx) {
-            myStatement.put(ctx.SCOL().getSourceInterval().hashCode(), ctx.SCOL().toString());
+            if(ctx.SCOL() != null)
+                myStatement.put(ctx.SCOL().getSourceInterval().hashCode(), ctx.SCOL().toString());
         }
 
         @Override
         public void  enterGetAssign(sqliteParser.GetAssignContext ctx)
         {
-            myStatement.put(ctx.ASSIGN().getSourceInterval().hashCode(), ctx.ASSIGN().toString());
+            if(ctx.ASSIGN() != null)
+                myStatement.put(ctx.ASSIGN().getSourceInterval().hashCode(), ctx.ASSIGN().toString());
         }
 
         public void enterGetDatabaseName(sqliteParser.GetDatabaseNameContext ctx) {
-            myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
+            if(ctx.any_name() != null)
+                myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
         }
 
         public void enterGetTableName(sqliteParser.GetTableNameContext ctx) {
-            myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
+            if(ctx.any_name() != null)
+                myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
         }
 
         @Override
         public void enterGetColumnName(sqliteParser.GetColumnNameContext ctx) {
-            myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
+            if(ctx.any_name() != null)
+                myStatement.put(ctx.any_name().getSourceInterval().hashCode(),ctx.any_name().getText());
         }
 
         public void enterSelectOrValues (sqliteParser.SelectOrValuesContext ctx) {
 
-            myStatement.put(ctx.K_SELECT().getSourceInterval().hashCode(),ctx.K_SELECT().toString());
-
-            if(ctx.K_FROM() != null)
-                myStatement.put(ctx.K_FROM().getSourceInterval().hashCode(), ctx.K_FROM().toString());
+            if(ctx.K_SELECT() != null)
+                myStatement.put(ctx.K_SELECT().getSourceInterval().hashCode(),ctx.K_SELECT().toString());
 
             if(ctx.K_WHERE() != null)
                 myStatement.put(ctx.K_WHERE().getSourceInterval().hashCode(), ctx.K_WHERE().toString());
+
+            if(ctx.K_FROM() != null)
+                myStatement.put(ctx.K_FROM().getSourceInterval().hashCode(), ctx.K_FROM().toString());
         }
 
         public void enterMyStar(sqliteParser.MyStarContext ctx) {
-            myStatement.put(ctx.STAR().getSourceInterval().hashCode(),ctx.STAR().toString());
+            if(ctx.STAR() != null)
+                myStatement.put(ctx.STAR().getSourceInterval().hashCode(),ctx.STAR().toString());
         }
 
         public void enterUnaryOperator(sqliteParser.UnaryOperatorContext ctx) {
@@ -154,7 +162,9 @@ public class MyListener {
 
         public void enterSelectCore(sqliteParser.SelectCoreContext ctx) {
 
-            myStatement.put(ctx.K_SELECT().getSourceInterval().hashCode(),ctx.K_SELECT().toString());
+            if(ctx.K_SELECT() != null)
+                myStatement.put(ctx.K_SELECT().getSourceInterval().hashCode(),ctx.K_SELECT().toString());
+
             if(ctx.K_FROM() != null)
                 myStatement.put(ctx.K_FROM().getSourceInterval().hashCode(), ctx.K_FROM().toString());
 
@@ -167,7 +177,7 @@ public class MyListener {
             if(ctx.IDENTIFIER() != null)
                 myStatement.put(ctx.IDENTIFIER().getSourceInterval().hashCode(), ctx.IDENTIFIER().toString());
 
-            else
+            else if(ctx.STRING_LITERAL() != null)
                 myStatement.put(ctx.STRING_LITERAL().getSourceInterval().hashCode(), ctx.STRING_LITERAL().toString());
         }
 

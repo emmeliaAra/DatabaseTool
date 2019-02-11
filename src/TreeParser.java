@@ -53,11 +53,11 @@ public class TreeParser {
 
         if(messages== null)
             messages = new Vector<>();
-        
+
         checkSyntaxErrors();
 
         //Check if there is a messege from ANTLR4 it means that there is an error so do not built the tree...
-        if(messages == null){
+        if(messages.isEmpty()){
 
             //Check if this is a drop, create or select statement
             if(charStream.toString().toLowerCase().contains( "drop")){
@@ -79,7 +79,10 @@ public class TreeParser {
                     operations();
                 }
             }
-        }else parserStatus = ANTLR_ERROR_STATUS;
+        }else{
+            System.out.println(messages);
+            parserStatus = ANTLR_ERROR_STATUS;
+        }
 
 
     }
