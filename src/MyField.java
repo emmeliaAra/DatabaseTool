@@ -26,7 +26,7 @@ public class MyField {
 
     }
 
-    
+
     public MyRelation getRelation() {
         return relation;
     }

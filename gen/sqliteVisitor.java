@@ -28,12 +28,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSql_stmt(sqliteParser.Sql_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link sqliteParser#compound_select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompound_select_stmt(sqliteParser.Compound_select_stmtContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code dropTable}
 	 * labeled alternative in {@link sqliteParser#drop_table_stmt}.
 	 * @param ctx the parse tree
@@ -47,13 +41,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code simpleSelectStatement}
-	 * labeled alternative in {@link sqliteParser#simple_select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSimpleSelectStatement(sqliteParser.SimpleSelectStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code selectStatement}
 	 * labeled alternative in {@link sqliteParser#select_stmt}.
@@ -69,12 +56,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelectOrValues(sqliteParser.SelectOrValuesContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link sqliteParser#type_name}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitType_name(sqliteParser.Type_nameContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
@@ -87,21 +68,7 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMyExpression(sqliteParser.MyExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code orderingTerm}
-	 * labeled alternative in {@link sqliteParser#ordering_term}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOrderingTerm(sqliteParser.OrderingTermContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code commonTableExpression}
-	 * labeled alternative in {@link sqliteParser#common_table_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCommonTableExpression(sqliteParser.CommonTableExpressionContext ctx);
+
 	/**
 	 * Visit a parse tree produced by the {@code myStar}
 	 * labeled alternative in {@link sqliteParser#result_column}.
@@ -117,46 +84,13 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMystart(sqliteParser.MystartContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code expressionAlias}
-	 * labeled alternative in {@link sqliteParser#result_column}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExpressionAlias(sqliteParser.ExpressionAliasContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code tableORSubqueryA}
 	 * labeled alternative in {@link sqliteParser#table_or_subquery}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link sqliteParser#join_clause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJoin_clause(sqliteParser.Join_clauseContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code none}
-	 * labeled alternative in {@link sqliteParser#join_operator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNone(sqliteParser.NoneContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code joinOperator}
-	 * labeled alternative in {@link sqliteParser#join_operator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJoinOperator(sqliteParser.JoinOperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code joinConstraint}
-	 * labeled alternative in {@link sqliteParser#join_constraint}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJoinConstraint(sqliteParser.JoinConstraintContext ctx);
+
 	/**
 	 * Visit a parse tree produced by the {@code selectCore}
 	 * labeled alternative in {@link sqliteParser#select_core}.
@@ -164,34 +98,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelectCore(sqliteParser.SelectCoreContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code compoundPperator}
-	 * labeled alternative in {@link sqliteParser#compound_operator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompoundPperator(sqliteParser.CompoundPperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code compoundOperator}
-	 * labeled alternative in {@link sqliteParser#compound_operator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompoundOperator(sqliteParser.CompoundOperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code signedNumber}
-	 * labeled alternative in {@link sqliteParser#signed_number}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSignedNumber(sqliteParser.SignedNumberContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code literalValue}
-	 * labeled alternative in {@link sqliteParser#literal_value}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLiteralValue(sqliteParser.LiteralValueContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code unaryOperator}
 	 * labeled alternative in {@link sqliteParser#unary_operator}.
@@ -255,20 +161,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitKeyword(sqliteParser.KeywordContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code typeName}
-	 * labeled alternative in {@link sqliteParser#name}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeName(sqliteParser.TypeNameContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code typeNameWithBrackets}
-	 * labeled alternative in {@link sqliteParser#name_with_brackets}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeNameWithBrackets(sqliteParser.TypeNameWithBracketsContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code getDatabaseName}
 	 * labeled alternative in {@link sqliteParser#database_name}.
 	 * @param ctx the parse tree
@@ -289,13 +181,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitGetColumnName(sqliteParser.GetColumnNameContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code getTableAlias}
-	 * labeled alternative in {@link sqliteParser#table_alias}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGetTableAlias(sqliteParser.GetTableAliasContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code identifier}
 	 * labeled alternative in {@link sqliteParser#any_name}.

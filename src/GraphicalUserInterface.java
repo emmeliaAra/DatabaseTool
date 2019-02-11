@@ -32,7 +32,10 @@ public class GraphicalUserInterface extends Application {
     private static final int OPTIMIZED_TREE_STATUS = 1;
     private static final int BUTTON_PREFERRED_SIZE = 100;
     private final int DROP_STATUS = 0;
-    private final int SELECT_STATUS = 1;
+    private final int DROP_ERROR_STATUS = 1;
+    private final int SELECT_STATUS = 2;
+    private final int STATEMENT_ERROR_STATUS = 3;
+    private final int ANTLR_ERROR_STATUS =4;
     private TreeView<Button> buttonCanonicalTree, buttonOptimizedTree;
     private TableView<Object> tableView;
     private String thisIsTheInput = null, path;
@@ -220,20 +223,14 @@ public class GraphicalUserInterface extends Application {
                             borderPane.setBottom(null);
                             borderPane.setBottom(messageArea);
                             safeCloseConnection(myTreeParser.getMySQLite());
-                        }else {
-                            // If the statement is not correct print the error messages.
-                            VBox messageBox = new VBox();
-                            ScrollPane messageScrollPane = new ScrollPane(messageBox);
-                            messageScrollPane.setPrefHeight(bounds.getHeight()/4);
-                            Vector<String> errorMessages = myTreeParser.getMessages();
+                        }else if(myTreeParser.getParserStatus() == DROP_ERROR_STATUS || myTreeParser.getParserStatus() == STATEMENT_ERROR_STATUS) {
+                            displayErrorMessages(bounds.getHeight()/4,borderPane,myTreeParser);
+                        }
+                        else if(myTreeParser.getParserStatus()== ANTLR_ERROR_STATUS) {
+                            System.out.println(" hellooo you mest up again.. tryyy gain please correct this tim ethought ");
+                            displayErrorMessages(bounds.getHeight()/4, borderPane, myTreeParser);
+                            //safeCloseConnection(myTreeParser.getMySQLite());
 
-                            for (int i=0; i<errorMessages.size(); i++){
-                                Label newLabel  = new Label(i+1 + "." +errorMessages.get(i));
-                                newLabel.setFont(Font.font(15));
-                                messageBox.getChildren().add(newLabel);
-                            }
-                            borderPane.setBottom(messageScrollPane);
-                            safeCloseConnection(myTreeParser.getMySQLite());
                         }
                     }
                 }
@@ -619,5 +616,22 @@ public class GraphicalUserInterface extends Application {
         Line line1 = new Line(startX,startY,endX,endY);
         gridPane.setHalignment(line1,hPos);
         gridPane.add(line1, gridC,gridX,columnSpan,rowSpan);
+    }
+
+    public void displayErrorMessages(Double height, BorderPane borderPane, TreeParser myTreeParser)
+    {
+        // If the statement is not correct print the error messages.
+        VBox messageBox = new VBox();
+        ScrollPane messageScrollPane = new ScrollPane(messageBox);
+        messageScrollPane.setPrefHeight(height);
+        Vector<String> errorMessages = myTreeParser.getMessages();
+
+        for (int i=0; i<errorMessages.size(); i++){
+            Label newLabel  = new Label(i+1 + "." +errorMessages.get(i));
+            newLabel.setFont(Font.font(15));
+            messageBox.getChildren().add(newLabel);
+        }
+        borderPane.setBottom(messageScrollPane);
+        safeCloseConnection(myTreeParser.getMySQLite());
     }
 }

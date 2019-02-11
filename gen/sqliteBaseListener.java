@@ -51,18 +51,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCompound_select_stmt(sqliteParser.Compound_select_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCompound_select_stmt(sqliteParser.Compound_select_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterDropTable(sqliteParser.DropTableContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -82,18 +70,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSimpleSelectStatement(sqliteParser.SimpleSelectStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSimpleSelectStatement(sqliteParser.SimpleSelectStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -123,18 +99,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterType_name(sqliteParser.Type_nameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitType_name(sqliteParser.Type_nameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterNone1(sqliteParser.None1Context ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -154,30 +118,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMyExpression(sqliteParser.MyExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOrderingTerm(sqliteParser.OrderingTermContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOrderingTerm(sqliteParser.OrderingTermContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCommonTableExpression(sqliteParser.CommonTableExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCommonTableExpression(sqliteParser.CommonTableExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -231,54 +171,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJoin_clause(sqliteParser.Join_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitJoin_clause(sqliteParser.Join_clauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNone(sqliteParser.NoneContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNone(sqliteParser.NoneContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterJoinOperator(sqliteParser.JoinOperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitJoinOperator(sqliteParser.JoinOperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterJoinConstraint(sqliteParser.JoinConstraintContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitJoinConstraint(sqliteParser.JoinConstraintContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSelectCore(sqliteParser.SelectCoreContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -286,54 +178,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelectCore(sqliteParser.SelectCoreContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCompoundPperator(sqliteParser.CompoundPperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCompoundPperator(sqliteParser.CompoundPperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCompoundOperator(sqliteParser.CompoundOperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCompoundOperator(sqliteParser.CompoundOperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSignedNumber(sqliteParser.SignedNumberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSignedNumber(sqliteParser.SignedNumberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLiteralValue(sqliteParser.LiteralValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLiteralValue(sqliteParser.LiteralValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -447,30 +291,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeName(sqliteParser.TypeNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTypeName(sqliteParser.TypeNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTypeNameWithBrackets(sqliteParser.TypeNameWithBracketsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTypeNameWithBrackets(sqliteParser.TypeNameWithBracketsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterGetDatabaseName(sqliteParser.GetDatabaseNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -502,18 +322,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitGetColumnName(sqliteParser.GetColumnNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterGetTableAlias(sqliteParser.GetTableAliasContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGetTableAlias(sqliteParser.GetTableAliasContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

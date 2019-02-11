@@ -3,7 +3,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.CharStream;
-import org.stringtemplate.v4.ST;
 
 import java.util.*;
 
@@ -18,8 +17,10 @@ public class TreeParser {
     private HashMap<String, LinkedList<String>> newTablesCreated, optimizedWhere;
     private String finalTable,dropTableName;
     private final int DROP_STATUS = 0;
-    private final int SELECT_STATUS = 1;
-    private final int STATEMENT_ERROR_STATUS = 2;
+    private final int DROP_ERROR_STATUS = 1;
+    private final int SELECT_STATUS = 2;
+    private final int STATEMENT_ERROR_STATUS = 3;
+    private final int ANTLR_ERROR_STATUS =4;
     private int parserStatus;
 
 
@@ -31,34 +32,56 @@ public class TreeParser {
 
     public void getStatementTokens() throws IllegalAccessException {
 
+        messages = new Vector<>();
         parserStatus = -1 ;
         sqliteLexer lexer = new sqliteLexer(charStream);
         TokenStream tokenStream = new CommonTokenStream(lexer);
         sqliteParser parser = new sqliteParser(tokenStream);
 
+        ErrorListener.InnerErrorListener errorListener = new ErrorListener.InnerErrorListener();
+        parser.removeErrorListeners();
+        parser.addErrorListener(errorListener);
+
         ParseTree myTree = parser.parse();
         ParseTreeWalker walker = new ParseTreeWalker();
+        messages = errorListener.getMsg();
 
         //create an instance of the inner class to call the methods.
         MyListener.MyInnerListener myListener = new MyListener.MyInnerListener(parser);
         walker.walk(myListener,myTree);
         statement = myListener.getMyStatement();
 
-        //Check if this is a drop, create or select statement
-        if(charStream.toString().toLowerCase().contains( "drop")){
-            parserStatus = DROP_STATUS;
-            dropTableOperation();
-        }
-        else if (charStream.toString().toLowerCase().contains("select")) {
-            getParts();
-            messages = mySQLite.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
-            if(!messages.isEmpty())
-                parserStatus = STATEMENT_ERROR_STATUS;
-            else{
-                parserStatus = SELECT_STATUS;
-                operations();
+        if(messages== null)
+            messages = new Vector<>();
+        
+        checkSyntaxErrors();
+
+        //Check if there is a messege from ANTLR4 it means that there is an error so do not built the tree...
+        if(messages == null){
+
+            //Check if this is a drop, create or select statement
+            if(charStream.toString().toLowerCase().contains( "drop")){
+                messages = mySQLite.handleSQLDropTableErrors(charStream.toString());
+                if(!messages.isEmpty())
+                    parserStatus = DROP_ERROR_STATUS;
+                else {
+                    parserStatus = DROP_STATUS;
+                    dropTableOperation();
+                }
             }
-        }
+            else if (charStream.toString().toLowerCase().contains("select")) {
+                getParts();
+                messages = mySQLite.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
+                if(!messages.isEmpty())
+                    parserStatus = STATEMENT_ERROR_STATUS;
+                else{
+                    parserStatus = SELECT_STATUS;
+                    operations();
+                }
+            }
+        }else parserStatus = ANTLR_ERROR_STATUS;
+
+
     }
 
     public void operations()throws IllegalAccessException {
@@ -222,6 +245,15 @@ public class TreeParser {
             i++;
         }
         return tree;
+    }
+
+    public void checkSyntaxErrors()
+    {
+
+        if(charStream.toString().toLowerCase().contains("select from")) {
+            messages.add("Select clause fields are missing. This is an example: Select name from students");
+            System.out.println(" emmelia is in here ! ");
+        }
     }
 
     public LinkedList<String> getNodeIdInOrderCanonical() {
