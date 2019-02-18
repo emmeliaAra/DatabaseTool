@@ -346,19 +346,30 @@ public class MySQLite extends DatabaseBasic{
             }
 
         errorMessages = selectANDWhereClauseErrors(selectFieldName,relationsInStatement,myRelationSchema,errorMessages);
-        errorMessages = moreThanOne(relationsInStatement,myRelationName,errorMessages);
+        errorMessages = moreThanOne(relationsInStatement,errorMessages);
         if(!whereClause.isEmpty())
             errorMessages = selectANDWhereClauseErrors(whereClause,relationsInStatement,myRelationSchema,errorMessages);
 
         return errorMessages;
     }
 
-    public Vector<String> moreThanOne( LinkedList<String> relationsInStatement, LinkedList<String> myRelationName,Vector<String>errorMessages )
+    public Vector<String> moreThanOne( LinkedList<String> relationsInStatement,Vector<String>errorMessages )
     {
         //Convert the list into a set. IF they are not of the same size it means that a table appears more than once in the from clause.
         Set<String> myRelationSet  = new LinkedHashSet<>(relationsInStatement);
-        if(myRelationSet.size() != relationsInStatement.size())
-            errorMessages.add("A table appears more than once in the \"FROM\" Clause: ");
+        if(myRelationSet.size() != relationsInStatement.size()) {
+            LinkedList<String> extraTables = new LinkedList<>();
+
+            for (String relation: relationsInStatement){
+                //If the first and the last occurrence of a table is not the same then the table is used twice. Is is not aleady added the add it to the lis
+                if (relationsInStatement.indexOf(relation) != relationsInStatement.lastIndexOf(relation) && !extraTables.contains(relation))
+                    extraTables.add(relation);
+            }
+
+            if(!extraTables.isEmpty())
+                errorMessages.add("This set of tables appears more than once in the \"FROM\" Clause: " + extraTables.toString());
+
+        }
 
         return errorMessages;
     }
@@ -443,9 +454,8 @@ public class MySQLite extends DatabaseBasic{
             String[] parts = evaluationStatement.split("\\.");
             if(!databaseName.equalsIgnoreCase(parts[0]) )
                 errorMessages.add("The database name used in the statement is not correct.\n The name of your database is: " + databaseName);
-        } else if(!getSchema().getRelations().contains(evaluationStatement.toLowerCase()))
+        } else if(getSchema().getRelationOnName(evaluationStatement) == null)
             errorMessages.add("The database you are using does not contain a table with the name: " + evaluationStatement);
-
 
         return errorMessages;
     }

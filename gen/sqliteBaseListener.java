@@ -63,37 +63,13 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx) { }
+	@Override public void enterFactored_select_stmt(sqliteParser.Factored_select_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelectStatement(sqliteParser.SelectStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelectStatement(sqliteParser.SelectStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelectOrValues(sqliteParser.SelectOrValuesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelectOrValues(sqliteParser.SelectOrValuesContext ctx) { }
+	@Override public void exitFactored_select_stmt(sqliteParser.Factored_select_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -183,6 +159,18 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterLiteralValue(sqliteParser.LiteralValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLiteralValue(sqliteParser.LiteralValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterUnaryOperator(sqliteParser.UnaryOperatorContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -190,18 +178,6 @@ public class sqliteBaseListener implements sqliteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitUnaryOperator(sqliteParser.UnaryOperatorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterColumnAlias(sqliteParser.ColumnAliasContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitColumnAlias(sqliteParser.ColumnAliasContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -17,27 +17,26 @@ public class sqliteParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		SCOL=1, DOT=2, OPEN_PAR=3, CLOSE_PAR=4, COMMA=5, ASSIGN=6, STAR=7, PLUS=8, 
-		MINUS=9, TILDE=10, PIPE2=11, DIV=12, MOD=13, LT2=14, GT2=15, AMP=16, PIPE=17, 
-		LT=18, LT_EQ=19, GT=20, GT_EQ=21, EQ=22, NOT_EQ1=23, NOT_EQ2=24, UNDERSCORE=25, 
-		K_AND=26, K_DROP=27, K_FROM=28, K_OR=29, K_SELECT=30, K_TABLE=31, K_WHERE=32, 
-		IDENTIFIER=33, NUMERIC_LITERAL=34, BIND_PARAMETER=35, STRING_LITERAL=36, 
-		BLOB_LITERAL=37, SINGLE_LINE_COMMENT=38, MULTILINE_COMMENT=39, SPACES=40, 
-		UNEXPECTED_CHAR=41;
+		MINUS=9, LT=10, LT_EQ=11, GT=12, GT_EQ=13, EQ=14, NOT_EQ1=15, NOT_EQ2=16, 
+		K_AND=17, K_DATABASE=18, K_DROP=19, K_FROM=20, K_OR=21, K_SELECT=22, K_TABLE=23, 
+		K_WHERE=24, IDENTIFIER=25, NUMERIC_LITERAL=26, BIND_PARAMETER=27, STRING_LITERAL=28, 
+		BLOB_LITERAL=29, SINGLE_LINE_COMMENT=30, MULTILINE_COMMENT=31, SPACES=32, 
+		UNEXPECTED_CHAR=33, K_ADD=34, K_ALL=35;
 	public static final int
 		RULE_parse = 0, RULE_error = 1, RULE_sql_stmt = 2, RULE_drop_table_stmt = 3, 
-		RULE_factored_select_stmt = 4, RULE_select_stmt = 5, RULE_select_or_values = 6, 
-		RULE_expr = 7, RULE_result_column = 8, RULE_table_or_subquery = 9, RULE_select_core = 10, 
-		RULE_unary_operator = 11, RULE_column_alias = 12, RULE_dot_symbol = 13, 
-		RULE_comma_symbol = 14, RULE_semicolon_symbol = 15, RULE_open_paren = 16, 
-		RULE_close_paren = 17, RULE_assign_symbol = 18, RULE_keyword = 19, RULE_database_name = 20, 
-		RULE_table_name = 21, RULE_column_name = 22, RULE_any_name = 23;
+		RULE_factored_select_stmt = 4, RULE_expr = 5, RULE_result_column = 6, 
+		RULE_table_or_subquery = 7, RULE_select_core = 8, RULE_literal_value = 9, 
+		RULE_unary_operator = 10, RULE_dot_symbol = 11, RULE_comma_symbol = 12, 
+		RULE_semicolon_symbol = 13, RULE_open_paren = 14, RULE_close_paren = 15, 
+		RULE_assign_symbol = 16, RULE_keyword = 17, RULE_database_name = 18, RULE_table_name = 19, 
+		RULE_column_name = 20, RULE_any_name = 21;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"parse", "error", "sql_stmt", "drop_table_stmt", "factored_select_stmt", 
-			"select_stmt", "select_or_values", "expr", "result_column", "table_or_subquery", 
-			"select_core", "unary_operator", "column_alias", "dot_symbol", "comma_symbol", 
-			"semicolon_symbol", "open_paren", "close_paren", "assign_symbol", "keyword", 
-			"database_name", "table_name", "column_name", "any_name"
+			"expr", "result_column", "table_or_subquery", "select_core", "literal_value", 
+			"unary_operator", "dot_symbol", "comma_symbol", "semicolon_symbol", "open_paren", 
+			"close_paren", "assign_symbol", "keyword", "database_name", "table_name", 
+			"column_name", "any_name"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -45,20 +44,18 @@ public class sqliteParser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "';'", "'.'", "'('", "')'", "','", "'='", "'*'", "'+'", "'-'", 
-			"'~'", "'||'", "'/'", "'%'", "'<<'", "'>>'", "'&'", "'|'", "'<'", "'<='", 
-			"'>'", "'>='", "'=='", "'!='", "'<>'", "'_'"
+			"'<'", "'<='", "'>'", "'>='", "'=='", "'!='", "'<>'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "SCOL", "DOT", "OPEN_PAR", "CLOSE_PAR", "COMMA", "ASSIGN", "STAR", 
-			"PLUS", "MINUS", "TILDE", "PIPE2", "DIV", "MOD", "LT2", "GT2", "AMP", 
-			"PIPE", "LT", "LT_EQ", "GT", "GT_EQ", "EQ", "NOT_EQ1", "NOT_EQ2", "UNDERSCORE", 
-			"K_AND", "K_DROP", "K_FROM", "K_OR", "K_SELECT", "K_TABLE", "K_WHERE", 
-			"IDENTIFIER", "NUMERIC_LITERAL", "BIND_PARAMETER", "STRING_LITERAL", 
+			"PLUS", "MINUS", "LT", "LT_EQ", "GT", "GT_EQ", "EQ", "NOT_EQ1", "NOT_EQ2", 
+			"K_AND", "K_DATABASE", "K_DROP", "K_FROM", "K_OR", "K_SELECT", "K_TABLE", 
+			"K_WHERE", "IDENTIFIER", "NUMERIC_LITERAL", "BIND_PARAMETER", "STRING_LITERAL", 
 			"BLOB_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", 
-			"UNEXPECTED_CHAR"
+			"UNEXPECTED_CHAR", "K_ADD", "K_ALL"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -153,26 +150,26 @@ public class sqliteParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(54);
+			setState(50);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << K_DROP) | (1L << K_SELECT) | (1L << UNEXPECTED_CHAR))) != 0)) {
 				{
-				setState(52);
+				setState(48);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case K_DROP:
 				case K_SELECT:
 					{
-					setState(48);
+					setState(44);
 					sql_stmt();
-					setState(49);
+					setState(45);
 					semicolon_symbol();
 					}
 					break;
 				case UNEXPECTED_CHAR:
 					{
-					setState(51);
+					setState(47);
 					error();
 					}
 					break;
@@ -180,11 +177,11 @@ public class sqliteParser extends Parser {
 					throw new NoViableAltException(this);
 				}
 				}
-				setState(56);
+				setState(52);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(57);
+			setState(53);
 			match(EOF);
 			}
 		}
@@ -222,9 +219,11 @@ public class sqliteParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(59);
+			setState(55);
 			((ErrorContext)_localctx).UNEXPECTED_CHAR = match(UNEXPECTED_CHAR);
-			notifyErrorListeners("Unexpected characher found " + (((ErrorContext)_localctx).UNEXPECTED_CHAR!=null?((ErrorContext)_localctx).UNEXPECTED_CHAR.getText():null));
+
+			        notifyErrorListeners("Unexpected characher found " + (((ErrorContext)_localctx).UNEXPECTED_CHAR!=null?((ErrorContext)_localctx).UNEXPECTED_CHAR.getText():null));
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -245,9 +244,6 @@ public class sqliteParser extends Parser {
 		public Factored_select_stmtContext factored_select_stmt() {
 			return getRuleContext(Factored_select_stmtContext.class,0);
 		}
-		public Select_stmtContext select_stmt() {
-			return getRuleContext(Select_stmtContext.class,0);
-		}
 		public Sql_stmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -266,30 +262,25 @@ public class sqliteParser extends Parser {
 		Sql_stmtContext _localctx = new Sql_stmtContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_sql_stmt);
 		try {
-			setState(65);
+			setState(60);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
-			case 1:
+			switch (_input.LA(1)) {
+			case K_DROP:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(62);
+				setState(58);
 				drop_table_stmt();
 				}
 				break;
-			case 2:
+			case K_SELECT:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(63);
+				setState(59);
 				factored_select_stmt();
 				}
 				break;
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(64);
-				select_stmt();
-				}
-				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -344,23 +335,23 @@ public class sqliteParser extends Parser {
 			_localctx = new DropTableContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(67);
+			setState(62);
 			match(K_DROP);
-			setState(68);
+			setState(63);
 			match(K_TABLE);
-			setState(72);
+			setState(67);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
 			case 1:
 				{
-				setState(69);
+				setState(64);
 				database_name();
-				setState(70);
+				setState(65);
 				dot_symbol();
 				}
 				break;
 			}
-			setState(74);
+			setState(69);
 			table_name();
 			}
 		}
@@ -376,28 +367,20 @@ public class sqliteParser extends Parser {
 	}
 
 	public static class Factored_select_stmtContext extends ParserRuleContext {
+		public Select_coreContext select_core() {
+			return getRuleContext(Select_coreContext.class,0);
+		}
 		public Factored_select_stmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_factored_select_stmt; }
-	 
-		public Factored_select_stmtContext() { }
-		public void copyFrom(Factored_select_stmtContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class FactoredSelectStatementContext extends Factored_select_stmtContext {
-		public Select_coreContext select_core() {
-			return getRuleContext(Select_coreContext.class,0);
-		}
-		public FactoredSelectStatementContext(Factored_select_stmtContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).enterFactoredSelectStatement(this);
+			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).enterFactored_select_stmt(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).exitFactoredSelectStatement(this);
+			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).exitFactored_select_stmt(this);
 		}
 	}
 
@@ -405,189 +388,10 @@ public class sqliteParser extends Parser {
 		Factored_select_stmtContext _localctx = new Factored_select_stmtContext(_ctx, getState());
 		enterRule(_localctx, 8, RULE_factored_select_stmt);
 		try {
-			_localctx = new FactoredSelectStatementContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(76);
+			setState(71);
 			select_core();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Select_stmtContext extends ParserRuleContext {
-		public Select_stmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_stmt; }
-	 
-		public Select_stmtContext() { }
-		public void copyFrom(Select_stmtContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class SelectStatementContext extends Select_stmtContext {
-		public Select_or_valuesContext select_or_values() {
-			return getRuleContext(Select_or_valuesContext.class,0);
-		}
-		public SelectStatementContext(Select_stmtContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).enterSelectStatement(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).exitSelectStatement(this);
-		}
-	}
-
-	public final Select_stmtContext select_stmt() throws RecognitionException {
-		Select_stmtContext _localctx = new Select_stmtContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_select_stmt);
-		try {
-			_localctx = new SelectStatementContext(_localctx);
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(78);
-			select_or_values();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Select_or_valuesContext extends ParserRuleContext {
-		public Select_or_valuesContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_select_or_values; }
-	 
-		public Select_or_valuesContext() { }
-		public void copyFrom(Select_or_valuesContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class SelectOrValuesContext extends Select_or_valuesContext {
-		public TerminalNode K_SELECT() { return getToken(sqliteParser.K_SELECT, 0); }
-		public List<Result_columnContext> result_column() {
-			return getRuleContexts(Result_columnContext.class);
-		}
-		public Result_columnContext result_column(int i) {
-			return getRuleContext(Result_columnContext.class,i);
-		}
-		public List<Comma_symbolContext> comma_symbol() {
-			return getRuleContexts(Comma_symbolContext.class);
-		}
-		public Comma_symbolContext comma_symbol(int i) {
-			return getRuleContext(Comma_symbolContext.class,i);
-		}
-		public TerminalNode K_FROM() { return getToken(sqliteParser.K_FROM, 0); }
-		public TerminalNode K_WHERE() { return getToken(sqliteParser.K_WHERE, 0); }
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
-		public List<Table_or_subqueryContext> table_or_subquery() {
-			return getRuleContexts(Table_or_subqueryContext.class);
-		}
-		public Table_or_subqueryContext table_or_subquery(int i) {
-			return getRuleContext(Table_or_subqueryContext.class,i);
-		}
-		public SelectOrValuesContext(Select_or_valuesContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).enterSelectOrValues(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).exitSelectOrValues(this);
-		}
-	}
-
-	public final Select_or_valuesContext select_or_values() throws RecognitionException {
-		Select_or_valuesContext _localctx = new Select_or_valuesContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_select_or_values);
-		int _la;
-		try {
-			_localctx = new SelectOrValuesContext(_localctx);
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(80);
-			match(K_SELECT);
-			setState(81);
-			result_column();
-			setState(87);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==COMMA) {
-				{
-				{
-				setState(82);
-				comma_symbol();
-				setState(83);
-				result_column();
-				}
-				}
-				setState(89);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			setState(100);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==K_FROM) {
-				{
-				setState(90);
-				match(K_FROM);
-				{
-				setState(91);
-				table_or_subquery();
-				setState(97);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				while (_la==COMMA) {
-					{
-					{
-					setState(92);
-					comma_symbol();
-					setState(93);
-					table_or_subquery();
-					}
-					}
-					setState(99);
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				}
-				}
-				}
-			}
-
-			setState(104);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==K_WHERE) {
-				{
-				setState(102);
-				match(K_WHERE);
-				setState(103);
-				expr(0);
-				}
-			}
-
 			}
 		}
 		catch (RecognitionException re) {
@@ -630,6 +434,9 @@ public class sqliteParser extends Parser {
 		}
 	}
 	public static class MyExpressionContext extends ExprContext {
+		public Literal_valueContext literal_value() {
+			return getRuleContext(Literal_valueContext.class,0);
+		}
 		public Column_nameContext column_name() {
 			return getRuleContext(Column_nameContext.class,0);
 		}
@@ -645,22 +452,21 @@ public class sqliteParser extends Parser {
 		public Database_nameContext database_name() {
 			return getRuleContext(Database_nameContext.class,0);
 		}
+		public Open_parenContext open_paren() {
+			return getRuleContext(Open_parenContext.class,0);
+		}
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode PIPE2() { return getToken(sqliteParser.PIPE2, 0); }
+		public Close_parenContext close_paren() {
+			return getRuleContext(Close_parenContext.class,0);
+		}
 		public TerminalNode STAR() { return getToken(sqliteParser.STAR, 0); }
-		public TerminalNode DIV() { return getToken(sqliteParser.DIV, 0); }
-		public TerminalNode MOD() { return getToken(sqliteParser.MOD, 0); }
 		public TerminalNode PLUS() { return getToken(sqliteParser.PLUS, 0); }
 		public TerminalNode MINUS() { return getToken(sqliteParser.MINUS, 0); }
-		public TerminalNode LT2() { return getToken(sqliteParser.LT2, 0); }
-		public TerminalNode GT2() { return getToken(sqliteParser.GT2, 0); }
-		public TerminalNode AMP() { return getToken(sqliteParser.AMP, 0); }
-		public TerminalNode PIPE() { return getToken(sqliteParser.PIPE, 0); }
 		public TerminalNode LT() { return getToken(sqliteParser.LT, 0); }
 		public TerminalNode LT_EQ() { return getToken(sqliteParser.LT_EQ, 0); }
 		public TerminalNode GT() { return getToken(sqliteParser.GT, 0); }
@@ -693,126 +499,115 @@ public class sqliteParser extends Parser {
 		int _parentState = getState();
 		ExprContext _localctx = new ExprContext(_ctx, _parentState);
 		ExprContext _prevctx = _localctx;
-		int _startState = 14;
-		enterRecursionRule(_localctx, 14, RULE_expr, _p);
+		int _startState = 10;
+		enterRecursionRule(_localctx, 10, RULE_expr, _p);
 		int _la;
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(121);
+			setState(93);
 			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case OPEN_PAR:
-			case K_AND:
-			case K_DROP:
-			case K_FROM:
-			case K_OR:
-			case K_SELECT:
-			case K_TABLE:
-			case K_WHERE:
-			case IDENTIFIER:
-			case STRING_LITERAL:
+			switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+			case 1:
 				{
 				_localctx = new MyExpressionContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 
-				setState(115);
+				setState(74);
+				literal_value();
+				}
+				break;
+			case 2:
+				{
+				_localctx = new MyExpressionContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(83);
 				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
+				switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
 				case 1:
 					{
-					setState(110);
+					setState(78);
 					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
+					switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 					case 1:
 						{
-						setState(107);
+						setState(75);
 						database_name();
-						setState(108);
+						setState(76);
 						dot_symbol();
 						}
 						break;
 					}
-					setState(112);
+					setState(80);
 					table_name();
-					setState(113);
+					setState(81);
 					dot_symbol();
 					}
 					break;
 				}
-				setState(117);
+				setState(85);
 				column_name();
 				}
 				break;
-			case PLUS:
-			case MINUS:
-			case TILDE:
+			case 3:
 				{
 				_localctx = new None1Context(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(118);
+				setState(86);
 				unary_operator();
-				setState(119);
-				expr(9);
+				setState(87);
+				expr(8);
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
+			case 4:
+				{
+				_localctx = new MyExpressionContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(89);
+				open_paren();
+				setState(90);
+				expr(0);
+				setState(91);
+				close_paren();
+				}
+				break;
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(154);
+			setState(120);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,13,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,9,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(152);
+					setState(118);
 					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,12,_ctx) ) {
+					switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
 					case 1:
 						{
 						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(123);
-						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
-						setState(124);
-						match(PIPE2);
-						setState(125);
-						expr(9);
+						setState(95);
+						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
+						setState(96);
+						match(STAR);
+						setState(97);
+						expr(8);
 						}
 						break;
 					case 2:
 						{
 						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(126);
-						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
-						setState(127);
-						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STAR) | (1L << DIV) | (1L << MOD))) != 0)) ) {
-						_errHandler.recoverInline(this);
-						}
-						else {
-							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-							_errHandler.reportMatch(this);
-							consume();
-						}
-						setState(128);
-						expr(8);
-						}
-						break;
-					case 3:
-						{
-						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
-						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(129);
+						setState(98);
 						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
-						setState(130);
+						setState(99);
 						_la = _input.LA(1);
 						if ( !(_la==PLUS || _la==MINUS) ) {
 						_errHandler.recoverInline(this);
@@ -822,37 +617,17 @@ public class sqliteParser extends Parser {
 							_errHandler.reportMatch(this);
 							consume();
 						}
-						setState(131);
+						setState(100);
 						expr(7);
 						}
 						break;
-					case 4:
+					case 3:
 						{
 						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(132);
+						setState(101);
 						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
-						setState(133);
-						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LT2) | (1L << GT2) | (1L << AMP) | (1L << PIPE))) != 0)) ) {
-						_errHandler.recoverInline(this);
-						}
-						else {
-							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-							_errHandler.reportMatch(this);
-							consume();
-						}
-						setState(134);
-						expr(6);
-						}
-						break;
-					case 5:
-						{
-						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
-						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(135);
-						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
-						setState(136);
+						setState(102);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LT) | (1L << LT_EQ) | (1L << GT) | (1L << GT_EQ))) != 0)) ) {
 						_errHandler.recoverInline(this);
@@ -862,80 +637,80 @@ public class sqliteParser extends Parser {
 							_errHandler.reportMatch(this);
 							consume();
 						}
-						setState(137);
-						expr(5);
+						setState(103);
+						expr(6);
 						}
 						break;
-					case 6:
+					case 4:
 						{
 						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(138);
-						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
-						setState(143);
+						setState(104);
+						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
+						setState(109);
 						_errHandler.sync(this);
 						switch (_input.LA(1)) {
 						case ASSIGN:
 							{
-							setState(139);
+							setState(105);
 							assign_symbol();
 							}
 							break;
 						case EQ:
 							{
-							setState(140);
+							setState(106);
 							match(EQ);
 							}
 							break;
 						case NOT_EQ1:
 							{
-							setState(141);
+							setState(107);
 							match(NOT_EQ1);
 							}
 							break;
 						case NOT_EQ2:
 							{
-							setState(142);
+							setState(108);
 							match(NOT_EQ2);
 							}
 							break;
 						default:
 							throw new NoViableAltException(this);
 						}
-						setState(145);
+						setState(111);
+						expr(5);
+						}
+						break;
+					case 5:
+						{
+						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_expr);
+						setState(112);
+						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
+						setState(113);
+						match(K_AND);
+						setState(114);
 						expr(4);
 						}
 						break;
-					case 7:
+					case 6:
 						{
 						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(146);
+						setState(115);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
-						setState(147);
-						match(K_AND);
-						setState(148);
-						expr(3);
-						}
-						break;
-					case 8:
-						{
-						_localctx = new MyExpressionContext(new ExprContext(_parentctx, _parentState));
-						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(149);
-						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
-						setState(150);
+						setState(116);
 						match(K_OR);
-						setState(151);
-						expr(2);
+						setState(117);
+						expr(3);
 						}
 						break;
 					}
 					} 
 				}
-				setState(156);
+				setState(122);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,13,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,9,_ctx);
 			}
 			}
 		}
@@ -995,9 +770,6 @@ public class sqliteParser extends Parser {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
-		public Column_aliasContext column_alias() {
-			return getRuleContext(Column_aliasContext.class,0);
-		}
 		public ExpressionAliasContext(Result_columnContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -1011,17 +783,16 @@ public class sqliteParser extends Parser {
 
 	public final Result_columnContext result_column() throws RecognitionException {
 		Result_columnContext _localctx = new Result_columnContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_result_column);
-		int _la;
+		enterRule(_localctx, 12, RULE_result_column);
 		try {
-			setState(166);
+			setState(129);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,15,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
 			case 1:
 				_localctx = new MyStarContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(157);
+				setState(123);
 				match(STAR);
 				}
 				break;
@@ -1029,11 +800,11 @@ public class sqliteParser extends Parser {
 				_localctx = new MystartContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(158);
+				setState(124);
 				table_name();
-				setState(159);
+				setState(125);
 				dot_symbol();
-				setState(160);
+				setState(126);
 				match(STAR);
 				}
 				break;
@@ -1041,18 +812,8 @@ public class sqliteParser extends Parser {
 				_localctx = new ExpressionAliasContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(162);
+				setState(128);
 				expr(0);
-				setState(164);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				if (_la==IDENTIFIER || _la==STRING_LITERAL) {
-					{
-					setState(163);
-					column_alias();
-					}
-				}
-
 				}
 				break;
 			}
@@ -1107,8 +868,8 @@ public class sqliteParser extends Parser {
 		public Comma_symbolContext comma_symbol(int i) {
 			return getRuleContext(Comma_symbolContext.class,i);
 		}
-		public Select_stmtContext select_stmt() {
-			return getRuleContext(Select_stmtContext.class,0);
+		public Factored_select_stmtContext factored_select_stmt() {
+			return getRuleContext(Factored_select_stmtContext.class,0);
 		}
 		public TableORSubqueryAContext(Table_or_subqueryContext ctx) { copyFrom(ctx); }
 		@Override
@@ -1123,29 +884,29 @@ public class sqliteParser extends Parser {
 
 	public final Table_or_subqueryContext table_or_subquery() throws RecognitionException {
 		Table_or_subqueryContext _localctx = new Table_or_subqueryContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_table_or_subquery);
+		enterRule(_localctx, 14, RULE_table_or_subquery);
 		int _la;
 		try {
-			setState(190);
+			setState(153);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,18,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,13,_ctx) ) {
 			case 1:
 				_localctx = new TableORSubqueryAContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(171);
+				setState(134);
 				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,16,_ctx) ) {
+				switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
 				case 1:
 					{
-					setState(168);
+					setState(131);
 					database_name();
-					setState(169);
+					setState(132);
 					dot_symbol();
 					}
 					break;
 				}
-				setState(173);
+				setState(136);
 				table_name();
 				}
 				break;
@@ -1153,29 +914,29 @@ public class sqliteParser extends Parser {
 				_localctx = new TableORSubqueryAContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(174);
+				setState(137);
 				open_paren();
 				{
-				setState(175);
+				setState(138);
 				table_or_subquery();
-				setState(181);
+				setState(144);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==COMMA) {
 					{
 					{
-					setState(176);
+					setState(139);
 					comma_symbol();
-					setState(177);
+					setState(140);
 					table_or_subquery();
 					}
 					}
-					setState(183);
+					setState(146);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
 				}
-				setState(184);
+				setState(147);
 				close_paren();
 				}
 				break;
@@ -1183,11 +944,11 @@ public class sqliteParser extends Parser {
 				_localctx = new TableORSubqueryAContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(186);
+				setState(149);
 				open_paren();
-				setState(187);
-				select_stmt();
-				setState(188);
+				setState(150);
+				factored_select_stmt();
+				setState(151);
 				close_paren();
 				}
 				break;
@@ -1253,55 +1014,55 @@ public class sqliteParser extends Parser {
 
 	public final Select_coreContext select_core() throws RecognitionException {
 		Select_coreContext _localctx = new Select_coreContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_select_core);
+		enterRule(_localctx, 16, RULE_select_core);
 		int _la;
 		try {
 			_localctx = new SelectCoreContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(192);
+			setState(155);
 			match(K_SELECT);
-			setState(193);
+			setState(156);
 			result_column();
-			setState(199);
+			setState(162);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(194);
+				setState(157);
 				comma_symbol();
-				setState(195);
+				setState(158);
 				result_column();
 				}
 				}
-				setState(201);
+				setState(164);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(212);
+			setState(175);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_FROM) {
 				{
-				setState(202);
+				setState(165);
 				match(K_FROM);
 				{
-				setState(203);
+				setState(166);
 				table_or_subquery();
-				setState(209);
+				setState(172);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==COMMA) {
 					{
 					{
-					setState(204);
+					setState(167);
 					comma_symbol();
-					setState(205);
+					setState(168);
 					table_or_subquery();
 					}
 					}
-					setState(211);
+					setState(174);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
@@ -1309,18 +1070,81 @@ public class sqliteParser extends Parser {
 				}
 			}
 
-			setState(216);
+			setState(179);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_WHERE) {
 				{
-				setState(214);
+				setState(177);
 				match(K_WHERE);
-				setState(215);
+				setState(178);
 				expr(0);
 				}
 			}
 
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class Literal_valueContext extends ParserRuleContext {
+		public Literal_valueContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_literal_value; }
+	 
+		public Literal_valueContext() { }
+		public void copyFrom(Literal_valueContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class LiteralValueContext extends Literal_valueContext {
+		public TerminalNode NUMERIC_LITERAL() { return getToken(sqliteParser.NUMERIC_LITERAL, 0); }
+		public TerminalNode STRING_LITERAL() { return getToken(sqliteParser.STRING_LITERAL, 0); }
+		public LiteralValueContext(Literal_valueContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).enterLiteralValue(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).exitLiteralValue(this);
+		}
+	}
+
+	public final Literal_valueContext literal_value() throws RecognitionException {
+		Literal_valueContext _localctx = new Literal_valueContext(_ctx, getState());
+		enterRule(_localctx, 18, RULE_literal_value);
+		try {
+			setState(183);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case NUMERIC_LITERAL:
+				_localctx = new LiteralValueContext(_localctx);
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(181);
+				match(NUMERIC_LITERAL);
+				}
+				break;
+			case STRING_LITERAL:
+				_localctx = new LiteralValueContext(_localctx);
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(182);
+				match(STRING_LITERAL);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1348,7 +1172,6 @@ public class sqliteParser extends Parser {
 	public static class UnaryOperatorContext extends Unary_operatorContext {
 		public TerminalNode MINUS() { return getToken(sqliteParser.MINUS, 0); }
 		public TerminalNode PLUS() { return getToken(sqliteParser.PLUS, 0); }
-		public TerminalNode TILDE() { return getToken(sqliteParser.TILDE, 0); }
 		public UnaryOperatorContext(Unary_operatorContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -1362,16 +1185,16 @@ public class sqliteParser extends Parser {
 
 	public final Unary_operatorContext unary_operator() throws RecognitionException {
 		Unary_operatorContext _localctx = new Unary_operatorContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_unary_operator);
+		enterRule(_localctx, 20, RULE_unary_operator);
 		try {
-			setState(221);
+			setState(187);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case MINUS:
 				_localctx = new UnaryOperatorContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(218);
+				setState(185);
 				match(MINUS);
 				}
 				break;
@@ -1379,79 +1202,8 @@ public class sqliteParser extends Parser {
 				_localctx = new UnaryOperatorContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(219);
+				setState(186);
 				match(PLUS);
-				}
-				break;
-			case TILDE:
-				_localctx = new UnaryOperatorContext(_localctx);
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(220);
-				match(TILDE);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Column_aliasContext extends ParserRuleContext {
-		public Column_aliasContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_column_alias; }
-	 
-		public Column_aliasContext() { }
-		public void copyFrom(Column_aliasContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class ColumnAliasContext extends Column_aliasContext {
-		public TerminalNode IDENTIFIER() { return getToken(sqliteParser.IDENTIFIER, 0); }
-		public TerminalNode STRING_LITERAL() { return getToken(sqliteParser.STRING_LITERAL, 0); }
-		public ColumnAliasContext(Column_aliasContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).enterColumnAlias(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sqliteListener ) ((sqliteListener)listener).exitColumnAlias(this);
-		}
-	}
-
-	public final Column_aliasContext column_alias() throws RecognitionException {
-		Column_aliasContext _localctx = new Column_aliasContext(_ctx, getState());
-		enterRule(_localctx, 24, RULE_column_alias);
-		try {
-			setState(225);
-			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case IDENTIFIER:
-				_localctx = new ColumnAliasContext(_localctx);
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(223);
-				match(IDENTIFIER);
-				}
-				break;
-			case STRING_LITERAL:
-				_localctx = new ColumnAliasContext(_localctx);
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(224);
-				match(STRING_LITERAL);
 				}
 				break;
 			default:
@@ -1495,12 +1247,12 @@ public class sqliteParser extends Parser {
 
 	public final Dot_symbolContext dot_symbol() throws RecognitionException {
 		Dot_symbolContext _localctx = new Dot_symbolContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_dot_symbol);
+		enterRule(_localctx, 22, RULE_dot_symbol);
 		try {
 			_localctx = new GetDotContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(227);
+			setState(189);
 			match(DOT);
 			}
 		}
@@ -1541,12 +1293,12 @@ public class sqliteParser extends Parser {
 
 	public final Comma_symbolContext comma_symbol() throws RecognitionException {
 		Comma_symbolContext _localctx = new Comma_symbolContext(_ctx, getState());
-		enterRule(_localctx, 28, RULE_comma_symbol);
+		enterRule(_localctx, 24, RULE_comma_symbol);
 		try {
 			_localctx = new GetCommaContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(229);
+			setState(191);
 			match(COMMA);
 			}
 		}
@@ -1587,12 +1339,12 @@ public class sqliteParser extends Parser {
 
 	public final Semicolon_symbolContext semicolon_symbol() throws RecognitionException {
 		Semicolon_symbolContext _localctx = new Semicolon_symbolContext(_ctx, getState());
-		enterRule(_localctx, 30, RULE_semicolon_symbol);
+		enterRule(_localctx, 26, RULE_semicolon_symbol);
 		try {
 			_localctx = new GetSCOLContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(231);
+			setState(193);
 			match(SCOL);
 			}
 		}
@@ -1633,12 +1385,12 @@ public class sqliteParser extends Parser {
 
 	public final Open_parenContext open_paren() throws RecognitionException {
 		Open_parenContext _localctx = new Open_parenContext(_ctx, getState());
-		enterRule(_localctx, 32, RULE_open_paren);
+		enterRule(_localctx, 28, RULE_open_paren);
 		try {
 			_localctx = new GetOpenParContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(233);
+			setState(195);
 			match(OPEN_PAR);
 			}
 		}
@@ -1679,12 +1431,12 @@ public class sqliteParser extends Parser {
 
 	public final Close_parenContext close_paren() throws RecognitionException {
 		Close_parenContext _localctx = new Close_parenContext(_ctx, getState());
-		enterRule(_localctx, 34, RULE_close_paren);
+		enterRule(_localctx, 30, RULE_close_paren);
 		try {
 			_localctx = new GetCloseParContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(235);
+			setState(197);
 			match(CLOSE_PAR);
 			}
 		}
@@ -1725,12 +1477,12 @@ public class sqliteParser extends Parser {
 
 	public final Assign_symbolContext assign_symbol() throws RecognitionException {
 		Assign_symbolContext _localctx = new Assign_symbolContext(_ctx, getState());
-		enterRule(_localctx, 36, RULE_assign_symbol);
+		enterRule(_localctx, 32, RULE_assign_symbol);
 		try {
 			_localctx = new GetAssignContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(237);
+			setState(199);
 			match(ASSIGN);
 			}
 		}
@@ -1746,7 +1498,10 @@ public class sqliteParser extends Parser {
 	}
 
 	public static class KeywordContext extends ParserRuleContext {
+		public TerminalNode K_ADD() { return getToken(sqliteParser.K_ADD, 0); }
+		public TerminalNode K_ALL() { return getToken(sqliteParser.K_ALL, 0); }
 		public TerminalNode K_AND() { return getToken(sqliteParser.K_AND, 0); }
+		public TerminalNode K_DATABASE() { return getToken(sqliteParser.K_DATABASE, 0); }
 		public TerminalNode K_DROP() { return getToken(sqliteParser.K_DROP, 0); }
 		public TerminalNode K_FROM() { return getToken(sqliteParser.K_FROM, 0); }
 		public TerminalNode K_OR() { return getToken(sqliteParser.K_OR, 0); }
@@ -1769,14 +1524,14 @@ public class sqliteParser extends Parser {
 
 	public final KeywordContext keyword() throws RecognitionException {
 		KeywordContext _localctx = new KeywordContext(_ctx, getState());
-		enterRule(_localctx, 38, RULE_keyword);
+		enterRule(_localctx, 34, RULE_keyword);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(239);
+			setState(201);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << K_AND) | (1L << K_DROP) | (1L << K_FROM) | (1L << K_OR) | (1L << K_SELECT) | (1L << K_TABLE) | (1L << K_WHERE))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << K_AND) | (1L << K_DATABASE) | (1L << K_DROP) | (1L << K_FROM) | (1L << K_OR) | (1L << K_SELECT) | (1L << K_TABLE) | (1L << K_WHERE) | (1L << K_ADD) | (1L << K_ALL))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1825,12 +1580,12 @@ public class sqliteParser extends Parser {
 
 	public final Database_nameContext database_name() throws RecognitionException {
 		Database_nameContext _localctx = new Database_nameContext(_ctx, getState());
-		enterRule(_localctx, 40, RULE_database_name);
+		enterRule(_localctx, 36, RULE_database_name);
 		try {
 			_localctx = new GetDatabaseNameContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(241);
+			setState(203);
 			any_name();
 			}
 		}
@@ -1873,12 +1628,12 @@ public class sqliteParser extends Parser {
 
 	public final Table_nameContext table_name() throws RecognitionException {
 		Table_nameContext _localctx = new Table_nameContext(_ctx, getState());
-		enterRule(_localctx, 42, RULE_table_name);
+		enterRule(_localctx, 38, RULE_table_name);
 		try {
 			_localctx = new GetTableNameContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(243);
+			setState(205);
 			any_name();
 			}
 		}
@@ -1921,12 +1676,12 @@ public class sqliteParser extends Parser {
 
 	public final Column_nameContext column_name() throws RecognitionException {
 		Column_nameContext _localctx = new Column_nameContext(_ctx, getState());
-		enterRule(_localctx, 44, RULE_column_name);
+		enterRule(_localctx, 40, RULE_column_name);
 		try {
 			_localctx = new GetColumnNameContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(245);
+			setState(207);
 			any_name();
 			}
 		}
@@ -2009,30 +1764,33 @@ public class sqliteParser extends Parser {
 
 	public final Any_nameContext any_name() throws RecognitionException {
 		Any_nameContext _localctx = new Any_nameContext(_ctx, getState());
-		enterRule(_localctx, 46, RULE_any_name);
+		enterRule(_localctx, 42, RULE_any_name);
 		try {
-			setState(254);
+			setState(216);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case IDENTIFIER:
 				_localctx = new IdentifierContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(247);
+				setState(209);
 				match(IDENTIFIER);
 				}
 				break;
 			case K_AND:
+			case K_DATABASE:
 			case K_DROP:
 			case K_FROM:
 			case K_OR:
 			case K_SELECT:
 			case K_TABLE:
 			case K_WHERE:
+			case K_ADD:
+			case K_ALL:
 				_localctx = new KeyWordLContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(248);
+				setState(210);
 				keyword();
 				}
 				break;
@@ -2040,7 +1798,7 @@ public class sqliteParser extends Parser {
 				_localctx = new StringLiteralContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(249);
+				setState(211);
 				match(STRING_LITERAL);
 				}
 				break;
@@ -2048,11 +1806,11 @@ public class sqliteParser extends Parser {
 				_localctx = new ReAnyNameContext(_localctx);
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(250);
+				setState(212);
 				match(OPEN_PAR);
-				setState(251);
+				setState(213);
 				any_name();
-				setState(252);
+				setState(214);
 				match(CLOSE_PAR);
 				}
 				break;
@@ -2073,7 +1831,7 @@ public class sqliteParser extends Parser {
 
 	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
 		switch (ruleIndex) {
-		case 7:
+		case 5:
 			return expr_sempred((ExprContext)_localctx, predIndex);
 		}
 		return true;
@@ -2081,112 +1839,91 @@ public class sqliteParser extends Parser {
 	private boolean expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0:
-			return precpred(_ctx, 8);
-		case 1:
 			return precpred(_ctx, 7);
-		case 2:
+		case 1:
 			return precpred(_ctx, 6);
-		case 3:
+		case 2:
 			return precpred(_ctx, 5);
-		case 4:
+		case 3:
 			return precpred(_ctx, 4);
-		case 5:
+		case 4:
 			return precpred(_ctx, 3);
-		case 6:
+		case 5:
 			return precpred(_ctx, 2);
-		case 7:
-			return precpred(_ctx, 1);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3+\u0103\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3%\u00dd\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
-		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
-		"\3\2\3\2\3\2\3\2\7\2\67\n\2\f\2\16\2:\13\2\3\2\3\2\3\3\3\3\3\3\3\4\3\4"+
-		"\3\4\5\4D\n\4\3\5\3\5\3\5\3\5\3\5\5\5K\n\5\3\5\3\5\3\6\3\6\3\7\3\7\3\b"+
-		"\3\b\3\b\3\b\3\b\7\bX\n\b\f\b\16\b[\13\b\3\b\3\b\3\b\3\b\3\b\7\bb\n\b"+
-		"\f\b\16\be\13\b\5\bg\n\b\3\b\3\b\5\bk\n\b\3\t\3\t\3\t\3\t\5\tq\n\t\3\t"+
-		"\3\t\3\t\5\tv\n\t\3\t\3\t\3\t\3\t\5\t|\n\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t"+
-		"\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u0092\n\t\3\t"+
-		"\3\t\3\t\3\t\3\t\3\t\3\t\7\t\u009b\n\t\f\t\16\t\u009e\13\t\3\n\3\n\3\n"+
-		"\3\n\3\n\3\n\3\n\5\n\u00a7\n\n\5\n\u00a9\n\n\3\13\3\13\3\13\5\13\u00ae"+
-		"\n\13\3\13\3\13\3\13\3\13\3\13\3\13\7\13\u00b6\n\13\f\13\16\13\u00b9\13"+
-		"\13\3\13\3\13\3\13\3\13\3\13\3\13\5\13\u00c1\n\13\3\f\3\f\3\f\3\f\3\f"+
-		"\7\f\u00c8\n\f\f\f\16\f\u00cb\13\f\3\f\3\f\3\f\3\f\3\f\7\f\u00d2\n\f\f"+
-		"\f\16\f\u00d5\13\f\5\f\u00d7\n\f\3\f\3\f\5\f\u00db\n\f\3\r\3\r\3\r\5\r"+
-		"\u00e0\n\r\3\16\3\16\5\16\u00e4\n\16\3\17\3\17\3\20\3\20\3\21\3\21\3\22"+
-		"\3\22\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\27\3\27\3\30\3\30\3\31"+
-		"\3\31\3\31\3\31\3\31\3\31\3\31\5\31\u0101\n\31\3\31\2\3\20\32\2\4\6\b"+
-		"\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\2\7\4\2\t\t\16\17\3\2\n\13"+
-		"\3\2\20\23\3\2\24\27\3\2\34\"\2\u0112\28\3\2\2\2\4=\3\2\2\2\6C\3\2\2\2"+
-		"\bE\3\2\2\2\nN\3\2\2\2\fP\3\2\2\2\16R\3\2\2\2\20{\3\2\2\2\22\u00a8\3\2"+
-		"\2\2\24\u00c0\3\2\2\2\26\u00c2\3\2\2\2\30\u00df\3\2\2\2\32\u00e3\3\2\2"+
-		"\2\34\u00e5\3\2\2\2\36\u00e7\3\2\2\2 \u00e9\3\2\2\2\"\u00eb\3\2\2\2$\u00ed"+
-		"\3\2\2\2&\u00ef\3\2\2\2(\u00f1\3\2\2\2*\u00f3\3\2\2\2,\u00f5\3\2\2\2."+
-		"\u00f7\3\2\2\2\60\u0100\3\2\2\2\62\63\5\6\4\2\63\64\5 \21\2\64\67\3\2"+
-		"\2\2\65\67\5\4\3\2\66\62\3\2\2\2\66\65\3\2\2\2\67:\3\2\2\28\66\3\2\2\2"+
-		"89\3\2\2\29;\3\2\2\2:8\3\2\2\2;<\7\2\2\3<\3\3\2\2\2=>\7+\2\2>?\b\3\1\2"+
-		"?\5\3\2\2\2@D\5\b\5\2AD\5\n\6\2BD\5\f\7\2C@\3\2\2\2CA\3\2\2\2CB\3\2\2"+
-		"\2D\7\3\2\2\2EF\7\35\2\2FJ\7!\2\2GH\5*\26\2HI\5\34\17\2IK\3\2\2\2JG\3"+
-		"\2\2\2JK\3\2\2\2KL\3\2\2\2LM\5,\27\2M\t\3\2\2\2NO\5\26\f\2O\13\3\2\2\2"+
-		"PQ\5\16\b\2Q\r\3\2\2\2RS\7 \2\2SY\5\22\n\2TU\5\36\20\2UV\5\22\n\2VX\3"+
-		"\2\2\2WT\3\2\2\2X[\3\2\2\2YW\3\2\2\2YZ\3\2\2\2Zf\3\2\2\2[Y\3\2\2\2\\]"+
-		"\7\36\2\2]c\5\24\13\2^_\5\36\20\2_`\5\24\13\2`b\3\2\2\2a^\3\2\2\2be\3"+
-		"\2\2\2ca\3\2\2\2cd\3\2\2\2dg\3\2\2\2ec\3\2\2\2f\\\3\2\2\2fg\3\2\2\2gj"+
-		"\3\2\2\2hi\7\"\2\2ik\5\20\t\2jh\3\2\2\2jk\3\2\2\2k\17\3\2\2\2lu\b\t\1"+
-		"\2mn\5*\26\2no\5\34\17\2oq\3\2\2\2pm\3\2\2\2pq\3\2\2\2qr\3\2\2\2rs\5,"+
-		"\27\2st\5\34\17\2tv\3\2\2\2up\3\2\2\2uv\3\2\2\2vw\3\2\2\2w|\5.\30\2xy"+
-		"\5\30\r\2yz\5\20\t\13z|\3\2\2\2{l\3\2\2\2{x\3\2\2\2|\u009c\3\2\2\2}~\f"+
-		"\n\2\2~\177\7\r\2\2\177\u009b\5\20\t\13\u0080\u0081\f\t\2\2\u0081\u0082"+
-		"\t\2\2\2\u0082\u009b\5\20\t\n\u0083\u0084\f\b\2\2\u0084\u0085\t\3\2\2"+
-		"\u0085\u009b\5\20\t\t\u0086\u0087\f\7\2\2\u0087\u0088\t\4\2\2\u0088\u009b"+
-		"\5\20\t\b\u0089\u008a\f\6\2\2\u008a\u008b\t\5\2\2\u008b\u009b\5\20\t\7"+
-		"\u008c\u0091\f\5\2\2\u008d\u0092\5&\24\2\u008e\u0092\7\30\2\2\u008f\u0092"+
-		"\7\31\2\2\u0090\u0092\7\32\2\2\u0091\u008d\3\2\2\2\u0091\u008e\3\2\2\2"+
-		"\u0091\u008f\3\2\2\2\u0091\u0090\3\2\2\2\u0092\u0093\3\2\2\2\u0093\u009b"+
-		"\5\20\t\6\u0094\u0095\f\4\2\2\u0095\u0096\7\34\2\2\u0096\u009b\5\20\t"+
-		"\5\u0097\u0098\f\3\2\2\u0098\u0099\7\37\2\2\u0099\u009b\5\20\t\4\u009a"+
-		"}\3\2\2\2\u009a\u0080\3\2\2\2\u009a\u0083\3\2\2\2\u009a\u0086\3\2\2\2"+
-		"\u009a\u0089\3\2\2\2\u009a\u008c\3\2\2\2\u009a\u0094\3\2\2\2\u009a\u0097"+
-		"\3\2\2\2\u009b\u009e\3\2\2\2\u009c\u009a\3\2\2\2\u009c\u009d\3\2\2\2\u009d"+
-		"\21\3\2\2\2\u009e\u009c\3\2\2\2\u009f\u00a9\7\t\2\2\u00a0\u00a1\5,\27"+
-		"\2\u00a1\u00a2\5\34\17\2\u00a2\u00a3\7\t\2\2\u00a3\u00a9\3\2\2\2\u00a4"+
-		"\u00a6\5\20\t\2\u00a5\u00a7\5\32\16\2\u00a6\u00a5\3\2\2\2\u00a6\u00a7"+
-		"\3\2\2\2\u00a7\u00a9\3\2\2\2\u00a8\u009f\3\2\2\2\u00a8\u00a0\3\2\2\2\u00a8"+
-		"\u00a4\3\2\2\2\u00a9\23\3\2\2\2\u00aa\u00ab\5*\26\2\u00ab\u00ac\5\34\17"+
-		"\2\u00ac\u00ae\3\2\2\2\u00ad\u00aa\3\2\2\2\u00ad\u00ae\3\2\2\2\u00ae\u00af"+
-		"\3\2\2\2\u00af\u00c1\5,\27\2\u00b0\u00b1\5\"\22\2\u00b1\u00b7\5\24\13"+
-		"\2\u00b2\u00b3\5\36\20\2\u00b3\u00b4\5\24\13\2\u00b4\u00b6\3\2\2\2\u00b5"+
-		"\u00b2\3\2\2\2\u00b6\u00b9\3\2\2\2\u00b7\u00b5\3\2\2\2\u00b7\u00b8\3\2"+
-		"\2\2\u00b8\u00ba\3\2\2\2\u00b9\u00b7\3\2\2\2\u00ba\u00bb\5$\23\2\u00bb"+
-		"\u00c1\3\2\2\2\u00bc\u00bd\5\"\22\2\u00bd\u00be\5\f\7\2\u00be\u00bf\5"+
-		"$\23\2\u00bf\u00c1\3\2\2\2\u00c0\u00ad\3\2\2\2\u00c0\u00b0\3\2\2\2\u00c0"+
-		"\u00bc\3\2\2\2\u00c1\25\3\2\2\2\u00c2\u00c3\7 \2\2\u00c3\u00c9\5\22\n"+
-		"\2\u00c4\u00c5\5\36\20\2\u00c5\u00c6\5\22\n\2\u00c6\u00c8\3\2\2\2\u00c7"+
-		"\u00c4\3\2\2\2\u00c8\u00cb\3\2\2\2\u00c9\u00c7\3\2\2\2\u00c9\u00ca\3\2"+
-		"\2\2\u00ca\u00d6\3\2\2\2\u00cb\u00c9\3\2\2\2\u00cc\u00cd\7\36\2\2\u00cd"+
-		"\u00d3\5\24\13\2\u00ce\u00cf\5\36\20\2\u00cf\u00d0\5\24\13\2\u00d0\u00d2"+
-		"\3\2\2\2\u00d1\u00ce\3\2\2\2\u00d2\u00d5\3\2\2\2\u00d3\u00d1\3\2\2\2\u00d3"+
-		"\u00d4\3\2\2\2\u00d4\u00d7\3\2\2\2\u00d5\u00d3\3\2\2\2\u00d6\u00cc\3\2"+
-		"\2\2\u00d6\u00d7\3\2\2\2\u00d7\u00da\3\2\2\2\u00d8\u00d9\7\"\2\2\u00d9"+
-		"\u00db\5\20\t\2\u00da\u00d8\3\2\2\2\u00da\u00db\3\2\2\2\u00db\27\3\2\2"+
-		"\2\u00dc\u00e0\7\13\2\2\u00dd\u00e0\7\n\2\2\u00de\u00e0\7\f\2\2\u00df"+
-		"\u00dc\3\2\2\2\u00df\u00dd\3\2\2\2\u00df\u00de\3\2\2\2\u00e0\31\3\2\2"+
-		"\2\u00e1\u00e4\7#\2\2\u00e2\u00e4\7&\2\2\u00e3\u00e1\3\2\2\2\u00e3\u00e2"+
-		"\3\2\2\2\u00e4\33\3\2\2\2\u00e5\u00e6\7\4\2\2\u00e6\35\3\2\2\2\u00e7\u00e8"+
-		"\7\7\2\2\u00e8\37\3\2\2\2\u00e9\u00ea\7\3\2\2\u00ea!\3\2\2\2\u00eb\u00ec"+
-		"\7\5\2\2\u00ec#\3\2\2\2\u00ed\u00ee\7\6\2\2\u00ee%\3\2\2\2\u00ef\u00f0"+
-		"\7\b\2\2\u00f0\'\3\2\2\2\u00f1\u00f2\t\6\2\2\u00f2)\3\2\2\2\u00f3\u00f4"+
-		"\5\60\31\2\u00f4+\3\2\2\2\u00f5\u00f6\5\60\31\2\u00f6-\3\2\2\2\u00f7\u00f8"+
-		"\5\60\31\2\u00f8/\3\2\2\2\u00f9\u0101\7#\2\2\u00fa\u0101\5(\25\2\u00fb"+
-		"\u0101\7&\2\2\u00fc\u00fd\7\5\2\2\u00fd\u00fe\5\60\31\2\u00fe\u00ff\7"+
-		"\6\2\2\u00ff\u0101\3\2\2\2\u0100\u00f9\3\2\2\2\u0100\u00fa\3\2\2\2\u0100"+
-		"\u00fb\3\2\2\2\u0100\u00fc\3\2\2\2\u0101\61\3\2\2\2\34\668CJYcfjpu{\u0091"+
-		"\u009a\u009c\u00a6\u00a8\u00ad\u00b7\u00c0\u00c9\u00d3\u00d6\u00da\u00df"+
-		"\u00e3\u0100";
+		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\3\2\3\2\3\2\3\2\7\2"+
+		"\63\n\2\f\2\16\2\66\13\2\3\2\3\2\3\3\3\3\3\3\3\4\3\4\5\4?\n\4\3\5\3\5"+
+		"\3\5\3\5\3\5\5\5F\n\5\3\5\3\5\3\6\3\6\3\7\3\7\3\7\3\7\3\7\5\7Q\n\7\3\7"+
+		"\3\7\3\7\5\7V\n\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\5\7`\n\7\3\7\3\7\3\7"+
+		"\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\5\7p\n\7\3\7\3\7\3\7\3\7"+
+		"\3\7\3\7\3\7\7\7y\n\7\f\7\16\7|\13\7\3\b\3\b\3\b\3\b\3\b\3\b\5\b\u0084"+
+		"\n\b\3\t\3\t\3\t\5\t\u0089\n\t\3\t\3\t\3\t\3\t\3\t\3\t\7\t\u0091\n\t\f"+
+		"\t\16\t\u0094\13\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u009c\n\t\3\n\3\n\3\n\3"+
+		"\n\3\n\7\n\u00a3\n\n\f\n\16\n\u00a6\13\n\3\n\3\n\3\n\3\n\3\n\7\n\u00ad"+
+		"\n\n\f\n\16\n\u00b0\13\n\5\n\u00b2\n\n\3\n\3\n\5\n\u00b6\n\n\3\13\3\13"+
+		"\5\13\u00ba\n\13\3\f\3\f\5\f\u00be\n\f\3\r\3\r\3\16\3\16\3\17\3\17\3\20"+
+		"\3\20\3\21\3\21\3\22\3\22\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\27"+
+		"\3\27\3\27\3\27\3\27\3\27\3\27\5\27\u00db\n\27\3\27\2\3\f\30\2\4\6\b\n"+
+		"\f\16\20\22\24\26\30\32\34\36 \"$&(*,\2\5\3\2\n\13\3\2\f\17\4\2\23\32"+
+		"$%\2\u00e7\2\64\3\2\2\2\49\3\2\2\2\6>\3\2\2\2\b@\3\2\2\2\nI\3\2\2\2\f"+
+		"_\3\2\2\2\16\u0083\3\2\2\2\20\u009b\3\2\2\2\22\u009d\3\2\2\2\24\u00b9"+
+		"\3\2\2\2\26\u00bd\3\2\2\2\30\u00bf\3\2\2\2\32\u00c1\3\2\2\2\34\u00c3\3"+
+		"\2\2\2\36\u00c5\3\2\2\2 \u00c7\3\2\2\2\"\u00c9\3\2\2\2$\u00cb\3\2\2\2"+
+		"&\u00cd\3\2\2\2(\u00cf\3\2\2\2*\u00d1\3\2\2\2,\u00da\3\2\2\2./\5\6\4\2"+
+		"/\60\5\34\17\2\60\63\3\2\2\2\61\63\5\4\3\2\62.\3\2\2\2\62\61\3\2\2\2\63"+
+		"\66\3\2\2\2\64\62\3\2\2\2\64\65\3\2\2\2\65\67\3\2\2\2\66\64\3\2\2\2\67"+
+		"8\7\2\2\38\3\3\2\2\29:\7#\2\2:;\b\3\1\2;\5\3\2\2\2<?\5\b\5\2=?\5\n\6\2"+
+		"><\3\2\2\2>=\3\2\2\2?\7\3\2\2\2@A\7\25\2\2AE\7\31\2\2BC\5&\24\2CD\5\30"+
+		"\r\2DF\3\2\2\2EB\3\2\2\2EF\3\2\2\2FG\3\2\2\2GH\5(\25\2H\t\3\2\2\2IJ\5"+
+		"\22\n\2J\13\3\2\2\2KL\b\7\1\2L`\5\24\13\2MN\5&\24\2NO\5\30\r\2OQ\3\2\2"+
+		"\2PM\3\2\2\2PQ\3\2\2\2QR\3\2\2\2RS\5(\25\2ST\5\30\r\2TV\3\2\2\2UP\3\2"+
+		"\2\2UV\3\2\2\2VW\3\2\2\2W`\5*\26\2XY\5\26\f\2YZ\5\f\7\nZ`\3\2\2\2[\\\5"+
+		"\36\20\2\\]\5\f\7\2]^\5 \21\2^`\3\2\2\2_K\3\2\2\2_U\3\2\2\2_X\3\2\2\2"+
+		"_[\3\2\2\2`z\3\2\2\2ab\f\t\2\2bc\7\t\2\2cy\5\f\7\nde\f\b\2\2ef\t\2\2\2"+
+		"fy\5\f\7\tgh\f\7\2\2hi\t\3\2\2iy\5\f\7\bjo\f\6\2\2kp\5\"\22\2lp\7\20\2"+
+		"\2mp\7\21\2\2np\7\22\2\2ok\3\2\2\2ol\3\2\2\2om\3\2\2\2on\3\2\2\2pq\3\2"+
+		"\2\2qy\5\f\7\7rs\f\5\2\2st\7\23\2\2ty\5\f\7\6uv\f\4\2\2vw\7\27\2\2wy\5"+
+		"\f\7\5xa\3\2\2\2xd\3\2\2\2xg\3\2\2\2xj\3\2\2\2xr\3\2\2\2xu\3\2\2\2y|\3"+
+		"\2\2\2zx\3\2\2\2z{\3\2\2\2{\r\3\2\2\2|z\3\2\2\2}\u0084\7\t\2\2~\177\5"+
+		"(\25\2\177\u0080\5\30\r\2\u0080\u0081\7\t\2\2\u0081\u0084\3\2\2\2\u0082"+
+		"\u0084\5\f\7\2\u0083}\3\2\2\2\u0083~\3\2\2\2\u0083\u0082\3\2\2\2\u0084"+
+		"\17\3\2\2\2\u0085\u0086\5&\24\2\u0086\u0087\5\30\r\2\u0087\u0089\3\2\2"+
+		"\2\u0088\u0085\3\2\2\2\u0088\u0089\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u009c"+
+		"\5(\25\2\u008b\u008c\5\36\20\2\u008c\u0092\5\20\t\2\u008d\u008e\5\32\16"+
+		"\2\u008e\u008f\5\20\t\2\u008f\u0091\3\2\2\2\u0090\u008d\3\2\2\2\u0091"+
+		"\u0094\3\2\2\2\u0092\u0090\3\2\2\2\u0092\u0093\3\2\2\2\u0093\u0095\3\2"+
+		"\2\2\u0094\u0092\3\2\2\2\u0095\u0096\5 \21\2\u0096\u009c\3\2\2\2\u0097"+
+		"\u0098\5\36\20\2\u0098\u0099\5\n\6\2\u0099\u009a\5 \21\2\u009a\u009c\3"+
+		"\2\2\2\u009b\u0088\3\2\2\2\u009b\u008b\3\2\2\2\u009b\u0097\3\2\2\2\u009c"+
+		"\21\3\2\2\2\u009d\u009e\7\30\2\2\u009e\u00a4\5\16\b\2\u009f\u00a0\5\32"+
+		"\16\2\u00a0\u00a1\5\16\b\2\u00a1\u00a3\3\2\2\2\u00a2\u009f\3\2\2\2\u00a3"+
+		"\u00a6\3\2\2\2\u00a4\u00a2\3\2\2\2\u00a4\u00a5\3\2\2\2\u00a5\u00b1\3\2"+
+		"\2\2\u00a6\u00a4\3\2\2\2\u00a7\u00a8\7\26\2\2\u00a8\u00ae\5\20\t\2\u00a9"+
+		"\u00aa\5\32\16\2\u00aa\u00ab\5\20\t\2\u00ab\u00ad\3\2\2\2\u00ac\u00a9"+
+		"\3\2\2\2\u00ad\u00b0\3\2\2\2\u00ae\u00ac\3\2\2\2\u00ae\u00af\3\2\2\2\u00af"+
+		"\u00b2\3\2\2\2\u00b0\u00ae\3\2\2\2\u00b1\u00a7\3\2\2\2\u00b1\u00b2\3\2"+
+		"\2\2\u00b2\u00b5\3\2\2\2\u00b3\u00b4\7\32\2\2\u00b4\u00b6\5\f\7\2\u00b5"+
+		"\u00b3\3\2\2\2\u00b5\u00b6\3\2\2\2\u00b6\23\3\2\2\2\u00b7\u00ba\7\34\2"+
+		"\2\u00b8\u00ba\7\36\2\2\u00b9\u00b7\3\2\2\2\u00b9\u00b8\3\2\2\2\u00ba"+
+		"\25\3\2\2\2\u00bb\u00be\7\13\2\2\u00bc\u00be\7\n\2\2\u00bd\u00bb\3\2\2"+
+		"\2\u00bd\u00bc\3\2\2\2\u00be\27\3\2\2\2\u00bf\u00c0\7\4\2\2\u00c0\31\3"+
+		"\2\2\2\u00c1\u00c2\7\7\2\2\u00c2\33\3\2\2\2\u00c3\u00c4\7\3\2\2\u00c4"+
+		"\35\3\2\2\2\u00c5\u00c6\7\5\2\2\u00c6\37\3\2\2\2\u00c7\u00c8\7\6\2\2\u00c8"+
+		"!\3\2\2\2\u00c9\u00ca\7\b\2\2\u00ca#\3\2\2\2\u00cb\u00cc\t\4\2\2\u00cc"+
+		"%\3\2\2\2\u00cd\u00ce\5,\27\2\u00ce\'\3\2\2\2\u00cf\u00d0\5,\27\2\u00d0"+
+		")\3\2\2\2\u00d1\u00d2\5,\27\2\u00d2+\3\2\2\2\u00d3\u00db\7\33\2\2\u00d4"+
+		"\u00db\5$\23\2\u00d5\u00db\7\36\2\2\u00d6\u00d7\7\5\2\2\u00d7\u00d8\5"+
+		",\27\2\u00d8\u00d9\7\6\2\2\u00d9\u00db\3\2\2\2\u00da\u00d3\3\2\2\2\u00da"+
+		"\u00d4\3\2\2\2\u00da\u00d5\3\2\2\2\u00da\u00d6\3\2\2\2\u00db-\3\2\2\2"+
+		"\27\62\64>EPU_oxz\u0083\u0088\u0092\u009b\u00a4\u00ae\u00b1\u00b5\u00b9"+
+		"\u00bd\u00da";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

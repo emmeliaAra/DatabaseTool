@@ -49,41 +49,15 @@ public interface sqliteListener extends ParseTreeListener {
 	 */
 	void exitDropTable(sqliteParser.DropTableContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code factoredSelectStatement}
-	 * labeled alternative in {@link sqliteParser#factored_select_stmt}.
+	 * Enter a parse tree produced by {@link sqliteParser#factored_select_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx);
+	void enterFactored_select_stmt(sqliteParser.Factored_select_stmtContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code factoredSelectStatement}
-	 * labeled alternative in {@link sqliteParser#factored_select_stmt}.
+	 * Exit a parse tree produced by {@link sqliteParser#factored_select_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code selectStatement}
-	 * labeled alternative in {@link sqliteParser#select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectStatement(sqliteParser.SelectStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code selectStatement}
-	 * labeled alternative in {@link sqliteParser#select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectStatement(sqliteParser.SelectStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code selectOrValues}
-	 * labeled alternative in {@link sqliteParser#select_or_values}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectOrValues(sqliteParser.SelectOrValuesContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code selectOrValues}
-	 * labeled alternative in {@link sqliteParser#select_or_values}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectOrValues(sqliteParser.SelectOrValuesContext ctx);
+	void exitFactored_select_stmt(sqliteParser.Factored_select_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
@@ -169,6 +143,18 @@ public interface sqliteListener extends ParseTreeListener {
 	 */
 	void exitSelectCore(sqliteParser.SelectCoreContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code literalValue}
+	 * labeled alternative in {@link sqliteParser#literal_value}.
+	 * @param ctx the parse tree
+	 */
+	void enterLiteralValue(sqliteParser.LiteralValueContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code literalValue}
+	 * labeled alternative in {@link sqliteParser#literal_value}.
+	 * @param ctx the parse tree
+	 */
+	void exitLiteralValue(sqliteParser.LiteralValueContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code unaryOperator}
 	 * labeled alternative in {@link sqliteParser#unary_operator}.
 	 * @param ctx the parse tree
@@ -180,18 +166,6 @@ public interface sqliteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitUnaryOperator(sqliteParser.UnaryOperatorContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code columnAlias}
-	 * labeled alternative in {@link sqliteParser#column_alias}.
-	 * @param ctx the parse tree
-	 */
-	void enterColumnAlias(sqliteParser.ColumnAliasContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code columnAlias}
-	 * labeled alternative in {@link sqliteParser#column_alias}.
-	 * @param ctx the parse tree
-	 */
-	void exitColumnAlias(sqliteParser.ColumnAliasContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code getDot}
 	 * labeled alternative in {@link sqliteParser#dot_symbol}.

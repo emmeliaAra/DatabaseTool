@@ -334,6 +334,7 @@ public class ExecuteTree {
      */
     public StringBuilder whereException(String query,String fromTable) {
 
+        System.out.println(query);
         //(?i) -> use embedded flag in the regex to ignore case! Split string but keep And + or to be added to the condition
         String[] whereParts = query.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
         StringBuilder myNewWhere = new StringBuilder();
@@ -342,6 +343,7 @@ public class ExecuteTree {
         for(int i=0; i<whereParts.length; i++) {
             //Get the symbo ie."==", "<="...
             String symbol = myHelper.getSymbol(whereParts[i]);
+            System.out.println(symbol);
             String[] equationParts;
             String condition;
 
@@ -357,7 +359,9 @@ public class ExecuteTree {
 
             if(symbol!=null) {
                 equationParts = whereParts[i].split(symbol);
-                for(int j=0; j<equationParts.length; j++)
+                for(int j=0; j<equationParts.length; j++){
+                    System.out.println(whereParts[i].split(symbol) + " emmelia " + whereParts[i]);
+                    System.out.println(equationParts[j]);
                     if (equationParts[j].contains(".")) {
                         // Get the relation name from the equation part and remove the white spaces. Remove the referencing table and any white spaces
                         String relationName = (equationParts[j].substring(0, equationParts[j].indexOf("."))).replaceAll("\\s", "");
@@ -376,7 +380,7 @@ public class ExecuteTree {
                             if (counter != 0)
                                 equationParts[j] = "\"" + equationParts[j] + ":" + counter + "\"";
                         }
-                    }
+                    }}
                     whereParts[i] = equationParts[0] +" " + symbol + " " + equationParts[1];
             }
             if(i != whereParts.length-1)
@@ -388,6 +392,13 @@ public class ExecuteTree {
         return  myNewWhere;
     }
 
+  /*  public String[] splitString(String statement)
+    {
+        String[] parts = null;
+        while (statement.)
+
+        return parts;
+    }*/
 
 
     /**

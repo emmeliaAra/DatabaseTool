@@ -4,9 +4,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
@@ -16,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import sun.plugin.javascript.navig.Array;
 
+import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -47,6 +51,7 @@ public class GraphicalUserInterface extends Application {
     private HashMap<Button,Integer> canonicalButtonsInOrder ,optimalButtonsInOrder;
     private LinkedList<Integer> conditionalNodesNum = new LinkedList<>();
     private LinkedList<Stage> newStages = new LinkedList<>();
+    private ArrayList<String> queries;
 
 
     public static void main(String[]args) {
@@ -62,6 +67,9 @@ public class GraphicalUserInterface extends Application {
         buttonsInLevel = new LinkedHashMap<>();
         canonicalButtonsInOrder = new HashMap<>();
         optimalButtonsInOrder = new HashMap<>();
+        queries = new ArrayList<>();
+        Screen myScreen = Screen.getPrimary();
+        Rectangle2D bounds = myScreen.getVisualBounds();
 
         //Create a boarderPane to build on
         BorderPane borderPane = new BorderPane();
@@ -83,7 +91,11 @@ public class GraphicalUserInterface extends Application {
         file.getItems().addAll(loadDataBase,exit);
         MenuItem resetDatabase  = new MenuItem("Reset Database");
         MenuItem saveDatabase = new MenuItem("Save Database");
-        options.getItems().addAll(resetDatabase,saveDatabase);
+        MenuItem viewQueries = new MenuItem("View Queries");
+        MenuItem hideQueries = new MenuItem("Hide Queries");
+        options.getItems().addAll(resetDatabase,saveDatabase,viewQueries,hideQueries);
+        viewQueries.setDisable(true); //Set it to disable at the beginning as if there is no database loaded yet, thus not a file to upload the queries from.
+        hideQueries.setDisable(true);
 
         //ADD ALL ITEMS TO THE topHBox
         menuHBox.getChildren().addAll(menuBar);
@@ -109,25 +121,23 @@ public class GraphicalUserInterface extends Application {
         //Create GridPanes for the trees.
         leftGrid = new GridPane();
         rightGrid = new GridPane();
-
-        Screen myScreen = Screen.getPrimary();
-        Rectangle2D bounds = myScreen.getVisualBounds();
+        leftGrid.setStyle("-fx-background-color: #336699;");
+        rightGrid.setStyle("-fx-background-color: #336699;");
+        leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
         ScrollPane leftScrollPane = new ScrollPane(leftGrid);
         ScrollPane rightScrollPane = new ScrollPane(rightGrid);
 
-        leftScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        leftScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        leftScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        leftScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         leftScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
-        rightScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        rightScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        rightScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        rightScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         rightScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
-        leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
-        rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
-
-        borderPane.setMinSize(bounds.getWidth() - 100, bounds.getHeight() - 100);
+       // borderPane.setMinSize(bounds.getWidth() - 100, bounds.getHeight() - 100);
         borderPane.setTop(finalHBox);
 
         borderPane.setLeft(leftScrollPane);
@@ -148,8 +158,7 @@ public class GraphicalUserInterface extends Application {
         messageArea.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         messageArea.setAlignment(Pos.TOP_LEFT);
         messageArea.setFont(Font.font(15));
-        leftGrid.setStyle("-fx-background-color: #336699;");
-        rightGrid.setStyle("-fx-background-color: #336699;");
+
 
         Label canonicalLabel  = new Label("Canonical Tree");
         Label optimizedLabel  = new Label("Optimized Tree");
@@ -206,10 +215,10 @@ public class GraphicalUserInterface extends Application {
                                 buildMyTree(rightGrid,optimizedLabel);
 
                             }else{
-                                Label label = new Label("There is no Optimal Tree to display when the Statement contains the operator 'OR'");
+                                Label label = new Label("There is no Optimal Tree to display \n when the Statement contains the operator 'OR'");
                                 label.setFont(Font.font(15));
                                 setGridConstraints(rightGrid,COLUMN_NUM,ROWS_NUM);
-                                rightGrid.add(label,1,2,10,5);
+                                rightGrid.add(label,1,2,15,5);
                             }
                             //Present the result in a table.
                             thisIsTheInput = charStream;
@@ -223,15 +232,11 @@ public class GraphicalUserInterface extends Application {
                             borderPane.setBottom(null);
                             borderPane.setBottom(messageArea);
                             safeCloseConnection(myTreeParser.getMySQLite());
-                        }else if(myTreeParser.getParserStatus() == DROP_ERROR_STATUS || myTreeParser.getParserStatus() == STATEMENT_ERROR_STATUS) {
+                        }else if(myTreeParser.getParserStatus() == DROP_ERROR_STATUS || myTreeParser.getParserStatus() == STATEMENT_ERROR_STATUS)
                             displayErrorMessages(bounds.getHeight()/4,borderPane,myTreeParser);
-                        }
-                        else if(myTreeParser.getParserStatus()== ANTLR_ERROR_STATUS) {
-                            System.out.println(" hellooo you mest up again.. tryyy gain please correct this tim ethought ");
-                            displayErrorMessages(bounds.getHeight()/4, borderPane, myTreeParser);
-                            //safeCloseConnection(myTreeParser.getMySQLite());
 
-                        }
+                        else if(myTreeParser.getParserStatus()== ANTLR_ERROR_STATUS)
+                            displayErrorMessages(bounds.getHeight()/4, borderPane, myTreeParser);
                     }
                 }
             }
@@ -246,20 +251,30 @@ public class GraphicalUserInterface extends Application {
         });
 
         loadDataBase.setOnAction(event -> {
-            clearStage(false);
-            borderPane.setBottom(null);
-            safeCloseConnection(mySQLite);
-            fileChooser.replaceFile();
-            path = fileChooser.setFileChooser(primaryStage) ;
-            messageArea.setText("Database loaded");
-            borderPane.setBottom(messageArea);
+
+          //  fileChooser.replaceFile();
+            String temp = fileChooser.setFileChooser(primaryStage,this,mySQLite);
+            if((temp!=null && path!=null && !path.equals(temp))|| path == null){
+                path =temp;
+                clearStage(false);
+                borderPane.setBottom(null);
+                resetScene(leftScrollPane,rightScrollPane,bounds,borderPane);
+                //safeCloseConnection(mySQLite);
+                hideQueries.setDisable(true);
+                messageArea.setText(fileChooser.getFileName() + " Database is loaded");
+                borderPane.setBottom(messageArea);
+                queries = fileChooser.readQueryFile(fileChooser.getFileName(),path);
+                if(queries!=null)
+                    viewQueries.setDisable(false);
+
+            }
         });
 
         exit.setOnAction(event -> {
             event.consume();
-            safeCloseConnection(mySQLite);
-            clearStage(false);
-            borderPane.setBottom(null);
+            //safeCloseConnection(mySQLite);
+            //clearStage(false);
+            //borderPane.setBottom(null);
             askToCommit(event);
         });
 
@@ -275,6 +290,35 @@ public class GraphicalUserInterface extends Application {
             clearStage(false);
             borderPane.setBottom(null);
             fileChooser.saveWithoutExit();
+        });
+
+        viewQueries.setOnAction(event -> {
+            hideQueries.setDisable(false);
+            viewQueries.setDisable(true);
+            leftGrid.setPrefSize((bounds.getWidth()/2)-125, bounds.getHeight() - 100);
+            leftScrollPane.setPrefSize((bounds.getWidth()/2)-125, bounds.getHeight() - 100);
+            rightScrollPane.setPrefSize((bounds.getWidth()/2)-125, bounds.getHeight() - 100);
+            rightGrid.setPrefSize((bounds.getWidth()/2)-125, bounds.getHeight() - 100);
+            borderPane.setRight(null);
+            borderPane.setCenter(rightScrollPane);
+
+            VBox queryBox = new VBox();
+            Label queryLabel = new Label("Your Queries");
+            queryLabel.setFont(Font.font(15));
+            ListView listView = listQueries(queries);
+            ScrollPane queryScroll = new ScrollPane(listView);
+            queryScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            queryScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+            queryBox.getChildren().addAll(queryLabel,queryScroll);
+            borderPane.setRight(queryBox);
+
+        });
+
+        hideQueries.setOnAction(event -> {
+            hideQueries.setDisable(true);
+            viewQueries.setDisable(false);
+          resetScene(leftScrollPane,rightScrollPane,bounds,borderPane);
         });
 
         //Close window when close window
@@ -303,7 +347,6 @@ public class GraphicalUserInterface extends Application {
             rowConst.setPercentHeight(100.0 / gridRows);
             gridPane.getRowConstraints().add(rowConst);
         }
-        gridPane.setGridLinesVisible(true);
     }
 
     //Creates the tree view that will be used later to add action to the tree and divides the nodes based on their level
@@ -376,7 +419,6 @@ public class GraphicalUserInterface extends Application {
         //add the label and set the columns and rows of the trees.
         gridPane.add(label,gridColumns/2, 1,6,1);
         setGridConstraints(gridPane,gridColumns,ROWS_NUM);
-        gridPane.setGridLinesVisible(true);
 
         /*Add the relation nodes/ opt_cond nodes first and then add the other nodes to them
           If k is an even number then hold the position of the current button
@@ -404,7 +446,6 @@ public class GraphicalUserInterface extends Application {
                 drawLine(0,0,30,30,column-temp,1,gridPane,HPos.LEFT,temp+1,gridRows-1);
                 positions.add(temp);
                 holdPos.remove(thisHoldPos);
-                //holdPos.removeLast();
             }
             column = column +2;
         }
@@ -473,7 +514,6 @@ public class GraphicalUserInterface extends Application {
             gridRows =gridRows-2;
             i++;
         }
-        System.out.println("_______________________________________________________________");
     }
 
     //Add action to The button Trees
@@ -614,7 +654,7 @@ public class GraphicalUserInterface extends Application {
     public void drawLine(int startX, int startY, int endX, int endY, int columnSpan, int rowSpan, GridPane gridPane, HPos hPos,int gridC, int gridX)
     {
         Line line1 = new Line(startX,startY,endX,endY);
-        gridPane.setHalignment(line1,hPos);
+        GridPane.setHalignment(line1,hPos);
         gridPane.add(line1, gridC,gridX,columnSpan,rowSpan);
     }
 
@@ -633,5 +673,36 @@ public class GraphicalUserInterface extends Application {
         }
         borderPane.setBottom(messageScrollPane);
         safeCloseConnection(myTreeParser.getMySQLite());
+    }
+
+    public ListView listQueries(ArrayList<String> queries)
+    {
+        ListView listView = new ListView();
+        listView.getItems().addAll(queries);
+
+        listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                    if(mouseEvent.getClickCount() == 2){
+                        statementField.clear();
+                        statementField.setText(listView.getSelectionModel().getSelectedItem().toString());
+                    }
+                }
+            }
+        });
+
+        return listView;
+    }
+
+    public void resetScene(ScrollPane leftScrollPane, ScrollPane rightScrollPane, Rectangle2D bounds, BorderPane borderPane)
+    {
+        leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        leftScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        rightScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
+        borderPane.setCenter(null);
+        borderPane.setRight(null);
+        borderPane.setRight(rightScrollPane);
     }
 }

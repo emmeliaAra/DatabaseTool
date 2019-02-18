@@ -5,79 +5,65 @@ parse
  ;
 
 error
- : UNEXPECTED_CHAR  {notifyErrorListeners("Unexpected characher found " + $UNEXPECTED_CHAR.text);}
-   /*{
-     throw new RuntimeException("UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text);
-   }*/
-
+ : UNEXPECTED_CHAR
+    {
+        notifyErrorListeners("Unexpected characher found " + $UNEXPECTED_CHAR.text);
+    }
  ;
 
 sql_stmt
-  :
-    drop_table_stmt
+  :  drop_table_stmt
    | factored_select_stmt
-   | select_stmt
   ;
 
 drop_table_stmt
- : K_DROP K_TABLE ( database_name dot_symbol )? table_name #dropTable
+ : K_DROP K_TABLE  ( database_name dot_symbol )? table_name #dropTable
  ;
 
 factored_select_stmt
- :select_core  #factoredSelectStatement
- ;
-
-select_stmt
- : select_or_values  #selectStatement
- ;
-
-select_or_values
- : K_SELECT  result_column ( comma_symbol result_column )*
-   ( K_FROM ( table_or_subquery ( comma_symbol table_or_subquery )*) )?
-   ( K_WHERE expr )? #selectOrValues
+ : select_core
  ;
 
 expr
- :( ( database_name dot_symbol )? table_name dot_symbol )? column_name #myExpression
+ : literal_value #myExpression
+ | ( ( database_name dot_symbol )? table_name dot_symbol )? column_name #myExpression
  | unary_operator expr #none1
- | expr PIPE2 expr  #myExpression
- | expr ( STAR |DIV |MOD ) expr #myExpression ///
+ | expr  STAR  expr #myExpression ///
  | expr ( PLUS |MINUS ) expr #myExpression
- | expr ( LT2 | GT2 | AMP | PIPE ) expr #myExpression
  | expr ( LT | LT_EQ | GT | GT_EQ ) expr #myExpression
  | expr ( assign_symbol | EQ | NOT_EQ1 | NOT_EQ2 ) expr #myExpression
  | expr K_AND expr #myExpression
- | expr K_OR expr #myExpression ;
+ | expr K_OR expr #myExpression
+ | open_paren expr close_paren #myExpression
+ ;
 
 result_column
  : STAR #myStar
  | table_name dot_symbol STAR #mystart
- | expr ( column_alias )?  #expressionAlias
+ | expr  #expressionAlias
  ;
 
 table_or_subquery
- : ( database_name dot_symbol )? table_name #tableORSubqueryA
+ : ( database_name dot_symbol )? table_name  #tableORSubqueryA
  | open_paren ( table_or_subquery ( comma_symbol table_or_subquery )*)
    close_paren  #tableORSubqueryA
- | open_paren select_stmt close_paren #tableORSubqueryA
+ | open_paren factored_select_stmt close_paren #tableORSubqueryA
  ;
-
 
 select_core
  : K_SELECT  result_column ( comma_symbol result_column )*
-   ( K_FROM ( table_or_subquery ( comma_symbol table_or_subquery )*) )?
+   ( K_FROM ( table_or_subquery ( comma_symbol table_or_subquery )*  ) )?
    ( K_WHERE expr )? #selectCore
+ ;
+
+literal_value
+ : NUMERIC_LITERAL #literalValue
+ | STRING_LITERAL #literalValue
  ;
 
 unary_operator
  : MINUS  #unaryOperator
  | PLUS   #unaryOperator
- | TILDE  #unaryOperator
- ;
-
-column_alias
- : IDENTIFIER #columnAlias
- | STRING_LITERAL #columnAlias
  ;
 
 dot_symbol
@@ -104,6 +90,7 @@ assign_symbol
 
 keyword
  : K_AND
+ | K_DATABASE
  | K_DROP
  | K_FROM
  | K_OR
@@ -124,8 +111,6 @@ column_name
  : any_name #getColumnName
  ;
 
-
-
 any_name
  : IDENTIFIER #identifier
  | keyword    #keyWordL
@@ -142,14 +127,6 @@ ASSIGN : '=';
 STAR : '*';
 PLUS : '+';
 MINUS : '-';
-TILDE : '~';
-PIPE2 : '||';
-DIV : '/';
-MOD : '%';
-LT2 : '<<';
-GT2 : '>>';
-AMP : '&';
-PIPE : '|';
 LT : '<';
 LT_EQ : '<=';
 GT : '>';
@@ -157,18 +134,17 @@ GT_EQ : '>=';
 EQ : '==';
 NOT_EQ1 : '!=';
 NOT_EQ2 : '<>';
-UNDERSCORE : '_';
 
 
 // http://www.sqlite.org/lang_keywords.html
 K_AND : A N D;
+K_DATABASE : D A T A B A S E;
 K_DROP : D R O P;
 K_FROM : F R O M;
 K_OR : O R;
 K_SELECT : S E L E C T;
 K_TABLE : T A B L E;
 K_WHERE : W H E R E;
-
 
 IDENTIFIER
  : '"' (~'"' | '""')* '"'   ////////////////

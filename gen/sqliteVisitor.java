@@ -35,27 +35,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDropTable(sqliteParser.DropTableContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code factoredSelectStatement}
-	 * labeled alternative in {@link sqliteParser#factored_select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFactoredSelectStatement(sqliteParser.FactoredSelectStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code selectStatement}
-	 * labeled alternative in {@link sqliteParser#select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelectStatement(sqliteParser.SelectStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code selectOrValues}
-	 * labeled alternative in {@link sqliteParser#select_or_values}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelectOrValues(sqliteParser.SelectOrValuesContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
@@ -105,13 +84,6 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitUnaryOperator(sqliteParser.UnaryOperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code columnAlias}
-	 * labeled alternative in {@link sqliteParser#column_alias}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitColumnAlias(sqliteParser.ColumnAliasContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code getDot}
 	 * labeled alternative in {@link sqliteParser#dot_symbol}.
