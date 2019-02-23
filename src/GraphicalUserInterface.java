@@ -121,8 +121,8 @@ public class GraphicalUserInterface extends Application {
         //Create GridPanes for the trees.
         leftGrid = new GridPane();
         rightGrid = new GridPane();
-        leftGrid.setStyle("-fx-background-color: #336699;");
-        rightGrid.setStyle("-fx-background-color: #336699;");
+        leftGrid.setStyle("-fx-background-color: #454646;");
+        rightGrid.setStyle("-fx-background-color: #454646;");
         leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
         rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
@@ -157,11 +157,15 @@ public class GraphicalUserInterface extends Application {
         messageArea.setAlignment(Pos.CENTER);
         messageArea.setFont(Font.font(25));
         messageArea.setText("Welcome to YourSQL!!");
+        messageArea.setStyle("-fx-background-color: #454646;");
+        messageArea.setTextFill(Color.web("#FFFFFF"));
         borderPane.setBottom(messageArea);
 
 
         Label canonicalLabel  = new Label("Canonical Tree");
         Label optimizedLabel  = new Label("Optimized Tree");
+        canonicalLabel.setTextFill(Color.web("#FFFFFF"));
+        optimizedLabel.setTextFill(Color.web("#FFFFFF"));
         canonicalLabel.setFont(Font.font(15));
         optimizedLabel.setFont(Font.font(15));
 
@@ -217,6 +221,7 @@ public class GraphicalUserInterface extends Application {
                             }else{
                                 Label label = new Label("There is no Optimal Tree to display \n when the Statement contains the operator 'OR'");
                                 label.setFont(Font.font(15));
+                                label.setTextFill(Color.web("#FFFFFF"));
                                 setGridConstraints(rightGrid,COLUMN_NUM,ROWS_NUM);
                                 rightGrid.add(label,1,2,15,5);
                             }
@@ -245,7 +250,8 @@ public class GraphicalUserInterface extends Application {
         clearButton.setOnMouseClicked(event -> {
 
             clearStage(false);
-            borderPane.setBottom(null);
+            messageArea.setText("Stage cleared...");
+            borderPane.setBottom(messageArea);
             safeCloseConnection(mySQLite);
             thisIsTheInput =null;
         });
@@ -259,9 +265,11 @@ public class GraphicalUserInterface extends Application {
                 clearStage(false);
                 borderPane.setBottom(null);
                 resetScene(leftScrollPane,rightScrollPane,bounds,borderPane);
-                //safeCloseConnection(mySQLite);
                 hideQueries.setDisable(true);
-                messageArea.setText(fileChooser.getFileName() + " Database is loaded");
+                if(fileChooser.getFileName() != null)
+                    messageArea.setText(fileChooser.getFileName() + " Database is loaded");
+                else
+                    messageArea.setText("No database was loaded");
                 borderPane.setBottom(messageArea);
                 queries = fileChooser.readQueryFile(fileChooser.getFileName(),path);
                 if(queries!=null)
@@ -272,24 +280,31 @@ public class GraphicalUserInterface extends Application {
 
         exit.setOnAction(event -> {
             event.consume();
-            //safeCloseConnection(mySQLite);
-            //clearStage(false);
-            //borderPane.setBottom(null);
             askToCommit(event);
         });
 
         resetDatabase.setOnAction(event -> {
-            safeCloseConnection(mySQLite);
-            clearStage(false);
-            fileChooser.replaceFile();
-            fileChooser.copyFile(path);
+            if(fileChooser.getFileName() != null) {
+                safeCloseConnection(mySQLite);
+                clearStage(false);
+                fileChooser.replaceFile();
+                fileChooser.copyFile(path);
+                messageArea.setText("Database " + fileChooser.getFileName() + " was reset successfully!");
+            }else
+                messageArea.setText("Please load a database first");
+            borderPane.setBottom(messageArea);
+
         });
 
         saveDatabase.setOnAction(event -> {
-            safeCloseConnection(mySQLite);
-            clearStage(false);
-            borderPane.setBottom(null);
-            fileChooser.saveWithoutExit();
+            if(fileChooser.getFileName() != null) {
+                safeCloseConnection(mySQLite);
+                clearStage(false);
+                fileChooser.saveWithoutExit();
+                messageArea.setText("Changes on database  " + fileChooser.getFileName() + " are saved! You cannot retrieve the original file anymore..");
+            }else
+                messageArea.setText("Please load a database first");
+            borderPane.setBottom(messageArea);
         });
 
         viewQueries.setOnAction(event -> {
@@ -664,11 +679,13 @@ public class GraphicalUserInterface extends Application {
         VBox messageBox = new VBox();
         ScrollPane messageScrollPane = new ScrollPane(messageBox);
         messageScrollPane.setPrefHeight(height);
+        messageScrollPane.setStyle("-fx-background: rgb(80,80,80);");
         Vector<String> errorMessages = myTreeParser.getMessages();
 
         for (int i=0; i<errorMessages.size(); i++){
             Label newLabel  = new Label(i+1 + "." +errorMessages.get(i));
             newLabel.setFont(Font.font(20));
+            newLabel.setTextFill(Color.web("#FFFFFF"));
             messageBox.getChildren().add(newLabel);
         }
         borderPane.setBottom(messageScrollPane);
