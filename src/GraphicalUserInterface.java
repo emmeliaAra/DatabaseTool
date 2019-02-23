@@ -137,15 +137,13 @@ public class GraphicalUserInterface extends Application {
         rightScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         rightScrollPane.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
-       // borderPane.setMinSize(bounds.getWidth() - 100, bounds.getHeight() - 100);
         borderPane.setTop(finalHBox);
-
         borderPane.setLeft(leftScrollPane);
         borderPane.setRight(rightScrollPane);
 
         Scene myScene = new Scene(borderPane);
         myScene.setFill(Color.BLUE);
-        primaryStage.setTitle("Database Tool");
+        primaryStage.setTitle("YourSQL: A relational Database Tool");
         primaryStage.setScene(myScene);
         primaryStage.show();
 
@@ -156,8 +154,10 @@ public class GraphicalUserInterface extends Application {
         messageArea.setPrefWidth(bounds.getWidth());
         messageArea.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
         messageArea.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        messageArea.setAlignment(Pos.TOP_LEFT);
-        messageArea.setFont(Font.font(15));
+        messageArea.setAlignment(Pos.CENTER);
+        messageArea.setFont(Font.font(25));
+        messageArea.setText("Welcome to YourSQL!!");
+        borderPane.setBottom(messageArea);
 
 
         Label canonicalLabel  = new Label("Canonical Tree");
@@ -668,7 +668,7 @@ public class GraphicalUserInterface extends Application {
 
         for (int i=0; i<errorMessages.size(); i++){
             Label newLabel  = new Label(i+1 + "." +errorMessages.get(i));
-            newLabel.setFont(Font.font(15));
+            newLabel.setFont(Font.font(20));
             messageBox.getChildren().add(newLabel);
         }
         borderPane.setBottom(messageScrollPane);

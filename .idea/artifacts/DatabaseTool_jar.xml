@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DatabaseTool:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DatabaseTool_jar</output-path>
+    <root id="archive" name="DatabaseTool.jar">
+      <element id="module-output" name="DatabaseTool" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/intellij-plugin-v4/lib/antlr-4.7-intellij-1.8.4-version-complete.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/sqlite-jdbc-3.23.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
