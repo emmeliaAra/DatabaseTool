@@ -55,13 +55,14 @@ public class TreeParser {
             messages = new Vector<>();
 
         checkSyntaxErrors();
+        ErrorChecker errorChecker = new ErrorChecker(mySQLite);
 
         //Check if there is a messege from ANTLR4 it means that there is an error so do not built the tree...
         if(messages.isEmpty()){
 
             //Check if this is a drop, create or select statement
             if(charStream.toString().toLowerCase().contains( "drop")){
-                messages = mySQLite.handleSQLDropTableErrors(charStream.toString());
+                messages = errorChecker.handleSQLDropTableErrors(charStream.toString());
                 if(!messages.isEmpty())
                     parserStatus = DROP_ERROR_STATUS;
                 else {
@@ -71,7 +72,7 @@ public class TreeParser {
             }
             else if (charStream.toString().toLowerCase().contains("select")) {
                 getParts();
-                messages = mySQLite.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
+                messages = errorChecker.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
                 if(!messages.isEmpty())
                     parserStatus = STATEMENT_ERROR_STATUS;
                 else{

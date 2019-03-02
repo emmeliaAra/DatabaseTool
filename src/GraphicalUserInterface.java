@@ -1,3 +1,4 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import sun.plugin.javascript.navig.Array;
+import sun.plugin.javascript.navig.Link;
 
 import java.security.MessageDigest;
 import java.sql.SQLException;
@@ -614,9 +616,8 @@ public class GraphicalUserInterface extends Application {
             e.printStackTrace();
         }
     }
-
-    public void askToCommit(Event e) {
-
+    public LinkedList<Object> buildCommitStage()
+    {
         //Create a new stage to ask "save" "dont save" "cancel".
         BorderPane pane = new BorderPane();
         Scene myScene = new Scene(pane);
@@ -637,6 +638,23 @@ public class GraphicalUserInterface extends Application {
         box.setSpacing(15);
         box.getChildren().addAll(save,dontSave,cancel);
         pane.setBottom(box);
+
+        LinkedList<Object> stageContents = new LinkedList<>();
+        stageContents.add(stage);
+        stageContents.add(save);
+        stageContents.add(dontSave);
+        stageContents.add(cancel);
+        return stageContents;
+    }
+
+    public void askToCommit(Event e) {
+
+        LinkedList<Object>   stageObjects = buildCommitStage();
+
+        Stage stage = (Stage) stageObjects.get(0);
+        Button save = (Button) stageObjects.get(1);
+        Button dontSave = (Button) stageObjects.get(2);
+        Button cancel = (Button) stageObjects.get(3);
 
         save.setOnMouseClicked(event ->{
             stage.close();
