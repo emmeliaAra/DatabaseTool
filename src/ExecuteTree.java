@@ -97,7 +97,6 @@ public class ExecuteTree {
                 }
             }
         }
-
         if(tree.getRootNode()!= null) {
             tree.createStack(tree.getRootNode());
             execute(tree.getStack());
@@ -226,6 +225,9 @@ public class ExecuteTree {
             whereC = myHelper.getWhereFields(where);
             whereC = whereException(whereC.toString(), fromF.toString());
             mySQLite.whereSelect(selectF,fromF,whereC);
+            System.out.println(whereC + " trace ");
+
+            //select * from courses where code = "jjfdkfa13456.245fccds";
             canonicalCondition = whereC.toString();
 
             //If where node then create the new relation and remove the nodes from the holdNodes if not then replace the new relation with the onw that the condition is applied to.
@@ -360,12 +362,14 @@ public class ExecuteTree {
             if(symbol!=null) {
                 equationParts = whereParts[i].split(symbol);
                 for(int j=0; j<equationParts.length; j++){
-                    System.out.println(whereParts[i].split(symbol) + " emmelia " + whereParts[i]);
-                    System.out.println(equationParts[j]);
-                    if (equationParts[j].contains(".")) {
+                    System.out.println(" for this one...re " + equationParts[j]);
+                    equationParts[j] =  equationParts[j].replaceAll("\\s", "");
+                    if (equationParts[j].contains(".") && !(equationParts[j].charAt(0)==('\"') && equationParts[j].charAt(0) ==('\"')) ) {
+                        System.out.println(" whyhyy can y tell me" + equationParts[j].charAt(0) + "e" );
                         // Get the relation name from the equation part and remove the white spaces. Remove the referencing table and any white spaces
                         String relationName = (equationParts[j].substring(0, equationParts[j].indexOf("."))).replaceAll("\\s", "");
                         equationParts[j] = (equationParts[j].substring(equationParts[j].indexOf(".") + 1)).replaceAll("\\s", "");
+
                         /*If the same field appears in more than one relation then the first the second time appears in this format name:n where n the number of appearance
                         Thus we look if the field appears in the relations before that(relations in order) and increase the counter.*/
                         int index = relationInOrder.indexOf(relationName);
@@ -380,7 +384,11 @@ public class ExecuteTree {
                             if (counter != 0)
                                 equationParts[j] = "\"" + equationParts[j] + ":" + counter + "\"";
                         }
-                    }}
+                    }else{
+                        System.out.println("here i am ");
+                        System.out.println(" vnfkvnknfkla " + equationParts[0] + " " + equationParts[1]);
+                    }
+                }
                     whereParts[i] = equationParts[0] +" " + symbol + " " + equationParts[1];
             }
             if(i != whereParts.length-1)
@@ -391,15 +399,6 @@ public class ExecuteTree {
         }
         return  myNewWhere;
     }
-
-  /*  public String[] splitString(String statement)
-    {
-        String[] parts = null;
-        while (statement.)
-
-        return parts;
-    }*/
-
 
     /**
      * When a cartesian product of 2 relations that have the same field name the first one is the same and the second one has the format

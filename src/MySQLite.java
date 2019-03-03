@@ -85,6 +85,7 @@ public class MySQLite extends DatabaseBasic{
     public ResultSet execute(String queryTemplate) {
 
         ResultSet resultSet = null;
+        System.out.println(queryTemplate);
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(queryTemplate);
             resultSet = preparedStatement.executeQuery();

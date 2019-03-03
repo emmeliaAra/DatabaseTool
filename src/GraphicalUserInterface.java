@@ -1,32 +1,31 @@
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.geometry.*;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.application.Application;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
+import static java.lang.Math.abs;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
+import javafx.scene.control.*;
+import java.sql.SQLException;
+import javafx.scene.layout.*;
+import javafx.util.Callback;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.scene.paint.Color;
-import javafx.util.Callback;
-import sun.plugin.javascript.navig.Array;
-import sun.plugin.javascript.navig.Link;
-
-import java.security.MessageDigest;
-import java.sql.SQLException;
+import javafx.event.Event;
+import javafx.scene.Scene;
+import javafx.geometry.*;
 import java.util.*;
 
-import static java.lang.Math.abs;
-
+/**
+ * This class is used to present the
+ * Graphical user interface for the system
+ * @author Emmeleia Arakleitou
+ */
 public class GraphicalUserInterface extends Application {
 
     private static Main myMain;
@@ -54,8 +53,15 @@ public class GraphicalUserInterface extends Application {
     private LinkedList<Integer> conditionalNodesNum = new LinkedList<>();
     private LinkedList<Stage> newStages = new LinkedList<>();
     private ArrayList<String> queries;
+    private boolean specialCase = false;
 
 
+
+    /**
+     * this is the main method that calls  the launch method
+     * of the Application class to call the start() method.
+     * @param args
+     */
     public static void main(String[]args) {
 
         myMain = new Main();
@@ -63,6 +69,10 @@ public class GraphicalUserInterface extends Application {
         launch(args);
     }
 
+    /**
+     * This method is contains all the elements of the GUI.
+     * @param primaryStage
+     */
     @Override
     public void start(Stage primaryStage) {
 
@@ -88,6 +98,7 @@ public class GraphicalUserInterface extends Application {
         Menu options = new Menu("Options");
         menuBar.getMenus().addAll(file,options);
 
+        //Create the items of the menu bar.
         MenuItem loadDataBase = new MenuItem("Load Database");
         MenuItem exit = new MenuItem("exit");
         file.getItems().addAll(loadDataBase,exit);
@@ -128,6 +139,8 @@ public class GraphicalUserInterface extends Application {
         leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
         rightGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);
 
+        /* Set the scrollPane to hold the left and right grid and set there policy to AS_NEEDED to present the scrollbar
+           when the items get off the screen */
         ScrollPane leftScrollPane = new ScrollPane(leftGrid);
         ScrollPane rightScrollPane = new ScrollPane(rightGrid);
 
@@ -149,8 +162,8 @@ public class GraphicalUserInterface extends Application {
         primaryStage.setScene(myScene);
         primaryStage.show();
 
+        //Create the file chooser and teh label to dipaly the error messages and the notifications
         fileChooser = new MyFileChooser();
-
         messageArea = new Label();
         messageArea.setPrefHeight(bounds.getHeight()/4);
         messageArea.setPrefWidth(bounds.getWidth());
@@ -163,7 +176,7 @@ public class GraphicalUserInterface extends Application {
         messageArea.setTextFill(Color.web("#FFFFFF"));
         borderPane.setBottom(messageArea);
 
-
+        //Create the labels of the canonical and the optimizes trees
         Label canonicalLabel  = new Label("Canonical Tree");
         Label optimizedLabel  = new Label("Optimized Tree");
         canonicalLabel.setTextFill(Color.web("#FFFFFF"));
@@ -198,6 +211,7 @@ public class GraphicalUserInterface extends Application {
 
                         //If this is a select statement
                         myTreeParser = myMain.main(charStream,path);
+                        specialCase = false;
                         if(myTreeParser.getParserStatus() == SELECT_STATUS){
 
                             //Build the tree and add action to the buttons.
@@ -239,16 +253,15 @@ public class GraphicalUserInterface extends Application {
                             borderPane.setBottom(null);
                             borderPane.setBottom(messageArea);
                             safeCloseConnection(myTreeParser.getMySQLite());
-                        }else if(myTreeParser.getParserStatus() == DROP_ERROR_STATUS || myTreeParser.getParserStatus() == STATEMENT_ERROR_STATUS)
+                        //else if there is an error in the statement present the error.
+                        }else if(myTreeParser.getParserStatus() == DROP_ERROR_STATUS || myTreeParser.getParserStatus() == STATEMENT_ERROR_STATUS ||myTreeParser.getParserStatus()== ANTLR_ERROR_STATUS)
                             displayErrorMessages(bounds.getHeight()/4,borderPane,myTreeParser);
-
-                        else if(myTreeParser.getParserStatus()== ANTLR_ERROR_STATUS)
-                            displayErrorMessages(bounds.getHeight()/4, borderPane, myTreeParser);
                     }
                 }
             }
         });
 
+        //when the clear button is pressed present the error message close the connection and clear the text field
         clearButton.setOnMouseClicked(event -> {
 
             clearStage(false);
@@ -258,10 +271,12 @@ public class GraphicalUserInterface extends Application {
             thisIsTheInput =null;
         });
 
+        //when the user press the load database button call the file chooser and based on the user input present the correct message
         loadDataBase.setOnAction(event -> {
 
           //  fileChooser.replaceFile();
             String temp = fileChooser.setFileChooser(primaryStage,this,mySQLite);
+            //if this is the first time the user loads a database and the database loaded is not the same as the other then load the new database
             if((temp!=null && path!=null && !path.equals(temp))|| path == null){
                 path =temp;
                 clearStage(false);
@@ -273,20 +288,24 @@ public class GraphicalUserInterface extends Application {
                 else
                     messageArea.setText("No database was loaded");
                 borderPane.setBottom(messageArea);
+                //call the file chooser to load the query file if there is any. If there is not any queries then disable the viewQueries buttons
                 queries = fileChooser.readQueryFile(fileChooser.getFileName(),path);
                 if(queries!=null)
                     viewQueries.setDisable(false);
-
             }
         });
 
+        //when the exit button is called then call the askToCommit method to open the new stage
         exit.setOnAction(event -> {
             event.consume();
             askToCommit(event);
         });
 
+        /* when the chooses the reset database the fileChooser
+           is called to replace the used database file copied before.*/
         resetDatabase.setOnAction(event -> {
             if(fileChooser.getFileName() != null) {
+                //close the connection, clear the stage, replace the file and inform the user
                 safeCloseConnection(mySQLite);
                 clearStage(false);
                 fileChooser.replaceFile();
@@ -295,9 +314,10 @@ public class GraphicalUserInterface extends Application {
             }else
                 messageArea.setText("Please load a database first");
             borderPane.setBottom(messageArea);
-
         });
 
+        /* when the user chooses to save the database the if there is a database loaded clear the stage, close the connection
+           and call the fileChooser to save the state of the database file */
         saveDatabase.setOnAction(event -> {
             if(fileChooser.getFileName() != null) {
                 safeCloseConnection(mySQLite);
@@ -309,6 +329,8 @@ public class GraphicalUserInterface extends Application {
             borderPane.setBottom(messageArea);
         });
 
+        /*When the user wished to view the queries enable the hide queries option, and disable the view queries
+         add the new grid to present the queries */
         viewQueries.setOnAction(event -> {
             hideQueries.setDisable(false);
             viewQueries.setDisable(true);
@@ -332,23 +354,33 @@ public class GraphicalUserInterface extends Application {
 
         });
 
+        /* When the user hides the queries eneble the view query button and disable the hide queries. Also reset the
+         * stage to its original state */
         hideQueries.setOnAction(event -> {
             hideQueries.setDisable(true);
             viewQueries.setDisable(false);
           resetScene(leftScrollPane,rightScrollPane,bounds,borderPane);
         });
 
-        //Close window when close window
+        //When the user clic the "X" button then ask the user to commit the changes and close the application
         primaryStage.setOnCloseRequest(e -> {
             e.consume();
             askToCommit(e);
         });
     }
 
+    /**
+     * This method is used to set the gridConstraints of the GridPanes
+     * @param gridPane the gridpane to set the constains for
+     * @param gridColumns the number of columns
+     * @param gridRows the number of rows
+     */
     public void setGridConstraints(GridPane gridPane,int gridColumns,int gridRows) {
 
+        //clear previous constraints if any
         gridPane.getColumnConstraints().clear();
         gridPane.getRowConstraints().clear();
+        //if the grid columns/rows are not grader than the column_num then set the columns/rows equal to COLUMN_NUM/ROWS_NUM
         if(gridColumns < COLUMN_NUM)
             gridColumns = COLUMN_NUM;
         if(gridRows < ROWS_NUM)
@@ -367,6 +399,14 @@ public class GraphicalUserInterface extends Application {
     }
 
     //Creates the tree view that will be used later to add action to the tree and divides the nodes based on their level
+
+    /**
+     * This method creates a tree view that it will be used later to add action to the tree
+     * It also divides teh nodes based on their level
+     * @param node *************
+     * @param treeItem
+     * @param treeType
+     */
     public void createTreeView(TreeStructure.Node<String> node,TreeItem<Button> treeItem,int treeType){
 
         //Creates the new treeItem and the button
@@ -388,10 +428,13 @@ public class GraphicalUserInterface extends Application {
         }
 
         //Keep track of the position of the optional_condition node so that the relations can be added later below.
-        if(node.getNodeStatus() == 4) {
+        if(node.getNodeStatus() == 4){
             int posOfOptimal = buttonsInLevel.get(level).size()-1;
             conditionalNodesNum.add(posOfOptimal);
-        }
+            //When the condition is applied to only one relation in the statement
+        }else if(node.getNodeStatus() == 2 && node.getChildren().get(0).getNodeStatus() != 1)
+            specialCase = true;
+
 
         //If the rootNode is passed initialise the treeView using the rootNode. If not add the new node to the treeItem and call this method for every node's child
         if(treeItem == null && node.getParentNode() == null ) {
@@ -470,9 +513,15 @@ public class GraphicalUserInterface extends Application {
         i++;
         gridRows = gridRows-2;
         int max = treeMap.size();
-        if(hasCondition) max --;  // if there is a condition then there is one additional list but is already added above.
+        if(hasCondition ) max --;  // if there is a condition then there is one additional list but is already added above.
 
         while (i<max) {
+            //If this is the special case where there is no "X" node then their is no value "1" in the tree map and it will result to an exception...
+            if(specialCase && i==1) {
+                i++;
+                max++;
+                continue;
+            }
             line = treeMap.get(i);
             //for every item in the list of level i
             for(int k=0; k<line.size(); k++) {
