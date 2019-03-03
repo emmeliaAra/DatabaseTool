@@ -24,7 +24,6 @@ public class ErrorListener  {
 
             List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
             Collections.reverse(stack);
-            System.err.println(msg);
 
             StringBuilder error ;
 

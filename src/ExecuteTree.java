@@ -225,9 +225,7 @@ public class ExecuteTree {
             whereC = myHelper.getWhereFields(where);
             whereC = whereException(whereC.toString(), fromF.toString());
             mySQLite.whereSelect(selectF,fromF,whereC);
-            System.out.println(whereC + " trace ");
 
-            //select * from courses where code = "jjfdkfa13456.245fccds";
             canonicalCondition = whereC.toString();
 
             //If where node then create the new relation and remove the nodes from the holdNodes if not then replace the new relation with the onw that the condition is applied to.
@@ -336,7 +334,6 @@ public class ExecuteTree {
      */
     public StringBuilder whereException(String query,String fromTable) {
 
-        System.out.println(query);
         //(?i) -> use embedded flag in the regex to ignore case! Split string but keep And + or to be added to the condition
         String[] whereParts = query.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
         StringBuilder myNewWhere = new StringBuilder();
@@ -345,7 +342,6 @@ public class ExecuteTree {
         for(int i=0; i<whereParts.length; i++) {
             //Get the symbo ie."==", "<="...
             String symbol = myHelper.getSymbol(whereParts[i]);
-            System.out.println(symbol);
             String[] equationParts;
             String condition;
 
@@ -362,10 +358,8 @@ public class ExecuteTree {
             if(symbol!=null) {
                 equationParts = whereParts[i].split(symbol);
                 for(int j=0; j<equationParts.length; j++){
-                    System.out.println(" for this one...re " + equationParts[j]);
                     equationParts[j] =  equationParts[j].replaceAll("\\s", "");
                     if (equationParts[j].contains(".") && !(equationParts[j].charAt(0)==('\"') && equationParts[j].charAt(0) ==('\"')) ) {
-                        System.out.println(" whyhyy can y tell me" + equationParts[j].charAt(0) + "e" );
                         // Get the relation name from the equation part and remove the white spaces. Remove the referencing table and any white spaces
                         String relationName = (equationParts[j].substring(0, equationParts[j].indexOf("."))).replaceAll("\\s", "");
                         equationParts[j] = (equationParts[j].substring(equationParts[j].indexOf(".") + 1)).replaceAll("\\s", "");
@@ -384,9 +378,6 @@ public class ExecuteTree {
                             if (counter != 0)
                                 equationParts[j] = "\"" + equationParts[j] + ":" + counter + "\"";
                         }
-                    }else{
-                        System.out.println("here i am ");
-                        System.out.println(" vnfkvnknfkla " + equationParts[0] + " " + equationParts[1]);
                     }
                 }
                     whereParts[i] = equationParts[0] +" " + symbol + " " + equationParts[1];

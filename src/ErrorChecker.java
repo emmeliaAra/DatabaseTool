@@ -145,28 +145,20 @@ public class ErrorChecker {
                         if(clauseToCheck.get(i).startsWith("\"") && clauseToCheck.get(i).endsWith("\""))
                             needMoreCheck = false;
                         else {
-                            char[] temp = clauseToCheck.get(i).toCharArray();
-                          /*  for (Character c : temp)
-                                if (!Character.isDigit(c)) {
-                                    needMoreCheck = true;
-                                    break;
-                                }*/
-                          System.out.println(clauseToCheck.get(i) + " heree heloooooo");
+                            //check if the part after the symbol is an integer or a float
                             try{
                                 Integer.parseInt(clauseToCheck.get(i));
                             }catch(NumberFormatException e){
                                 needMoreCheck = true;
                             }
-                            System.out.println(needMoreCheck + " here i am ");
                             if(needMoreCheck){
                                 try{
-                                    System.out.println(" hello here");
                                     Float.parseFloat(clauseToCheck.get(i));
                                     needMoreCheck = false;
                                 }catch(NumberFormatException e){
                                     needMoreCheck = true;
-                                    System.out.println(" hola ");
-                                }}
+                                }
+                            }
                         }
                     }
                     //if the previous token is symbol the other side is not a string or a number then check if the field is ambiguous or if the field does not exists at all.

@@ -80,10 +80,8 @@ public class TreeParser {
                     operations();
                 }
             }
-        }else{
-            System.out.println(messages);
+        }else
             parserStatus = ANTLR_ERROR_STATUS;
-        }
 
 
     }
@@ -113,7 +111,6 @@ public class TreeParser {
 
             ExecuteTree executeOptimizedTree = new ExecuteTree(canonicalTreeForOpt, selectFieldName, whereClause, mySQLite);
             canonicalTreeForOpt.createStack(canonicalTreeForOpt.getRootNode());
-            canonicalTreeForOpt.printTree(canonicalTreeForOpt.getRootNode(), " ");
             executeOptimizedTree.execute(canonicalTreeForOpt.getStack());
 
             nodeIdInOrderOptimal = executeOptimizedTree.getNodeIdInOrder();
@@ -223,7 +220,6 @@ public class TreeParser {
         int index = 0;
         while ((index = charStream.indexOf("or",index))!= -1) {
             char c = stream.charAt(index+2);
-            System.out.println(c);
             if(c == ' ') {
                 hasOr = true;
                 break;
@@ -253,10 +249,8 @@ public class TreeParser {
 
     public void checkSyntaxErrors()
     {
-
         if(charStream.toString().toLowerCase().contains("select from")) {
             messages.add("Select clause fields are missing. This is an example: Select name from students");
-            System.out.println(" emmelia is in here ! ");
         }
     }
 
