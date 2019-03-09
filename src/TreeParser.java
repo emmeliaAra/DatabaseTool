@@ -54,12 +54,11 @@ public class TreeParser {
         if(messages== null)
             messages = new Vector<>();
 
-        checkSyntaxErrors();
+
         ErrorChecker errorChecker = new ErrorChecker(mySQLite);
-
-        //Check if there is a messege from ANTLR4 it means that there is an error so do not built the tree...
+        messages = errorChecker.checkSelect(charStream.toString(),messages);
+        //Check if there is a message from ANTLR4 it means that there is an error so do not built the tree...
         if(messages.isEmpty()){
-
             //Check if this is a drop, create or select statement
             if(charStream.toString().toLowerCase().contains( "drop")){
                 messages = errorChecker.handleSQLDropTableErrors(charStream.toString());
@@ -72,16 +71,24 @@ public class TreeParser {
             }
             else if (charStream.toString().toLowerCase().contains("select")) {
                 getParts();
-                messages = errorChecker.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
-                if(!messages.isEmpty())
-                    parserStatus = STATEMENT_ERROR_STATUS;
-                else{
-                    parserStatus = SELECT_STATUS;
-                    operations();
-                }
+                if(charStream.toString().toLowerCase().contains("from"))
+                    messages = errorChecker.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
+                else
+                    messages = errorChecker.checkFromClause(charStream.toString(),messages);
+
+                    if(!messages.isEmpty())
+                        parserStatus = STATEMENT_ERROR_STATUS;
+                    else{
+                        parserStatus = SELECT_STATUS;
+                        operations();
+                    }
             }
-        }else
+        }else {
             parserStatus = ANTLR_ERROR_STATUS;
+            //To check if the from claus is empty...
+            if(errorListener.getCheck())
+                messages = errorChecker.checkFromClause(charStream.toString(),messages);
+        }
 
 
     }
@@ -245,13 +252,6 @@ public class TreeParser {
             i++;
         }
         return tree;
-    }
-
-    public void checkSyntaxErrors()
-    {
-        if(charStream.toString().toLowerCase().contains("select from")) {
-            messages.add("Select clause fields are missing. This is an example: Select name from students");
-        }
     }
 
     public LinkedList<String> getNodeIdInOrderCanonical() {

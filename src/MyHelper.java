@@ -87,4 +87,23 @@ public class MyHelper {
         else return null;
     }
 
+    public boolean isFloat(String stringToChek)
+    {
+        try{
+            Float.parseFloat(stringToChek);
+            return true;
+        }catch(NumberFormatException e){
+           return false;
+        }
+    }
+
+    public boolean isInteger(String stringToCheck){
+        try{
+            Integer.parseInt(stringToCheck);
+            return true;
+        }catch(NumberFormatException e){
+            return false;
+        }
+    }
+
 }

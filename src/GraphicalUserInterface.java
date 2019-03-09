@@ -748,9 +748,13 @@ public class GraphicalUserInterface extends Application {
         messageScrollPane.setPrefHeight(height);
         messageScrollPane.setStyle("-fx-background: rgb(80,80,80);");
         Vector<String> errorMessages = myTreeParser.getMessages();
+        Label newLabel = new Label("Errors Found in the statement:");
+        newLabel.setFont(Font.font(20));
+        newLabel.setTextFill(Color.web("#FFFFFF"));
+        messageBox.getChildren().add(newLabel);
 
         for (int i=0; i<errorMessages.size(); i++){
-            Label newLabel  = new Label(i+1 + "." +errorMessages.get(i));
+            newLabel  = new Label(i+1 + "." +errorMessages.get(i));
             newLabel.setFont(Font.font(20));
             newLabel.setTextFill(Color.web("#FFFFFF"));
             messageBox.getChildren().add(newLabel);

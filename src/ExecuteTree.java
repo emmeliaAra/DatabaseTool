@@ -335,31 +335,38 @@ public class ExecuteTree {
     public StringBuilder whereException(String query,String fromTable) {
 
         //(?i) -> use embedded flag in the regex to ignore case! Split string but keep And + or to be added to the condition
-        String[] whereParts = query.split("(?<=(?i)and)|(?=(?i)and) |(?<=(?i)or)|(?=(?i)or) ");
+        String[] whereParts = query.split("(?<=(?i) and)|(?=(?i) and) |(?<=(?i) or)|(?=(?i) or) ");
         StringBuilder myNewWhere = new StringBuilder();
         getRelationsInOrder(fromTable);
+
+        for (int i=0; i<whereParts.length; i++)
+            System.out.println(whereParts[i]);
+
 
         for(int i=0; i<whereParts.length; i++) {
             //Get the symbo ie."==", "<="...
             String symbol = myHelper.getSymbol(whereParts[i]);
             String[] equationParts;
-            String condition;
+            String condition = null;
 
             //Split the statement into parts when an "And"/"Or" appears
-            if(whereParts[i].toLowerCase().contains("and")) {
-                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("and"));
-                condition = " and ";
-            } else if(whereParts[i].toLowerCase().contains("or")) {
-                whereParts[i] = whereParts[i].substring(0,whereParts[i].toLowerCase().indexOf("or"));
-                condition = " or ";
-            }
-            else condition = null;
+            if(!whereParts[i].equalsIgnoreCase("and") && !whereParts[i].equalsIgnoreCase("or")) {
+                if(i+1<whereParts.length)
+                {
+                    if (whereParts[i+1].equalsIgnoreCase("and"))
+                        condition = " and ";
+                    else if(whereParts[i+1].equalsIgnoreCase("or"))
+                        condition = " or ";
+                }else
+                    condition = null;
+            }else
+                continue;
 
             if(symbol!=null) {
                 equationParts = whereParts[i].split(symbol);
                 for(int j=0; j<equationParts.length; j++){
                     equationParts[j] =  equationParts[j].replaceAll("\\s", "");
-                    if (equationParts[j].contains(".") && !(equationParts[j].charAt(0)==('\"') && equationParts[j].charAt(0) ==('\"')) ) {
+                    if (equationParts[j].contains(".") && !(equationParts[j].charAt(0)==('\"') && equationParts[j].charAt(0) ==('\"')) && !myHelper.isFloat(equationParts[j])) {
                         // Get the relation name from the equation part and remove the white spaces. Remove the referencing table and any white spaces
                         String relationName = (equationParts[j].substring(0, equationParts[j].indexOf("."))).replaceAll("\\s", "");
                         equationParts[j] = (equationParts[j].substring(equationParts[j].indexOf(".") + 1)).replaceAll("\\s", "");
@@ -433,6 +440,9 @@ public class ExecuteTree {
                 newSelectList.add(selectStringParts[i]);
         return newSelectList;
     }
+
+
+
 
     /**
      * Checks if the tableName passed as argument is an element of the newTablesCreated if not then it means that it is an existing table
