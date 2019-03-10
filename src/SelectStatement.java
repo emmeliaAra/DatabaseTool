@@ -17,7 +17,7 @@ public class SelectStatement {
     }
 
 
-    public  TreeStructure<String> secondAttempt() throws IllegalAccessException {
+    public  TreeStructure<String> buildSelectTree() throws IllegalAccessException {
 
         //Create the Tree and the root node.
         TreeStructure<String> c = new TreeStructure<>();

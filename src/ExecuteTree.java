@@ -163,10 +163,10 @@ public class ExecuteTree {
             StringBuilder fromF ,selectF;
 
             /*If there are no new relations created means that the condition will be applied to the one relation in the query
-            If new relations are created then the getRightSelect method is called*/
+             *If new relations are created then the getRightSelect method is called*/
             if(!newTablesCreated.isEmpty()){
                 getRelationsInOrder(holdNodes.getFirst().getData());
-                //call helper method to make the list into one String so that it can be split later when ever "," appears
+                //call helper method to make the list into one String so that it can be split later whenever "," appears
                 selectF = myHelper.getSelectFields(new LinkedList<>(selectFieldName));
                 selectFields  = getRightSelect(selectF.toString());
             }
@@ -198,8 +198,8 @@ public class ExecuteTree {
      */
     public void isWhereClause(TreeStructure.Node<String> popNode) throws IllegalAccessException
     {
-        //execute the where condition on the resulting relation from the cartesian products and create a new relation
-        //so that will be used to execute the project operation!
+        /*Execute the where condition on the resulting relation from the cartesian products and create a new relation
+         *so that will be used to execute the project operation!*/
         if((holdNodes.size() == 1 && popNode.getNodeStatus() == WHERE_NODE_STATUS ) || popNode.getNodeStatus() == OPT_COND_NODE_STATUS) {
 
             StringBuilder fromF,selectF,whereC;
@@ -228,7 +228,8 @@ public class ExecuteTree {
 
             canonicalCondition = whereC.toString();
 
-            //If where node then create the new relation and remove the nodes from the holdNodes if not then replace the new relation with the onw that the condition is applied to.
+            /*If where node then create the new relation and remove the nodes from the holdNodes if not then replace
+             *the new relation with the onw that the condition is applied to.*/
             if(popNode.getNodeStatus() == WHERE_NODE_STATUS){
                 createNewRelation(popNode,selectF,tempFrom,fromF,tableName,whereC,IS_ZERO_METHOD_NUM);
                holdNodes = new LinkedList<>();
@@ -323,11 +324,9 @@ public class ExecuteTree {
         return newNode;
     }
 
-    //need to fix this in case that the same fields appears three times to get the right one.
-
     /**
      * This method adjust the where clause so that it will fit the field names of the new relation created.
-     * Removes referencd tables and calld the correct fields
+     * Removes referenced tables and called the correct fields
      * @param query the string representing the where clause
      * @param fromTable the name of the relation that this query will be applied to.
      * @return a StringBuilder object holding the new where clause.
@@ -338,10 +337,6 @@ public class ExecuteTree {
         String[] whereParts = query.split("(?<=(?i) and)|(?=(?i) and) |(?<=(?i) or)|(?=(?i) or) ");
         StringBuilder myNewWhere = new StringBuilder();
         getRelationsInOrder(fromTable);
-
-        for (int i=0; i<whereParts.length; i++)
-            System.out.println(whereParts[i]);
-
 
         for(int i=0; i<whereParts.length; i++) {
             //Get the symbo ie."==", "<="...
@@ -371,9 +366,10 @@ public class ExecuteTree {
                         String relationName = (equationParts[j].substring(0, equationParts[j].indexOf("."))).replaceAll("\\s", "");
                         equationParts[j] = (equationParts[j].substring(equationParts[j].indexOf(".") + 1)).replaceAll("\\s", "");
 
-                        /*If the same field appears in more than one relation then the first the second time appears in this format name:n where n the number of appearance
-                        Thus we look if the field appears in the relations before that(relations in order) and increase the counter.*/
-                        int index = relationInOrder.indexOf(relationName);
+                        /* If the same field appears in more than one relation then the second time appears in this
+                         * format name:n where n the number of appearance. So we look if the field appears in the relations
+                         * before that(relations in order) and increase the counter.*/
+                        int index = relationInOrder.indexOf(relationName); //Only check if not the first relation because if it is the first then the field name will the normal one
                         if (index > 0) {
                             int counter = 0;
                             for (int k = 0; k < index; k++) {
@@ -387,21 +383,22 @@ public class ExecuteTree {
                         }
                     }
                 }
-                    whereParts[i] = equationParts[0] +" " + symbol + " " + equationParts[1];
+                whereParts[i] = equationParts[0] +" " + symbol + " " + equationParts[1];
             }
+            //If not the last one add the condition (AND/OR).
             if(i != whereParts.length-1)
                 myNewWhere.append(whereParts[i] + condition);
             else
                 myNewWhere.append(whereParts[i]);
-
         }
         return  myNewWhere;
     }
 
     /**
-     * When a cartesian product of 2 relations that have the same field name the first one is the same and the second one has the format
-     * "fieldNAme:1" and the number changes according to how many times the same field name appears.
-     * This function is used to set the right select field because the initial one ex.courses.c_id is wrong because the final relation may have a different name.
+     * When a cartesian product of 2 relations that have the same field name the first one is the same and the second
+     * one has the format "fieldNAme:1" and the number changes according to how many times the same field name appears.
+     * This function is used to set the right select field because the initial one ex.courses.c_id is wrong because the
+     * final relation may have a different name.
      * @param selectString The string representing the select clause
      * @return the new select clause
      */
@@ -411,13 +408,13 @@ public class ExecuteTree {
         String[] selectStringParts = selectString.split(",");
 
         for (int i = 0; i < selectStringParts.length; i++)
+
             // if there is a referencing table it must be removed because this is not the one in the from list anymore.
             if (selectStringParts[i].contains(".")) {
                 String[] fullStopParts = selectStringParts[i].split("\\.");
-                /*get the position of the referencing table in the relationInOrder.
-                -> if index ==0 then in the initial statement this relation is the first one appeared in the from list*/
+                /*get the position of the referencing table in the relationInOrder.if index ==0 then in the initial statement this
+                 * relation is the first one appeared in the from list and we do not to add :counter */
                 int index = relationInOrder.indexOf(fullStopParts[0]);
-                //if index -> zero then their is no need to add :1
                 if (index == 0)
                     newSelectList.add(fullStopParts[1]);
                 /*if index >0 check if the same field name appears in one of the previous relations in the relationInOrder list
@@ -466,8 +463,8 @@ public class ExecuteTree {
 
     /**
      * Accessor for the list that holds the node's ID.
-     * (Order that they were poped from the stack)
-     * @return
+     * (Order that they were popped from the stack)
+     * @return LinkedList with the nodeNames in the order they were removed from the stack
      */
     public LinkedList<String> getNodeIdInOrder()
     {

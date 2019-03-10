@@ -25,7 +25,7 @@ public class DatabaseBasic {
     }
 
     /**
-     * Opens the Database file and calls
+     * Checks if the database file exists and calls
      * getConnection method to connect to the database.
      * Throws Exception if the file is not found
      */

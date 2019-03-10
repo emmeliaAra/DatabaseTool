@@ -97,7 +97,7 @@ public class TreeParser {
 
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
         //creates and executes the trees to present the results.
-        TreeStructure<String> canonicalTree = selectStatementToTree.secondAttempt();
+        TreeStructure<String> canonicalTree = selectStatementToTree.buildSelectTree();
         ExecuteTree executeCanonicalTree = new ExecuteTree(canonicalTree,selectFieldName,whereClause,mySQLite);
         canonicalTree.createStack(canonicalTree.getRootNode());
         executeCanonicalTree.execute(canonicalTree.getStack());
@@ -105,7 +105,7 @@ public class TreeParser {
         boolean hasOr = containsOr(charStream.toString());
         //keep a copy of the original tree so that can be optimised.
         SelectStatement selectStatementForOpt = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
-        TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.secondAttempt();
+        TreeStructure<String> canonicalTreeForOpt = selectStatementForOpt.buildSelectTree();
 
         if(!hasOr) {
             newTablesCreated = executeCanonicalTree.getNewTablesCreated();
@@ -184,7 +184,7 @@ public class TreeParser {
         String project = temp.toLowerCase().substring(temp.indexOf("select") +6,temp.indexOf("from"));
         TreeStructure<String> canonicalTree = null;
         try {
-            canonicalTree = selectStatement.secondAttempt();
+            canonicalTree = selectStatement.buildSelectTree();
             if(statement.toString().toLowerCase().contains("where")) {
                 canonicalTree.getRootNode().setNodeData("π[" + project + "]");
                 canonicalTree.getRootNode().getChildren().get(0).setNodeData("σ[" + condition + "]");

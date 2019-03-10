@@ -27,26 +27,35 @@ public class MyField {
     }
 
 
+    /**
+     * Accessor for the relalation that this field belongs to
+     * @return A MyRelation Instance
+     */
     public MyRelation getRelation() {
         return relation;
     }
 
-    public String getFieldName()
-    {
+    /**
+     * Accessor for the name of the field
+     * @return a string that represents the field name
+     */
+    public String getFieldName() {
         return fieldName;
     }
 
-    private String getType()
-    {
+    /**
+     * Accessor that return the type of the fiel. (will be used when additional statements will be added)
+     * @return String that represent the type
+     */
+    private String getType() {
         return type;
     }
 
+    /**
+     * Accessor for the constraints. (will be used when additional statements will be added)
+     * @return
+     */
     public LinkedList<Integer> getConstraints() {
         return constraints;
-    }
-
-    public void setConstraints(LinkedList constraints)
-    {
-        this.constraints = constraints;
     }
 }

@@ -84,7 +84,6 @@ public class MySQLite extends DatabaseBasic{
 
     public ResultSet execute(String queryTemplate) {
 
-        System.out.println(queryTemplate);
         ResultSet resultSet = null;
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(queryTemplate);
@@ -156,10 +155,10 @@ public class MySQLite extends DatabaseBasic{
             for (int i=0; i<relations.size(); i++ ) {
                 resultSetTable = metaData.getColumns(null,null,relations.get(i).getRelationName(),null);
                 // Get primary and foreign keys
-             //   keySet = metaData.getPrimaryKeys(null,null,relations.get(i).getRelationName());
-              //  primaryKeys = getPrimaryKeys(keySet);
-                //keySet = metaData.getImportedKeys(null,null,relations.get(i).getRelationName());
-                //foreignKeys = getForeignKeys(keySet);
+                keySet = metaData.getPrimaryKeys(null,null,relations.get(i).getRelationName());
+                primaryKeys = getPrimaryKeys(keySet);
+                keySet = metaData.getImportedKeys(null,null,relations.get(i).getRelationName());
+                foreignKeys = getForeignKeys(keySet);
 
                 //GET INFORMATION FOR EACH COLUMN!
                 while(resultSetTable.next()) {
@@ -169,17 +168,17 @@ public class MySQLite extends DatabaseBasic{
                     String type = resultSetTable.getString("TYPE_NAME");
                     MyField field = new MyField(relations.get(i), columnName, type, null);
                     relations.get(i).addField(field);
-                 /*   if (primaryKeys.contains(columnName)) {
+                    if (primaryKeys.contains(columnName)) {
                         //Add constraint
                         constraints.add(PRIMARY_CON);
                         relations.get(i).addPrimaryKey(field);
-                    }*/
-                 /*   if (foreignKeys.containsKey(columnName)) {
+                    }
+                    if (foreignKeys.containsKey(columnName)) {
                         //add constraint
                         constraints.add(FOREIGN_CON);
                         relations.get(i).addForeignKey(field, foreignKeys.get(columnName));
                         HashMap<String, String> temp = foreignKeys.get(columnName);
-                    }*/
+                    }
                     //  String temp = resultSetTable.getString("IS_NULLABLE");
                 }
             }
@@ -248,24 +247,6 @@ public class MySQLite extends DatabaseBasic{
                 myNewJoin.append(joinParts[i]);
         }
         return myNewJoin;
-    }
-
-    public void getResults(ResultSet resultSet)
-    {
-        try {
-            ResultSetMetaData  resultSetMetaData = resultSet.getMetaData();
-            int columnNum = resultSetMetaData.getColumnCount();
-            while (resultSet.next()){
-                for(int i=1; i<columnNum+1; i++) {
-                  String val = resultSet.getString(i);
-                  System.out.print(val + "        ");
-                }
-                System.out.println(" ");
-            }
-
-        }catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public javafx.scene.control.TableView getRows(TableView table, String tableName)
