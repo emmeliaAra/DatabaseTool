@@ -38,7 +38,7 @@ public class TreeParser {
         TokenStream tokenStream = new CommonTokenStream(lexer);
         sqliteParser parser = new sqliteParser(tokenStream);
 
-        ErrorListener.InnerErrorListener errorListener = new ErrorListener.InnerErrorListener();
+        SemanticErrorListener.InnerErrorListener errorListener = new SemanticErrorListener.InnerErrorListener();
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
 
