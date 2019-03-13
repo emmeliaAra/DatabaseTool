@@ -1,4 +1,4 @@
-// Generated from C:/Users/emmel/Desktop/SCC 2016-2017/2018-2019/SCC 300 - Third Year Project/DatabaseTool/src\sqlite.g4 by ANTLR 4.7.2
+// Generated from C:/Users/emmel/Desktop/SCC 2016-2017/2018-2019/DatabaseTool/DatabaseTool/src\sqlite.g4 by ANTLR 4.7.2
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -47,7 +47,7 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-
+	T visitMyExpression(sqliteParser.MyExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code myStar}
 	 * labeled alternative in {@link sqliteParser#result_column}.
@@ -63,13 +63,19 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMystart(sqliteParser.MystartContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code expressionAlias}
+	 * labeled alternative in {@link sqliteParser#result_column}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpressionAlias(sqliteParser.ExpressionAliasContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code tableORSubqueryA}
 	 * labeled alternative in {@link sqliteParser#table_or_subquery}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx);
-
 	/**
 	 * Visit a parse tree produced by the {@code selectCore}
 	 * labeled alternative in {@link sqliteParser#select_core}.
@@ -77,6 +83,13 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelectCore(sqliteParser.SelectCoreContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code literalValue}
+	 * labeled alternative in {@link sqliteParser#literal_value}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiteralValue(sqliteParser.LiteralValueContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code unaryOperator}
 	 * labeled alternative in {@link sqliteParser#unary_operator}.

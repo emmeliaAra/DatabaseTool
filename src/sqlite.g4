@@ -13,15 +13,11 @@ error
 
 sql_stmt
   :  drop_table_stmt
-   | factored_select_stmt
+   | select_core
   ;
 
 drop_table_stmt
  : K_DROP K_TABLE  ( database_name dot_symbol )? table_name #dropTable
- ;
-
-factored_select_stmt
- : select_core
  ;
 
 expr
@@ -47,7 +43,7 @@ table_or_subquery
  : ( database_name dot_symbol )? table_name  #tableORSubqueryA
  | open_paren ( table_or_subquery ( comma_symbol table_or_subquery )*)
    close_paren  #tableORSubqueryA
- | open_paren factored_select_stmt close_paren #tableORSubqueryA
+ | open_paren select_core close_paren #tableORSubqueryA
  ;
 
 select_core

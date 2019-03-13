@@ -1,4 +1,4 @@
-// Generated from C:/Users/emmel/Desktop/SCC 2016-2017/2018-2019/SCC 300 - Third Year Project/DatabaseTool/src\sqlite.g4 by ANTLR 4.7.2
+// Generated from C:/Users/emmel/Desktop/SCC 2016-2017/2018-2019/DatabaseTool/DatabaseTool/src\sqlite.g4 by ANTLR 4.7.2
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -48,16 +48,6 @@ public interface sqliteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDropTable(sqliteParser.DropTableContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link sqliteParser#factored_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterFactored_select_stmt(sqliteParser.Factored_select_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link sqliteParser#factored_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitFactored_select_stmt(sqliteParser.Factored_select_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code none1}
 	 * labeled alternative in {@link sqliteParser#expr}.
