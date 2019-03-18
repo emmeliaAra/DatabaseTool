@@ -63,25 +63,13 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNone1(sqliteParser.None1Context ctx) { }
+	@Override public void enterSelectCore(sqliteParser.SelectCoreContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNone1(sqliteParser.None1Context ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterMyExpression(sqliteParser.MyExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMyExpression(sqliteParser.MyExpressionContext ctx) { }
+	@Override public void exitSelectCore(sqliteParser.SelectCoreContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -123,25 +111,37 @@ public class sqliteBaseListener implements sqliteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx) { }
+	@Override public void enterTable_or_database(sqliteParser.Table_or_databaseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx) { }
+	@Override public void exitTable_or_database(sqliteParser.Table_or_databaseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSelectCore(sqliteParser.SelectCoreContext ctx) { }
+	@Override public void enterNone1(sqliteParser.None1Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSelectCore(sqliteParser.SelectCoreContext ctx) { }
+	@Override public void exitNone1(sqliteParser.None1Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMyExpression(sqliteParser.MyExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMyExpression(sqliteParser.MyExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

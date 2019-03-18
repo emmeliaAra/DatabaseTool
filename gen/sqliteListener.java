@@ -49,29 +49,17 @@ public interface sqliteListener extends ParseTreeListener {
 	 */
 	void exitDropTable(sqliteParser.DropTableContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code none1}
-	 * labeled alternative in {@link sqliteParser#expr}.
+	 * Enter a parse tree produced by the {@code selectCore}
+	 * labeled alternative in {@link sqliteParser#select_core}.
 	 * @param ctx the parse tree
 	 */
-	void enterNone1(sqliteParser.None1Context ctx);
+	void enterSelectCore(sqliteParser.SelectCoreContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code none1}
-	 * labeled alternative in {@link sqliteParser#expr}.
+	 * Exit a parse tree produced by the {@code selectCore}
+	 * labeled alternative in {@link sqliteParser#select_core}.
 	 * @param ctx the parse tree
 	 */
-	void exitNone1(sqliteParser.None1Context ctx);
-	/**
-	 * Enter a parse tree produced by the {@code myExpression}
-	 * labeled alternative in {@link sqliteParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterMyExpression(sqliteParser.MyExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code myExpression}
-	 * labeled alternative in {@link sqliteParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitMyExpression(sqliteParser.MyExpressionContext ctx);
+	void exitSelectCore(sqliteParser.SelectCoreContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code myStar}
 	 * labeled alternative in {@link sqliteParser#result_column}.
@@ -109,29 +97,39 @@ public interface sqliteListener extends ParseTreeListener {
 	 */
 	void exitExpressionAlias(sqliteParser.ExpressionAliasContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code tableORSubqueryA}
-	 * labeled alternative in {@link sqliteParser#table_or_subquery}.
+	 * Enter a parse tree produced by {@link sqliteParser#table_or_database}.
 	 * @param ctx the parse tree
 	 */
-	void enterTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx);
+	void enterTable_or_database(sqliteParser.Table_or_databaseContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code tableORSubqueryA}
-	 * labeled alternative in {@link sqliteParser#table_or_subquery}.
+	 * Exit a parse tree produced by {@link sqliteParser#table_or_database}.
 	 * @param ctx the parse tree
 	 */
-	void exitTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx);
+	void exitTable_or_database(sqliteParser.Table_or_databaseContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code selectCore}
-	 * labeled alternative in {@link sqliteParser#select_core}.
+	 * Enter a parse tree produced by the {@code none1}
+	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterSelectCore(sqliteParser.SelectCoreContext ctx);
+	void enterNone1(sqliteParser.None1Context ctx);
 	/**
-	 * Exit a parse tree produced by the {@code selectCore}
-	 * labeled alternative in {@link sqliteParser#select_core}.
+	 * Exit a parse tree produced by the {@code none1}
+	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitSelectCore(sqliteParser.SelectCoreContext ctx);
+	void exitNone1(sqliteParser.None1Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code myExpression}
+	 * labeled alternative in {@link sqliteParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMyExpression(sqliteParser.MyExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code myExpression}
+	 * labeled alternative in {@link sqliteParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMyExpression(sqliteParser.MyExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code literalValue}
 	 * labeled alternative in {@link sqliteParser#literal_value}.

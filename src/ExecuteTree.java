@@ -51,7 +51,7 @@ public class ExecuteTree {
 
     /**
      * Method that recursively calls it's self until all the nodes are removed from the tree after execution
-     * @param stack The Stack that holds all the relaitons in the reverse order that they were visited
+     * @param stack The Stack that holds all the relations in the reverse order that they were visited
      * @throws IllegalAccessException
      */
     public void execute(Stack<TreeStructure.Node<String>> stack) throws IllegalAccessException {

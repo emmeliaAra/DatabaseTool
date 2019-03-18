@@ -38,7 +38,7 @@ public class TreeParser {
         TokenStream tokenStream = new CommonTokenStream(lexer);
         sqliteParser parser = new sqliteParser(tokenStream);
 
-        SemanticErrorListener.InnerErrorListener errorListener = new SemanticErrorListener.InnerErrorListener();
+        SyntaxErrorListener.InnerErrorListener errorListener = new SyntaxErrorListener.InnerErrorListener();
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
 
@@ -55,13 +55,13 @@ public class TreeParser {
             messages = new Vector<>();
 
 
-        ErrorChecker errorChecker = new ErrorChecker(mySQLite);
-        messages = errorChecker.checkSelect(charStream.toString(),messages);
+        SemanticErrorChecker semanticErrorChecker = new SemanticErrorChecker(mySQLite);
+        messages = semanticErrorChecker.checkSelect(charStream.toString(),messages);
         //Check if there is a message from ANTLR4 it means that there is an error so do not built the tree...
         if(messages.isEmpty()){
             //Check if this is a drop, create or select statement
             if(charStream.toString().toLowerCase().contains( "drop")){
-                messages = errorChecker.handleSQLDropTableErrors(charStream.toString());
+                messages = semanticErrorChecker.handleSQLDropTableErrors(charStream.toString());
                 if(!messages.isEmpty())
                     parserStatus = DROP_ERROR_STATUS;
                 else {
@@ -72,9 +72,9 @@ public class TreeParser {
             else if (charStream.toString().toLowerCase().contains("select")) {
                 getParts();
                 if(charStream.toString().toLowerCase().contains("from"))
-                    messages = errorChecker.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
+                    messages = semanticErrorChecker.handleSQlExceptions(selectFieldName,fromRelationNames,whereClause);
                 else
-                    messages = errorChecker.checkFromClause(charStream.toString(),messages);
+                    messages = semanticErrorChecker.checkFromClause(charStream.toString(),messages);
 
                     if(!messages.isEmpty())
                         parserStatus = STATEMENT_ERROR_STATUS;
@@ -87,7 +87,7 @@ public class TreeParser {
             parserStatus = ANTLR_ERROR_STATUS;
             //To check if the from claus is empty...
             if(errorListener.getCheck())
-                messages = errorChecker.checkFromClause(charStream.toString(),messages);
+                messages = semanticErrorChecker.checkFromClause(charStream.toString(),messages);
         }
 
 

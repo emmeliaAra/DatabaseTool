@@ -8,7 +8,6 @@ public class SelectStatement {
     private static final int WHERE_NODE_STATUS = 2;
     private static final int ACTION_NODE_STATUS = 3;
     private static final int NODE_INITIAL_ID = -1;
-    private int fieldNameNum = 0;
 
     public SelectStatement(Vector<String> selectFieldName, Vector<String> fromRelationNames, Vector<String> whereClause) {
         this.selectFieldName = selectFieldName;
@@ -36,7 +35,7 @@ public class SelectStatement {
 
         level ++;
         int i=0;
-        /*if there are more than one relation and the tempnode has more than one child
+        /*if there are more than one relation ( the temp node has more than one child)
           go through all the children of temp node replace 2 nodes with one.
           Add the new node to temp.
          */
@@ -52,7 +51,7 @@ public class SelectStatement {
 
             tempNode.getChildren().remove(i);
             tempNode.getChildren().remove(i);
-            c.addChildNode1(tempNode,"X",CARTESIAN_NODE_STATUS,NODE_INITIAL_ID,i,level);
+            c.addChildNodeWithIndex(tempNode,"X",CARTESIAN_NODE_STATUS,NODE_INITIAL_ID,i,level);
             tempC1.setParentNode(tempNode.getChildren().get(i));
             tempC2.setParentNode(tempNode.getChildren().get(i));
 

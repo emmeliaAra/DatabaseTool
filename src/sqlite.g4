@@ -20,6 +20,23 @@ drop_table_stmt
  : K_DROP K_TABLE  ( database_name dot_symbol )? table_name #dropTable
  ;
 
+    select_core
+     : K_SELECT  result_column ( comma_symbol result_column )*
+      ( K_FROM ( table_or_database ( comma_symbol table_or_database )*))?
+      ( K_WHERE expr )?                                                  #selectCore
+      ;
+
+result_column
+ : STAR #myStar
+ | table_name dot_symbol STAR #mystart
+ | expr  #expressionAlias
+ ;
+
+table_or_database
+ : ( database_name dot_symbol )? table_name
+ | open_paren ( table_or_database ( comma_symbol table_or_database )*) close_paren
+ ;
+
 expr
  : literal_value #myExpression
  | ( ( database_name dot_symbol )? table_name dot_symbol )? column_name #myExpression
@@ -31,25 +48,6 @@ expr
  | expr K_AND expr #myExpression
  | expr K_OR expr #myExpression
  | open_paren expr close_paren #myExpression
- ;
-
-result_column
- : STAR #myStar
- | table_name dot_symbol STAR #mystart
- | expr  #expressionAlias
- ;
-
-table_or_subquery
- : ( database_name dot_symbol )? table_name  #tableORSubqueryA
- | open_paren ( table_or_subquery ( comma_symbol table_or_subquery )*)
-   close_paren  #tableORSubqueryA
- | open_paren select_core close_paren #tableORSubqueryA
- ;
-
-select_core
- : K_SELECT  result_column ( comma_symbol result_column )*
-   ( K_FROM ( table_or_subquery ( comma_symbol table_or_subquery )*  ) )?
-   ( K_WHERE expr )? #selectCore
  ;
 
 literal_value
@@ -111,7 +109,7 @@ any_name
  : IDENTIFIER #identifier
  | keyword    #keyWordL
  | STRING_LITERAL  #stringLiteral
- | OPEN_PAR any_name CLOSE_PAR #reAnyName // no implementation for this one but I dont know.
+ | OPEN_PAR any_name CLOSE_PAR #reAnyName
  ;
 
 SCOL : ';';

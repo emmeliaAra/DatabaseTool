@@ -671,6 +671,7 @@ public class GraphicalUserInterface extends Application {
         BorderPane pane = new BorderPane();
         Scene myScene = new Scene(pane);
         Stage stage = new Stage();
+        stage.setResizable(false);
         newStages.add(stage);
         pane.setMinSize(50, 50);
         stage.setTitle("Database Tool");

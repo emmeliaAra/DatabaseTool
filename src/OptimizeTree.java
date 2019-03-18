@@ -42,8 +42,7 @@ public class OptimizeTree {
                     /*if there is a condition associated with that relation then call the method. and set set conditionAlready to TRue so that
                     if a node is associated with more than one conditions all the associated conditions will be added to it's parent node.
                     after every iteration of the loop the popNode is becoming the node that holds the condition if any so need to make pop node to hold the
-                    relation node again (if node has a child node-> avoid exception)
-                    So that i will remember how it works!!!*/
+                    relation node again (if node has a child node-> avoid exception)!!!*/
                     while(optimizedWhere.containsValue(new LinkedList<>(Collections.singleton(popNode.getData())))) {
                         conditionAlready = relationNodeAction(popNode, conditionAlready);
                         if(popNode.getChildren().size() == 1) popNode = popNode.getChildren().get(0);
@@ -54,7 +53,7 @@ public class OptimizeTree {
                 case CARTESIAN_NODE_STATUS: {
 
                     cartesianNodeAction(popNode,(Stack<TreeStructure.Node<String>>) optimizationStack.clone());
-                    cartesianNodesIncludeCond(popNode, associatedRelations);
+                    cartesianNodesIncludeCond(popNode);
                     associatedRelations = new LinkedList<>();
                 }
                 case WHERE_NODE_STATUS:{
@@ -66,7 +65,8 @@ public class OptimizeTree {
         }
         //Delete node that holds the condition if any from the initial tree
         if(whereNodeToDelete!=null){
-            //The condition node will be removed so the root node level must become the condition node's level
+            /*The condition node will be removed so the root node level must become the condition node's level
+             *Make the root node the parent of its child node so the whole tree won't be deleted when the node is deleted*/
             canonicalTree.getRootNode().setNodeLevel(whereNodeToDelete.getNodeLevel());
             whereNodeToDelete.getChildren().get(0).setParentNode(whereNodeToDelete.getParentNode());
             canonicalTree.deleteNode(whereNodeToDelete);
@@ -84,7 +84,7 @@ public class OptimizeTree {
         if(condition != null) {
             if(!conditionAlready){
             /*hold the data of the current popped node and change this node to a optCond node
-            and create an new child node of this node to hold the relation. */
+            and create an new child node for this node to hold the relation. */
             String tempData = node.getData();
             node.setNodeData(condition);
             node.setNodeStatus(OPT_COND_NODE_STATUS);
@@ -124,7 +124,7 @@ public class OptimizeTree {
       }
     }
 
-    public void cartesianNodesIncludeCond(TreeStructure.Node<String> nodeToAddCond, LinkedList<String> associatedRelations)
+    public void cartesianNodesIncludeCond(TreeStructure.Node<String> nodeToAddCond)
     {
         /* if condition returned is not null the make the cartesian node to hold a condition! but do not change the status so that it could
         * be used as a cartesian node id needed when dealing with other conditions*/

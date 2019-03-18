@@ -57,10 +57,10 @@ public class MyFileChooser extends GraphicalUserInterface{
      */
     public void copyFile(String path)
     {
-        //Copy the file with the name databaseFileNamecopy.db
+        //Copy the file with the name databaseFileNamecopy.txt so that is wont appear on the dialog box.
         if(path!= null){
             Path myPath = Paths.get(path);
-            myCopyPath = path.substring(0,path.indexOf(".")) + "copy.db";
+            myCopyPath = path.substring(0,path.indexOf(".")) + "copy.txt";
             Path destination = Paths.get(myCopyPath);
             try {
                 Files.copy(myPath, destination, StandardCopyOption.REPLACE_EXISTING);
@@ -78,8 +78,13 @@ public class MyFileChooser extends GraphicalUserInterface{
         //Delete the original and copy the copy using the original's name path
         if(myStringPath != null){
             Path originalPath  = Paths.get(myStringPath);
-            Path copyPath = Paths.get(myCopyPath);
+            //Path copyPath = Paths.get(myCopyPath);
             try {
+                File thisFile = new File(myCopyPath);
+                File renamedFile = new File(myStringPath+".db");
+                thisFile.renameTo(renamedFile);
+                Path copyPath = Paths.get(myStringPath+".db");
+
                 Files.delete(originalPath);
                 Files.copy(copyPath,originalPath,StandardCopyOption.REPLACE_EXISTING);
                 Files.delete(copyPath);

@@ -35,19 +35,12 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDropTable(sqliteParser.DropTableContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code none1}
-	 * labeled alternative in {@link sqliteParser#expr}.
+	 * Visit a parse tree produced by the {@code selectCore}
+	 * labeled alternative in {@link sqliteParser#select_core}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNone1(sqliteParser.None1Context ctx);
-	/**
-	 * Visit a parse tree produced by the {@code myExpression}
-	 * labeled alternative in {@link sqliteParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMyExpression(sqliteParser.MyExpressionContext ctx);
+	T visitSelectCore(sqliteParser.SelectCoreContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code myStar}
 	 * labeled alternative in {@link sqliteParser#result_column}.
@@ -70,19 +63,25 @@ public interface sqliteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpressionAlias(sqliteParser.ExpressionAliasContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code tableORSubqueryA}
-	 * labeled alternative in {@link sqliteParser#table_or_subquery}.
+	 * Visit a parse tree produced by {@link sqliteParser#table_or_database}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTableORSubqueryA(sqliteParser.TableORSubqueryAContext ctx);
+	T visitTable_or_database(sqliteParser.Table_or_databaseContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code selectCore}
-	 * labeled alternative in {@link sqliteParser#select_core}.
+	 * Visit a parse tree produced by the {@code none1}
+	 * labeled alternative in {@link sqliteParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSelectCore(sqliteParser.SelectCoreContext ctx);
+	T visitNone1(sqliteParser.None1Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code myExpression}
+	 * labeled alternative in {@link sqliteParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMyExpression(sqliteParser.MyExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code literalValue}
 	 * labeled alternative in {@link sqliteParser#literal_value}.

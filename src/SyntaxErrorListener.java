@@ -7,7 +7,7 @@ import java.util.*;
  * Produce new messages to present to the user
  * @author Emmeleia Arakleitou
  */
-public class SemanticErrorListener {
+public class SyntaxErrorListener {
 
     public static class InnerErrorListener extends  BaseErrorListener{
 

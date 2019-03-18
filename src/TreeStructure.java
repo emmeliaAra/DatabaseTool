@@ -97,7 +97,7 @@ public class TreeStructure<T> {
             throw new IllegalAccessException("The parent node provided is not part of this tree.");
     }
 
-    public Node<T> addChildNode1(Node<T> parentNode, T data, int nodeStatus, int nodeID,int index,int nodeL) throws IllegalAccessException {
+    public Node<T> addChildNodeWithIndex(Node<T> parentNode, T data, int nodeStatus, int nodeID,int index,int nodeL) throws IllegalAccessException {
 
 
         if(parentNode != null && parentNode.hostingTree == this)

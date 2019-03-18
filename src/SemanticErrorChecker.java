@@ -5,7 +5,7 @@ import java.util.*;
  * and produce the appropriate error messages.
  * @author Emmeleia Arakleitou
  */
-public class ErrorChecker {
+public class SemanticErrorChecker {
 
     private static MySQLite mySQLite;
     private Schema schema;
@@ -13,10 +13,10 @@ public class ErrorChecker {
     private MyHelper myHelper;
 
     /**
-     * Constructor of ErrorChecker
+     * Constructor of SemanticErrorChecker
      * @param mySQLite an instance of the class that connects to the database
      */
-    public ErrorChecker(MySQLite mySQLite)
+    public SemanticErrorChecker(MySQLite mySQLite)
     {
         this.mySQLite = mySQLite;
         this.schema = mySQLite.getSchema();
@@ -83,6 +83,41 @@ public class ErrorChecker {
 
         return errorMessages;
     }
+
+
+  /*  public Vector<String> checkReferencingDatabase(Vector<String> fromRelation,Vector<String>errorMessages) {
+
+        LinkedList<MyRelation> databaseRelations = schema.getRelations();
+        //If the from list contains a dot is either a mistake of the table is referenced using the database.
+        if (fromRelation.contains(".")) {
+            for (int i = 0; i < fromRelation.size(); i++) {
+                if (fromRelation.get(i).equals(".") && i > 0) {
+
+                    if (!fromRelation.get(i-1).equalsIgnoreCase(databaseName))
+                        //fromRelation.get(i+1) cannot be null because this is a syntax mistake and ANTLR spot it before calling this method
+                        errorMessages.add("The database used to reference table \"" + fromRelation.get(i+1) + "\" does not" +
+                                "exists. The name of the database you are using is \" " + databaseName + "\"");
+                    else{
+                        boolean foundAMatch = false;
+                        //If the name of the database is correct then check if the database has a table with that name
+                        for (MyRelation relation: databaseRelations)
+                            if(relation.getRelationName().equalsIgnoreCase(fromRelation.get(i+1))) {
+                                foundAMatch =true;
+                                break;
+                            }
+                        if(!foundAMatch) {
+                            errorMessages.add("The database you are using does not have a table named \" " + fromRelation.get(i + 1) + "\"");
+                            i++;
+                        }
+                    }
+                    iNotToCheck.add(i-1);
+                    iNotToCheck.add(i);
+                    iNotToCheck.add(i+1);
+                }
+            }
+        }
+        return errorMessages;
+    }*/
 
     /**
      * This method checks if a relation in the from field appears twice.
