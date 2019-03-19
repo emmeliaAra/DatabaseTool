@@ -21,9 +21,9 @@ public class MyFileChooser extends GraphicalUserInterface{
 
     /**
      * This method is used to create the fileChooser and load the file.
-     * @param myStage
-     * @param gUi
-     * @param mySQLite
+     * @param myStage The stage the the fileChooser will be displayed
+     * @param gUi an instance of the Graphical User interface class
+     * @param mySQLite an instance to the class that connects to the DBMS
      * @return
      */
     public String setFileChooser(Stage myStage, GraphicalUserInterface gUi, MySQLite mySQLite)
@@ -53,7 +53,7 @@ public class MyFileChooser extends GraphicalUserInterface{
 
     /**
      * This method is used to copy the database file
-     * @param path
+     * @param path the path of the file to copy
      */
     public void copyFile(String path)
     {
@@ -65,7 +65,7 @@ public class MyFileChooser extends GraphicalUserInterface{
             try {
                 Files.copy(myPath, destination, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("An Error occurred and the file cannot be copied.");
             }
         }
     }
@@ -89,7 +89,7 @@ public class MyFileChooser extends GraphicalUserInterface{
                 Files.copy(copyPath,originalPath,StandardCopyOption.REPLACE_EXISTING);
                 Files.delete(copyPath);
             } catch (IOException e) {
-                e.printStackTrace();
+               System.out.println("An Error occurred and the changes cannot be restored ");
             }
         }
     }
@@ -105,7 +105,7 @@ public class MyFileChooser extends GraphicalUserInterface{
             try {
                 Files.delete(copyPath);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("An Error occurred and the file cannot be deleted ");
             }
         }
     }
@@ -120,7 +120,7 @@ public class MyFileChooser extends GraphicalUserInterface{
     }
 
     /**
-     * This methos is used to read the query file if
+     * This method is used to read the query file if
      * @param databaseName the name of the database file
      * @param path the path that the file must be loacated
      * @return a list with the queries if any.

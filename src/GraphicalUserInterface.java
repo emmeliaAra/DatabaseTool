@@ -283,15 +283,17 @@ public class GraphicalUserInterface extends Application {
                 borderPane.setBottom(null);
                 resetScene(leftScrollPane,rightScrollPane,bounds,borderPane);
                 hideQueries.setDisable(true);
-                if(fileChooser.getFileName() != null)
+                if(fileChooser.getFileName() != null) {
                     messageArea.setText(fileChooser.getFileName() + " Database is loaded");
+                    //call the file chooser to load the query file if there is any. If there is not any queries then disable the viewQueries buttons
+                    queries = fileChooser.readQueryFile(fileChooser.getFileName(),path);
+                    if(queries!=null)
+                        viewQueries.setDisable(false);
+                }
                 else
                     messageArea.setText("No database was loaded");
                 borderPane.setBottom(messageArea);
-                //call the file chooser to load the query file if there is any. If there is not any queries then disable the viewQueries buttons
-                queries = fileChooser.readQueryFile(fileChooser.getFileName(),path);
-                if(queries!=null)
-                    viewQueries.setDisable(false);
+
             }
         });
 

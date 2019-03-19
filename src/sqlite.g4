@@ -179,6 +179,7 @@ SPACES
 
 UNEXPECTED_CHAR
  : .
+ | '&'
  ;
 
 fragment DIGIT : [0-9];
