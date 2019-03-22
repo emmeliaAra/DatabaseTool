@@ -400,12 +400,10 @@ public class GraphicalUserInterface extends Application {
         }
     }
 
-    //Creates the tree view that will be used later to add action to the tree and divides the nodes based on their level
-
     /**
      * This method creates a tree view that it will be used later to add action to the tree
      * It also divides teh nodes based on their level
-     * @param node *************
+     * @param node
      * @param treeItem
      * @param treeType
      */
@@ -457,6 +455,11 @@ public class GraphicalUserInterface extends Application {
         node.getChildren().forEach(each -> createTreeView(each,newItem,treeType));
     }
 
+    /**
+     * This method used the tree view to build the vertical tree
+     * @param gridPane the gird to add the buttons to
+     * @param label the label of the tree "Optimized/Canonical"
+     */
     public void buildMyTree(GridPane gridPane,Label label) {
 
         TreeMap<Integer, LinkedList<Button>> treeMap = new TreeMap<>(buttonsInLevel);
@@ -584,7 +587,14 @@ public class GraphicalUserInterface extends Application {
         }
     }
 
-    //Add action to The button Trees
+    /**
+     * This method is invoked to add action to the buttons so when they are clicked
+     * a new window will open to present the intermediate results
+     * @param treeItem the item in the tree
+     * @param myList the list containing the relations
+     * @param mySQLite the class that connects to the db and executes the statements
+     * @param buttonsInOrder the buttons in the order they are visited (preoorder) traversal
+     */
     public void addActionToTree(TreeItem<Button> treeItem, LinkedList<String> myList, MySQLite mySQLite,HashMap<Button,Integer> buttonsInOrder) {
         treeItem.getValue().setOnMouseClicked(e -> {
             //get the position of the table that this button represents so that the results can be displayed
@@ -607,8 +617,13 @@ public class GraphicalUserInterface extends Application {
         treeItem.getChildren().forEach(each -> addActionToTree(each,myList,mySQLite,buttonsInOrder));
     }
 
-    public TableView displayResults(MySQLite mySQLite, String relation)
-    {
+    /**
+     * This method is called to display the results using a table view
+     * @param mySQLite the class that connects to the db and executes the statements
+     * @param relation the relation that we will be retrieving the results for
+     * @return
+     */
+    public TableView displayResults(MySQLite mySQLite, String relation) {
         TableView results = new TableView<>();
         LinkedList<String> columnNames = mySQLite.getColumnNames(relation);
 
@@ -625,13 +640,16 @@ public class GraphicalUserInterface extends Application {
             i++;
             results.getColumns().add(tableColumn);
         }
-
         results = mySQLite.getRows(results,relation);
         results.setMaxHeight(250);
         results.onScrollToProperty();
         return results;
     }
 
+    /**
+     * This method is used to clear the contents of the stege
+     * @param comingFromSubmit
+     */
     public void clearStage(boolean comingFromSubmit)
     {
         //clear the contents of the stage.
@@ -652,6 +670,10 @@ public class GraphicalUserInterface extends Application {
         rightGrid.getChildren().clear();
     }
 
+    /**
+     * This method is used to close the connection when needed
+     * @param mySQLite the class that connects to the db and executes the statements
+     */
     public void safeCloseConnection(MySQLite mySQLite)
     {
         try {
@@ -667,6 +689,11 @@ public class GraphicalUserInterface extends Application {
             e.printStackTrace();
         }
     }
+
+    /**
+     * This method is used to build the stage that opens when the user press exit
+     * @return
+     */
     public LinkedList<Object> buildCommitStage()
     {
         //Create a new stage to ask "save" "dont save" "cancel".
@@ -699,6 +726,11 @@ public class GraphicalUserInterface extends Application {
         return stageContents;
     }
 
+    /**
+     * This method is used to check if the user wants to commit the changes
+     * discard them or return to the application
+     * @param e
+     */
     public void askToCommit(Event e) {
 
         LinkedList<Object>   stageObjects = buildCommitStage();
@@ -736,6 +768,19 @@ public class GraphicalUserInterface extends Application {
     }
 
 
+    /**
+     * This method is used to draw the lines that links the nodes in the tree
+     * @param startX the starting X position of the line
+     * @param startY the starting Y position of the line
+     * @param endX the ending X position of the line
+     * @param endY the ending Y position of the line
+     * @param columnSpan the number of columns that this line will span
+     * @param rowSpan the number of rows that this line will span
+     * @param gridPane the gird to add the line to
+     * @param hPos  the horizontal position
+     * @param gridC the cell in the grid (Y)
+     * @param gridX the cell in the grid (X)
+     */
     public void drawLine(int startX, int startY, int endX, int endY, int columnSpan, int rowSpan, GridPane gridPane, HPos hPos,int gridC, int gridX)
     {
         Line line1 = new Line(startX,startY,endX,endY);
@@ -743,6 +788,12 @@ public class GraphicalUserInterface extends Application {
         gridPane.add(line1, gridC,gridX,columnSpan,rowSpan);
     }
 
+    /**
+     * This method is used to display the error messages in the bottom of the screen.
+     * @param height the height of the bottom element
+     * @param borderPane  the instance of the border pane
+     * @param myTreeParser an instance of the tree parser to get the results.
+     */
     public void displayErrorMessages(Double height, BorderPane borderPane, TreeParser myTreeParser)
     {
         // If the statement is not correct print the error messages.
@@ -766,6 +817,11 @@ public class GraphicalUserInterface extends Application {
         safeCloseConnection(myTreeParser.getMySQLite());
     }
 
+    /**
+     * This method is used to create a list view and diaply the queries from the query file.
+     * @param queries the arrayList containing the queries from the file
+     * @return
+     */
     public ListView listQueries(ArrayList<String> queries)
     {
         ListView listView = new ListView();
@@ -786,6 +842,13 @@ public class GraphicalUserInterface extends Application {
         return listView;
     }
 
+    /**
+     * This method is called to reset the elements of the scene
+     * @param leftScrollPane an instance of the left scrollPane
+     * @param rightScrollPane an instance of the right scrollPane
+     * @param bounds the screen bounds
+     * @param borderPane an instance of the borderPane
+     */
     public void resetScene(ScrollPane leftScrollPane, ScrollPane rightScrollPane, Rectangle2D bounds, BorderPane borderPane)
     {
         leftGrid.setPrefSize((bounds.getWidth()/2), bounds.getHeight() - 100);

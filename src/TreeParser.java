@@ -6,6 +6,11 @@ import org.antlr.v4.runtime.CharStream;
 
 import java.util.*;
 
+/**
+ * This method is used to call the compiler
+ * and the classes to create and optimize the trees
+ * @author Emmeleia Arakleitou
+ */
 public class TreeParser {
 
     private CharStream charStream;
@@ -24,12 +29,21 @@ public class TreeParser {
     private int parserStatus;
 
 
-    public TreeParser(CharStream charStream,String path)
-    {
+    /**
+     * Constructor of the class
+     * @param charStream the charStream received from the GUI
+     * @param path the path of the database received from the FileChooser
+     */
+    public TreeParser(CharStream charStream,String path) {
         this.charStream = charStream;
         mySQLite = new MySQLite(path);
     }
 
+    /**
+     * This method is used to get the tokes from the parser and
+     * instantiate the classes to evaluate the statement
+     * @throws IllegalAccessException
+     */
     public void getStatementTokens() throws IllegalAccessException {
 
         messages = new Vector<>();
@@ -89,10 +103,12 @@ public class TreeParser {
             if(errorListener.getCheck())
                 messages = semanticErrorChecker.checkFromClause(charStream.toString(),messages);
         }
-
-
     }
 
+    /**
+     * This method instantiate the classes to create and optimize the tree
+     * @throws IllegalAccessException
+     */
     public void operations()throws IllegalAccessException {
 
         SelectStatement selectStatementToTree = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
@@ -127,6 +143,9 @@ public class TreeParser {
         finalTable = executeCanonicalTree.getFinalTable();
     }
 
+    /**
+     * This method is called when a DROP table statement is received.
+     */
     public void dropTableOperation()
     {
         Object[] values = statement.values().toArray();
@@ -135,6 +154,10 @@ public class TreeParser {
         mySQLite.dropTable(dropTableName);
     }
 
+    /**
+     * This method is used to divide the SQL statement into 3 lists containing the select,
+     * from and where clause.
+     */
     public void getParts()
     {
         selectFieldName  = new Vector<>();
@@ -175,6 +198,11 @@ public class TreeParser {
         }
     }
 
+    /**
+     * This method creates a different instance of the canonical tree that will be passed to the GUI
+     * for visualization.
+     * @return
+     */
     public TreeStructure<String> getCanonicalTree()
     {
         SelectStatement selectStatement = new SelectStatement(selectFieldName, fromRelationNames, whereClause);
@@ -195,6 +223,11 @@ public class TreeParser {
         return canonicalTree;
     }
 
+    /**
+     * This method creates a different instance of the optimized tree that will be passed to the GUI
+     * for visualization.
+     * @return
+     */
     public TreeStructure<String> getOptimizedTree()
     {
         boolean hasOr = containsOr(charStream.toString());
@@ -216,13 +249,16 @@ public class TreeParser {
         else return null;
     }
 
-    public Boolean containsOr(String charStream)
-    {
+    /**
+     * This method checks if the statement contains the Or operator
+     * @param charStream the SQL statement
+     * @return true if there is an or in the statement otherwise false.
+     */
+    public Boolean containsOr(String charStream) {
          /*index cannot be 0  and or cannot be the last word in the statement  because it means that it will start/end with or
         and this is not a valid statement so it will break before, thus only check if the next char is space. if not then set to true*/
 
         boolean hasOr = false;
-
         String stream = charStream.toLowerCase();
         int index = 0;
         while ((index = charStream.indexOf("or",index))!= -1) {
@@ -238,6 +274,13 @@ public class TreeParser {
     }
 
     //Set node id. The first one  popped has nodeId = 0 etc.
+
+    /**
+     * This method sets the node id based on the order they are popped from the stack
+     * First  has id =0
+     * @param tree tree that its nodes will be numbered
+     * @return
+     */
     public TreeStructure<String> setNodeID(TreeStructure<String> tree)
     {
         Stack<TreeStructure.Node<String>> stack;
@@ -254,26 +297,66 @@ public class TreeParser {
         return tree;
     }
 
+    /**
+     * get the nodes in the order they are popped from the stack
+     * for a canonical tree
+     * @return
+     */
     public LinkedList<String> getNodeIdInOrderCanonical() {
         return nodeIdInOrderCanonical;
     }
 
+    /**
+     * get the nodes in the order they are popped from the stack
+     * for an optimized tree
+     * @return
+     */
     public LinkedList<String> getNodeIdInOrderOptimal()
     {
         return nodeIdInOrderOptimal;
     }
+
+    /**
+     * Accessor for mySQLite object
+     * @return
+     */
     public MySQLite getMySQLite()
     {
         return mySQLite;
     }
+
+    /**
+     * Accessor for the name of the resulting table
+     * @return
+     */
     public String getFinalTable(){
         return finalTable;
     }
+
+    /**
+     * Accessor for parser status
+     * DROP_STATUS = 0;
+     * DROP_ERROR_STATUS = 1;
+     * SELECT_STATUS = 2;
+     * STATEMENT_ERROR_STATUS = 3;
+     * ANTLR_ERROR_STATUS =4;
+     * @return
+     */
     public int getParserStatus(){ return parserStatus;}
+
+    /**
+     * Accessor for name of the table to be dropped
+     * @return
+     */
     public String getDropTableName(){
         return dropTableName;
     }
 
+
+    /**
+     * Accessor for error messages
+     * @return
+     */
     public Vector<String> getMessages() {
         return messages;
     }

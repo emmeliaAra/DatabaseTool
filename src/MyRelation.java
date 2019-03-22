@@ -1,6 +1,5 @@
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.HashMap;
 
 /**
  * This class represents the Relations of the database
@@ -18,8 +17,7 @@ public class MyRelation {
      * @param mySchema the schema that the relation belongs to
      * @param relationName the relation name
      */
-    public MyRelation(Schema mySchema, String relationName) // en ksero an tha kamo class foreing key j primayr key gia na ta krata touta.
-    {
+    public MyRelation(Schema mySchema, String relationName) {
         this.mySchema = mySchema;
         this.relationName = relationName;
 
@@ -34,14 +32,6 @@ public class MyRelation {
      */
     public void addField(MyField field){
         this.fields.add(field);
-    }
-
-    /**
-     * Accessor for the schema
-     * @return
-     */
-    public Schema getMySchema() {
-        return mySchema;
     }
 
     /**

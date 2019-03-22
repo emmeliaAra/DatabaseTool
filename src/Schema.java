@@ -38,15 +38,6 @@ public class Schema{
     }
 
     /**
-     * Accessor for the database name
-     * @return the database name
-     */
-    public String getDatabaseName()
-    {
-        return databaseName;
-    }
-
-    /**
      * This method returns a MyRelation Object based on a String name passed as argument
      * Or returns null if the database does not have this relation
      * @param relationName the name of the relation to look for

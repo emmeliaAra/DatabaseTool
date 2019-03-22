@@ -1,5 +1,10 @@
 import java.util.Vector;
 
+/**
+ * This method is used to build the tree for the
+ * select statement
+ * @author Emmeleia Arakleitou
+ */
 public class SelectStatement {
 
     private Vector<String> selectFieldName, fromRelationNames, whereClause;
@@ -9,14 +14,24 @@ public class SelectStatement {
     private static final int ACTION_NODE_STATUS = 3;
     private static final int NODE_INITIAL_ID = -1;
 
+    /**
+     * Constructor of the selectStatement class
+     * @param selectFieldName elements in the select clause
+     * @param fromRelationNames elements in the from clause
+     * @param whereClause the condition
+     */
     public SelectStatement(Vector<String> selectFieldName, Vector<String> fromRelationNames, Vector<String> whereClause) {
         this.selectFieldName = selectFieldName;
         this.fromRelationNames = fromRelationNames;
         this.whereClause = whereClause;
     }
 
-
-    public  TreeStructure<String> buildSelectTree() throws IllegalAccessException {
+    /**
+     * This method is used to build the canonical tree from the SQL statement.
+     * @return
+     * @throws IllegalAccessException
+     */
+    public TreeStructure<String> buildSelectTree() throws IllegalAccessException {
 
         //Create the Tree and the root node.
         TreeStructure<String> c = new TreeStructure<>();
@@ -58,6 +73,9 @@ public class SelectStatement {
             i=i+1;
 
         }
+        /*If there is a relational node in the tree set rootlevel = level +2 and set the level of the conditional node to level +1.
+          IF only one relation in the tree set the level of the root to be 1 greater than the level of the single node
+          otherwise set root level to level +1 */
         if (rootNode.getChildren().getFirst().getNodeStatus() == WHERE_NODE_STATUS) {
             rootNode.setNodeLevel(level +2);
             rootNode.getChildren().getFirst().setNodeLevel(level+1);

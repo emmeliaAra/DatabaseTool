@@ -17,8 +17,6 @@ public class MyFileChooser extends GraphicalUserInterface{
     private String initialDirPath = "C:\\Users\\emmel\\Desktop";
     private String myStringPath = null,myCopyPath, fileName;
 
-    //String temp ="C:\\Users\\emmel\\Desktop\\SCC 2016-2017\\2018-2019\\SCC 300 - Third Year Project\\DatabaseTool";
-
     /**
      * This method is used to create the fileChooser and load the file.
      * @param myStage The stage the the fileChooser will be displayed
@@ -31,7 +29,7 @@ public class MyFileChooser extends GraphicalUserInterface{
         FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("databaseFile","*.db");
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(extensionFilter);
-        fileChooser.setInitialDirectory(new File(initialDirPath));   //set the initial directory
+        //fileChooser.setInitialDirectory(new File(initialDirPath));   //set the initial directory - Commented So that it works on different devices
         File file = fileChooser.showOpenDialog(myStage);
 
         //If the file exists. get the path and pass it but also keep a copy of the file.
@@ -78,7 +76,6 @@ public class MyFileChooser extends GraphicalUserInterface{
         //Delete the original and copy the copy using the original's name path
         if(myStringPath != null){
             Path originalPath  = Paths.get(myStringPath);
-            //Path copyPath = Paths.get(myCopyPath);
             try {
                 File thisFile = new File(myCopyPath);
                 File renamedFile = new File(myStringPath+".db");

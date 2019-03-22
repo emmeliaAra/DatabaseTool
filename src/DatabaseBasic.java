@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.io.File;
 
 /**
- * This Class provides connection to the database
+ * This Class provides connection to the DBMS
  * @author Emmeleia Arakleitou
  */
 public class DatabaseBasic {
@@ -55,24 +55,22 @@ public class DatabaseBasic {
         try{
             connection = DriverManager.getConnection(DATABASE_LOCATION +databaseName);
             connection.setAutoCommit(false);
-        }catch (SQLException sqlex)
-        {
+        }catch (SQLException sqlex) {
             sqlex.printStackTrace();
             close();
         }
-
     }
 
     /**
-     * This method closes the connection with the databasse an commits the changes..
+     * This method closes the connection with
+     * the database and commits the changes
      */
     public final void close()
     {
         try {
             connection.commit();
             connection.close();
-        }catch (Exception ex)
-        {
+        }catch (Exception ex) {
             ex.printStackTrace();
         }
     }

@@ -1,5 +1,10 @@
 import java.util.*;
 
+/**
+ * This class is used to build an optimized tree from
+ * the canonical tree
+ * @author Emmeleia Arakleitou.
+ */
 public class OptimizeTree {
 
     private HashMap<String,LinkedList<String>> optimizedWhere,newTablesFromCanonical;
@@ -15,6 +20,14 @@ public class OptimizeTree {
     private static final int OPT_COND_NODE_STATUS = 4;
     private static final int JOIN_NODE_STATUS = 5;
 
+    /**
+     * Constructor of the OptimizeTree class
+     * @param canonicalTree1 the canonical tree that will be optimized
+     * @param schema the schema of the database
+     * @param whereClause a vector containing the where clause elements
+     * @param newTablesFromCanonical the new relations created where executing the canonical tree
+     * @param optimizedWhere the optimized where clause.
+     */
     public OptimizeTree(TreeStructure<String> canonicalTree1, Schema schema, Vector<String> whereClause,HashMap<String, LinkedList<String>> newTablesFromCanonical, HashMap<String,LinkedList<String>> optimizedWhere) {
         this.canonicalTree = canonicalTree1;
         this.whereClause = whereClause;
@@ -25,6 +38,12 @@ public class OptimizeTree {
         associatedRelations = new LinkedList<>();
     }
 
+    /**
+     * This is the method that iterates through the stack elements until
+     * canonical tree is optimized.
+     * @return the optimized tree
+     * @throws IllegalAccessException
+     */
     public TreeStructure<String> optimiseTree() throws IllegalAccessException {
 
         canonicalTree.createStack(canonicalTree.getRootNode());
@@ -77,6 +96,12 @@ public class OptimizeTree {
         return canonicalTree;
     }
 
+    /**
+     * Method that handles a relational node
+     * @param node the node popped from the stack
+     * @param conditionAlready boolean that indicated if there is another condition associated with this relation(only)
+     * @return
+     */
     public boolean relationNodeAction(TreeStructure.Node<String> node,boolean conditionAlready){
 
         associatedRelations.addLast(node.getData());
@@ -104,6 +129,11 @@ public class OptimizeTree {
         return conditionAlready;
     }
 
+    /**
+     * Method that handles a cartesian node
+     * @param node the node popped from the stack
+     * @param stack a cloned object of the optimized stack
+     */
     public void cartesianNodeAction(TreeStructure.Node<String> node, Stack<TreeStructure.Node<String>> stack){
 
         /* When we reach a helper node -> check num of children and for we pop the numOfNodeChildren from the stack
@@ -124,6 +154,11 @@ public class OptimizeTree {
       }
     }
 
+    /**
+     * Method to check if their is a condition associated with the relations under the cartesian node
+     * if yes then change the data of the node.
+     * @param nodeToAddCond
+     */
     public void cartesianNodesIncludeCond(TreeStructure.Node<String> nodeToAddCond)
     {
         /* if condition returned is not null the make the cartesian node to hold a condition! but do not change the status so that it could
@@ -134,6 +169,12 @@ public class OptimizeTree {
             nodeToAddCond.setNodeData(nodeToAddCond.getData() + " " + condition);
     }
 
+    /**
+     * Method that checks if there are any conditions associated with the
+     * relations stored in the associatedRelations list and returns the conditions.
+     * @param nodeStatus the status of the node that is popped from the stack.
+     * @return
+     */
     public String getCondition(int nodeStatus) {
 
         String condition = null;
@@ -176,6 +217,9 @@ public class OptimizeTree {
         return condition;
     }
 
+    /**
+     * Method used to convert the cartesian node to a Join node in the tree
+     */
     public void convertCartesianToJoin(){
 
         //Remove the nodes that are representing the cartesian products and a condition to a join operation
@@ -193,6 +237,12 @@ public class OptimizeTree {
         }
     }
 
+    /**
+     * a method used to spit the parts of the original where clause wherever
+     * an "AND" is found so that this parts of the condition will be added at the appropriate
+     * place in the optimized tree.
+     * @return
+     */
     public HashMap<String,LinkedList<String>>  splitWhere() {
 
         LinkedList<String> where = new LinkedList<>(whereClause);
@@ -246,6 +296,5 @@ public class OptimizeTree {
         }
         return optimizedWhere;
     }
-
 }
 

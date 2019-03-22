@@ -84,41 +84,6 @@ public class SemanticErrorChecker {
         return errorMessages;
     }
 
-
-  /*  public Vector<String> checkReferencingDatabase(Vector<String> fromRelation,Vector<String>errorMessages) {
-
-        LinkedList<MyRelation> databaseRelations = schema.getRelations();
-        //If the from list contains a dot is either a mistake of the table is referenced using the database.
-        if (fromRelation.contains(".")) {
-            for (int i = 0; i < fromRelation.size(); i++) {
-                if (fromRelation.get(i).equals(".") && i > 0) {
-
-                    if (!fromRelation.get(i-1).equalsIgnoreCase(databaseName))
-                        //fromRelation.get(i+1) cannot be null because this is a syntax mistake and ANTLR spot it before calling this method
-                        errorMessages.add("The database used to reference table \"" + fromRelation.get(i+1) + "\" does not" +
-                                "exists. The name of the database you are using is \" " + databaseName + "\"");
-                    else{
-                        boolean foundAMatch = false;
-                        //If the name of the database is correct then check if the database has a table with that name
-                        for (MyRelation relation: databaseRelations)
-                            if(relation.getRelationName().equalsIgnoreCase(fromRelation.get(i+1))) {
-                                foundAMatch =true;
-                                break;
-                            }
-                        if(!foundAMatch) {
-                            errorMessages.add("The database you are using does not have a table named \" " + fromRelation.get(i + 1) + "\"");
-                            i++;
-                        }
-                    }
-                    iNotToCheck.add(i-1);
-                    iNotToCheck.add(i);
-                    iNotToCheck.add(i+1);
-                }
-            }
-        }
-        return errorMessages;
-    }*/
-
     /**
      * This method checks if a relation in the from field appears twice.
      * @param relationsInStatement the relations that appear in the from clause of the statement

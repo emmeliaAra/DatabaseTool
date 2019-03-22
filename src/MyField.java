@@ -17,15 +17,12 @@ public class MyField {
      * @param type the type of the field
      * @param constraint the constraint of the field(if any)
      */
-    public MyField(MyRelation relation, String fieldName, String type, LinkedList<Integer> constraint)
-    {
+    public MyField(MyRelation relation, String fieldName, String type, LinkedList<Integer> constraint) {
         this.relation = relation;
         this.fieldName = fieldName;
         this.type = type;
         this.constraints = constraint;
-
     }
-
 
     /**
      * Accessor for the relalation that this field belongs to
@@ -41,21 +38,5 @@ public class MyField {
      */
     public String getFieldName() {
         return fieldName;
-    }
-
-    /**
-     * Accessor that return the type of the fiel. (will be used when additional statements will be added)
-     * @return String that represent the type
-     */
-    private String getType() {
-        return type;
-    }
-
-    /**
-     * Accessor for the constraints. (will be used when additional statements will be added)
-     * @return
-     */
-    public LinkedList<Integer> getConstraints() {
-        return constraints;
     }
 }

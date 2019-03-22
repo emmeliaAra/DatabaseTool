@@ -130,7 +130,6 @@ NOT_EQ1 : '!=';
 NOT_EQ2 : '<>';
 
 
-// http://www.sqlite.org/lang_keywords.html
 K_AND : A N D;
 K_DATABASE : D A T A B A S E;
 K_DROP : D R O P;
@@ -141,10 +140,10 @@ K_TABLE : T A B L E;
 K_WHERE : W H E R E;
 
 IDENTIFIER
- : '"' (~'"' | '""')* '"'   ////////////////
- | '`' (~'`' | '``')* '`'   //////////////
- | '[' ~']'* ']'            ////////////1
- | [a-zA-Z_] [a-zA-Z_0-9]* // TODO check: needs more chars in set
+ : '"' (~'"' | '""')* '"'
+ | '`' (~'`' | '``')* '`'
+ | '[' ~']'* ']'
+ | [a-zA-Z_] [a-zA-Z_0-9]*
  ;
 
 NUMERIC_LITERAL
@@ -153,7 +152,7 @@ NUMERIC_LITERAL
  ;
 
 BIND_PARAMETER
- : '?' DIGIT*    ////////////////////
+ : '?' DIGIT*
  | [:@$] IDENTIFIER
  ;
 

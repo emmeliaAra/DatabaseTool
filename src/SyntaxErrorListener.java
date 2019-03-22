@@ -62,8 +62,7 @@ public class SyntaxErrorListener {
             errorMessage.add(error.toString());
         }
 
-        public Vector<String> getMsg()
-        {
+        public Vector<String> getMsg() {
             return errorMessage;
         }
 

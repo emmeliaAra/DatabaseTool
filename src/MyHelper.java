@@ -1,9 +1,10 @@
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.HashMap;
+
 
 /**
- * This class is used to implement some methods used in various classes
- * to reduce code duplication.
+ * This class is used to implement some methods used
+ * in various classes to reduce code duplication.
  * @author Emmeleia Arakleitou
  */
 public class MyHelper {
@@ -69,10 +70,8 @@ public class MyHelper {
                     else sb.append(" " + myList.get(i));
                 else
                     sb.append(" " + myList.get(i));
-
         return sb;
     }
-
 
     /**
      * This method is used to return a relation name based on the field.
