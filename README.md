@@ -7,4 +7,4 @@ The System make use of the SQLite Database Management system so any databases in
 ## Overview
 The user submits a SQL statement that is converted into a canonical tree that is built using relational algebra operations and the corresponding optimized tree. Additionally, the intermediate results of every execution step are available to allow comparison between the execution process.
 
-
+Click <a download="YourSQL.exe" href="YourSQL.exe" title="executable"> here </a> to download the application
